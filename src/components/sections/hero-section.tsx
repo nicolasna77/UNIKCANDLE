@@ -20,7 +20,7 @@ const HeroSection = () => {
     <section className="bg-primary-foreground py-16 md:py-24 lg:py-32 mx-auto">
       {/* Background decorative elements */}
       <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 space-y-reverse gap-4 md:items-center">
+        <div className="grid lg:grid-cols-2 gap-4 md:items-center">
           {/* Text content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -71,11 +71,11 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="relative flex justify-center items-center w-full h-[450px]"
           >
-            <div className="relative w-[450px] h-[450px]">
+            <div className="relative w-[450px] h-[450px] flex items-center justify-center">
               <Candle3D />
             </div>
           </motion.div>
-        </div>{" "}
+        </div>
       </div>
     </section>
   );
