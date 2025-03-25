@@ -1,103 +1,260 @@
-import Image from "next/image";
+"use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Flame } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import { Sparkles } from "lucide-react";
+
+import { Lora } from "next/font/google";
+import HeroSection from "@/components/sections/hero-section";
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+});
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="bg-background min-h-screen">
+      <HeroSection />
+      {/* Section 1 : Le Concept */}
+      <section className="py-24 lg:py-32 bg-background relative">
+        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-muted text-muted-foreground rounded-full font-medium text-sm border shadow-sm">
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <span>Le Concept</span>
+            </div>
+            <h2
+              className={`${lora.className} text-4xl lg:text-5xl font-bold text-foreground tracking-tight`}
+            >
+              Une bougie pas comme les autres
+            </h2>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Chez UNIKCANDLE, nous croyons que chaque bougie raconte une
+              histoire. Imaginez une bougie qui ne se contente pas
+              d&apos;éclairer, mais qui porte vos mots, vos émotions, vos
+              souvenirs.
+            </p>
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl p-8 space-y-8 text-left shadow-lg border">
+              <div className="flex items-start gap-4">
+                <div className="bg-primary/10 rounded-full p-3 mt-1">
+                  <MessageCircle className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-lg text-card-foreground">
+                  <span className="font-semibold text-primary">
+                    Personnalisez votre bougie
+                  </span>{" "}
+                  <br />
+                  choisissez son odeur, son design, et enregistrez un message
+                  audio.
+                </p>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="bg-primary/10 rounded-full p-3 mt-1">
+                  <Flame className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-lg text-card-foreground">
+                  <span className="font-semibold text-primary">
+                    Découvrez votre message
+                  </span>{" "}
+                  <br />à la fin de la combustion, scannez la bougie pour
+                  écouter votre message grâce à la réalité augmentée.
+                </p>
+              </div>
+            </div>
+            <Button size="lg" variant="default">
+              Je m&apos;inscris pour être informé du lancement
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Section 2 : Comment Ça Marche */}
+      <section className="py-24 lg:py-32 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <h2
+            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
+          >
+            Comment ça marche ? <br />
+            <span className="text-primary">C&apos;est simple et magique !</span>
+          </h2>
+          <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+            <div className="text-center space-y-6 group">
+              <div className="text-4xl font-bold text-primary border-2 border-primary/20 m-auto rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                1
+              </div>
+              <h3 className="text-xl font-semibold text-balance mb-2">
+                Sélectionne le parfum de ta bougie
+              </h3>
+              <p className="text-balance text-3xl">✨</p>
+            </div>
+            <div className="text-center space-y-6 group">
+              <div className="text-4xl font-bold text-primary border-2 border-primary/20 m-auto rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                2
+              </div>
+              <h3 className="text-xl font-semibold text-balance mb-2">
+                Enregistre un message personnalisé
+              </h3>
+              <p className="text-balance text-3xl">🎙️</p>
+            </div>
+            <div className="text-center space-y-6 group">
+              <div className="text-4xl font-bold text-primary border-2 border-primary/20 m-auto rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                3
+              </div>
+              <h3 className="text-xl font-semibold text-balance mb-2">
+                Choisis une animation en réalité augmentée
+              </h3>
+              <p className="text-balance text-3xl">🔮</p>
+            </div>
+          </div>
+          <div className="text-center mt-16">
+            <Button size="lg" variant="default">
+              Prêt à vivre l&apos;expérience UNIKCANDLE ?
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3 : Pourquoi UNIKCANDLE */}
+      <section className="py-24 lg:py-32 bg-background relative">
+        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
+        <div className="container mx-auto px-4">
+          <h2
+            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
+          >
+            Pourquoi choisir <span className="text-primary">UNIKCANDLE</span> ?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+              <CardHeader>
+                <CardTitle
+                  className={`${lora.className} text-primary text-2xl font-bold`}
+                >
+                  Unique
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Chaque bougie est personnalisée pour vous ou pour offrir.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+              <CardHeader>
+                <CardTitle
+                  className={`${lora.className} text-primary text-2xl font-bold`}
+                >
+                  Innovante
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  La réalité augmentée transforme votre bougie en une expérience
+                  immersive.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+              <CardHeader>
+                <CardTitle
+                  className={`${lora.className} text-primary text-2xl font-bold`}
+                >
+                  Émotionnelle
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Un cadeau qui parle au cœur et crée des souvenirs
+                  inoubliables.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="text-center mt-16">
+            <Button size="lg" variant="default">
+              Offrez ou offrez-vous une émotion unique
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4 : Témoignages */}
+      <section className="py-24 lg:py-32 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <h2
+            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
+          >
+            Ce qu&apos;ils en pensent
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="hover:shadow-xl transition-shadow border-primary/10">
+              <CardHeader className="flex flex-row items-center gap-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarFallback>M</AvatarFallback>
+                </Avatar>
+                <CardTitle className="text-lg">Marie, future cliente</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 text-muted-foreground italic">
+                &quot;Mon ami a adoré écouter mon message à la fin de la
+                combustion !&quot;
+              </CardContent>
+            </Card>
+            <Card className="hover:shadow-xl transition-shadow border-primary/10">
+              <CardHeader className="flex flex-row items-center gap-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarFallback>J</AvatarFallback>
+                </Avatar>
+                <CardTitle className="text-lg">Jean, futur client</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 text-muted-foreground italic">
+                &quot;Une idée géniale pour un cadeau unique et émouvant.
+                J&apos;attends impatiemment le lancement !&quot;
+              </CardContent>
+            </Card>
+          </div>
+          <div className="text-center mt-16">
+            <Button size="lg" variant="default">
+              Rejoignez la communauté UNIKCANDLE
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5 : Newsletter */}
+      <section className="py-24 lg:py-32 bg-card relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
+        <div className="container mx-auto px-4 relative z-10">
+          <h2
+            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-8 text-card-foreground tracking-tight`}
+          >
+            Ne manquez pas le lancement de{" "}
+            <span className="text-primary">UNIKCANDLE</span> !
+          </h2>
+          <p className="text-xl text-center text-balance mb-12 max-w-2xl mx-auto text-muted-foreground">
+            Inscrivez-vous dès maintenant pour être informé en avant-première du
+            lancement de UNIKCANDLE. Recevez des offres exclusives et soyez
+            parmi les premiers à créer votre bougie unique.
+          </p>
+          <div className="max-w-md mx-auto">
+            <div className="flex gap-4">
+              <Input
+                type="email"
+                placeholder="Votre adresse email"
+                className="rounded-full"
+              />
+              <Button size="lg" variant="default">
+                Je m&apos;inscris
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
