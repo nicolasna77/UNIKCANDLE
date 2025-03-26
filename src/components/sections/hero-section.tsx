@@ -32,7 +32,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isLoaded ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6 }}
-                className={`${lora.className} text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-secondary-foreground tracking-tight`}
+                className={`${lora.className} text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-primary tracking-tight`}
               >
                 UNIKCANDLE
               </motion.h1>

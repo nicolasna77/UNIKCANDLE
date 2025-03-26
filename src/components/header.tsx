@@ -18,7 +18,12 @@ export default function Header() {
     >
       <div className="mx-auto flex h-16 max-w-screen-xl flex-1 items-center gap-8 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="text-xl font-bold">
-          <Image src="/logo/symbol.png" alt="logo" width={40} height={40} />
+          <Image
+            src="/logo/logo-primary-color.png"
+            alt="logo"
+            width={40}
+            height={40}
+          />
         </Link>
       </div>
     </header>
