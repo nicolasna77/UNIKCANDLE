@@ -4,7 +4,6 @@ import "./globals.css";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { Analytics } from "@vercel/analytics/react";
-
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
