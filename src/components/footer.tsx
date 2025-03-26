@@ -25,7 +25,7 @@ const Footer = () => {
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <SocialIcon url="www.twitter.com" />
+                <SocialIcon url="www.x.com" />
               </button>
               <button
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
