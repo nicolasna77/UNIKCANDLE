@@ -18,7 +18,6 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden bg-background">
-      <div className="absolute inset-0 pattern-vertical-lines pattern-blue-500 pattern-bg-white pattern-size-6 pattern-opacity-20" />
       <div className="relative py-12 sm:py-16 md:py-24 lg:py-32 mx-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 md:items-center">
