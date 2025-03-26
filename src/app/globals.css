@@ -71,7 +71,7 @@
 
 
 
-
+@plugin "tailwindcss-bg-patterns";
 
 @layer base {
   * {
