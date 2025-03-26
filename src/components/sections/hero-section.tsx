@@ -20,13 +20,13 @@ const HeroSection = () => {
     <section className="relative overflow-hidden bg-background">
       <div className="relative py-12 sm:py-16 md:py-24 lg:py-32 mx-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 md:items-center">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 items-center">
             {/* Text content */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6"
+              className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6 w-full"
             >
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
@@ -72,12 +72,10 @@ const HeroSection = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="relative flex justify-center items-center w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]"
+              className="w-full flex items-center justify-center"
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-[300px] h-[300px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] lg:w-[450px] lg:h-[450px]">
-                  <Candle3D />
-                </div>
+              <div className="relative w-[300px] h-[300px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] lg:w-[450px] lg:h-[450px]">
+                <Candle3D />
               </div>
             </motion.div>
           </div>

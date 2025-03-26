@@ -246,6 +246,9 @@ export function Candle3D() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full m-auto h-full z-0" />
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center"
+    />
   );
 }
