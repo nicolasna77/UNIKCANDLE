@@ -23,6 +23,7 @@ export default function Header() {
             alt="logo"
             width={40}
             height={40}
+            quality={100}
           />
         </Link>
       </div>

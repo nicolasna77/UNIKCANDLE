@@ -2,13 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Flame } from "lucide-react";
 import { MessageCircle } from "lucide-react";
 import { Sparkles } from "lucide-react";
-
 import { Lora } from "next/font/google";
 import HeroSection from "@/components/sections/hero-section";
+import TestimonialSection from "@/components/sections/testimonial-section";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -173,6 +172,21 @@ export default function Home() {
                 </p>
               </CardContent>
             </Card>
+            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+              <CardHeader>
+                <CardTitle
+                  className={`${lora.className} text-primary text-2xl font-bold`}
+                >
+                  Émotionnelle
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Un cadeau qui parle au cœur et crée des souvenirs
+                  inoubliables.
+                </p>
+              </CardContent>
+            </Card>
           </div>
           <div className="text-center mt-16">
             <Button size="lg" variant="default">
@@ -183,71 +197,27 @@ export default function Home() {
       </section>
 
       {/* Section 4 : Témoignages */}
-      <section className="py-24 lg:py-32 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <h2
-            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
-          >
-            Ce qu&apos;ils en pensent
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="hover:shadow-xl transition-shadow border-primary/10">
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>M</AvatarFallback>
-                </Avatar>
-                <CardTitle className="text-lg">Marie, future cliente</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 text-muted-foreground italic">
-                &quot;Mon ami a adoré écouter mon message à la fin de la
-                combustion !&quot;
-              </CardContent>
-            </Card>
-            <Card className="hover:shadow-xl transition-shadow border-primary/10">
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>J</AvatarFallback>
-                </Avatar>
-                <CardTitle className="text-lg">Jean, futur client</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 text-muted-foreground italic">
-                &quot;Une idée géniale pour un cadeau unique et émouvant.
-                J&apos;attends impatiemment le lancement !&quot;
-              </CardContent>
-            </Card>
-          </div>
-          <div className="text-center mt-16">
-            <Button size="lg" variant="default">
-              Rejoignez la communauté UNIKCANDLE
-            </Button>
-          </div>
-        </div>
-      </section>
+      <TestimonialSection />
 
       {/* Section 5 : Newsletter */}
       <section className="py-24 lg:py-32 bg-card relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
         <div className="container mx-auto px-4 relative z-10">
           <h2
-            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-8 text-card-foreground tracking-tight`}
+            className={`${lora.className} text-4xl lg:text-5xl text-balance font-bold text-center mb-8 text-card-foreground tracking-tight`}
           >
             Ne manquez pas le lancement de{" "}
-            <span className="text-primary">UNIKCANDLE</span> !
+            <span className={`${lora.className} text-primary`}>UNIKCANDLE</span>{" "}
+            !
           </h2>
-          <p className="text-xl text-center text-balance mb-12 max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-xl text-center text-balance mb-12 max-w-3xl mx-auto text-muted-foreground">
             Inscrivez-vous dès maintenant pour être informé en avant-première du
             lancement de UNIKCANDLE. Recevez des offres exclusives et soyez
             parmi les premiers à créer votre bougie unique.
           </p>
           <div className="max-w-md mx-auto">
             <div className="flex gap-4">
-              <Input
-                type="email"
-                placeholder="Votre adresse email"
-                className="rounded-full"
-              />
+              <Input type="email" placeholder="Votre adresse email" />
               <Button size="lg" variant="default">
                 Je m&apos;inscris
               </Button>
