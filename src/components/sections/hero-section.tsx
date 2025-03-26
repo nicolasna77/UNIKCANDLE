@@ -17,7 +17,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="bg-primary-foreground overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32 mx-auto">
+    <section className="bg-background overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32 mx-auto">
       {/* Background decorative elements */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 md:items-center">
@@ -57,7 +57,7 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="w-full sm:w-auto"
             >
-              <Button size="lg" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto" variant="default">
                 Je m&apos;inscris pour être informé du lancement
               </Button>
             </motion.div>
