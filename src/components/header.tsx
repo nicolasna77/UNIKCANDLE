@@ -16,8 +16,11 @@ export default function Header() {
           : "bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-screen-xl flex-1 items-center gap-8 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-xl font-bold">
+      <div className="mx-auto flex h-16  flex-1 items-center gap-8 px-4 sm:px-6 lg:px-8">
+        <Link
+          href="/"
+          className="text-xl bg-white border border-border rounded-xl p-1 font-bold"
+        >
           <Image
             src="/logo/logo-primary-color.png"
             alt="logo"

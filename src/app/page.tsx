@@ -74,15 +74,15 @@ export default function Home() {
       </section>
 
       {/* Section 2 : Comment Ça Marche */}
-      <section className="py-24 lg:py-32 bg-muted/50">
-        <div className="container mx-auto px-4">
+      <section className="py-24 lg:py-32 px-4 bg-muted/50">
+        <div className="container mx-auto ">
           <h2
             className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
           >
             Comment ça marche ? <br />
             <span className="text-primary">C&apos;est simple et magique !</span>
           </h2>
-          <div className="grid lg:grid-cols-2 gap-y-24 items-center mx-auto">
+          <div className="grid lg:grid-cols-2  items-center mx-auto">
             <div className="space-y-12">
               <div className="flex items-center gap-6 group">
                 <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
@@ -118,7 +118,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="relative aspect-video rounded-xl overflow-hidden ">
+            <div className="relative h-full w-full  ">
               <Candle3D />
             </div>
           </div>
