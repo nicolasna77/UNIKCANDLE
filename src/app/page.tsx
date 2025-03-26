@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Flame } from "lucide-react";
 import { MessageCircle } from "lucide-react";
@@ -9,6 +8,7 @@ import { Lora } from "next/font/google";
 import HeroSection from "@/components/sections/hero-section";
 import TestimonialSection from "@/components/sections/testimonial-section";
 import { Candle3D } from "@/components/Candle3D";
+import NewsletterSection from "@/components/sections/newsletter";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -198,31 +198,7 @@ export default function Home() {
       <TestimonialSection />
 
       {/* Section 5 : Newsletter */}
-      <section className="py-24 lg:py-32 bg-card relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
-        <div className="container mx-auto px-4 relative z-10">
-          <h2
-            className={`${lora.className} text-4xl lg:text-5xl text-balance font-bold text-center mb-8 text-card-foreground tracking-tight`}
-          >
-            Ne manquez pas le lancement de{" "}
-            <span className={`${lora.className} text-primary`}>UNIKCANDLE</span>{" "}
-            !
-          </h2>
-          <p className="text-xl text-center text-balance mb-12 max-w-3xl mx-auto text-muted-foreground">
-            Inscrivez-vous dès maintenant pour être informé en avant-première du
-            lancement de UNIKCANDLE. Recevez des offres exclusives et soyez
-            parmi les premiers à créer votre bougie unique.
-          </p>
-          <div className="max-w-md mx-auto">
-            <div className="flex gap-4">
-              <Input type="email" placeholder="Votre adresse email" />
-              <Button size="lg" variant="default">
-                Je m&apos;inscris
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <NewsletterSection />
     </main>
   );
 }

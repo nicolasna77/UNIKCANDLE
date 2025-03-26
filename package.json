@@ -2,15 +2,21 @@
   "name": "unikcandle",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "tsx prisma/seed.ts",
+    "studio": "prisma studio"
+  },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^6.5.0",
     "@radix-ui/react-avatar": "^1.1.3",
     "@radix-ui/react-slot": "^1.1.2",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.5.0",
@@ -21,19 +27,36 @@
     "react-social-icons": "^6.22.0",
     "tailwind-merge": "^3.0.2",
     "three": "^0.174.0",
-    "tw-animate-css": "^1.2.4"
+    "tw-animate-css": "^1.2.4",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.17.27",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.174.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
+    "prisma": "^6.5.0",
     "tailwindcss": "^4",
     "tailwindcss-bg-patterns": "^0.3.0",
-    "typescript": "^5"
-  }
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicolasna77/UNIKCANDLE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nicolasna77/UNIKCANDLE/issues"
+  },
+  "homepage": "https://github.com/nicolasna77/UNIKCANDLE#readme"
 }

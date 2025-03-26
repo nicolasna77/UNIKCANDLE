@@ -3,6 +3,7 @@ import { Lora, Montserrat } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
+import { Analytics } from "@vercel/analytics/react";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -26,6 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Analytics />
       <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
         <Header />
         {children}
