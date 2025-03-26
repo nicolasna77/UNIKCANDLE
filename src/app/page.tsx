@@ -81,33 +81,58 @@ export default function Home() {
             Comment ça marche ? <br />
             <span className="text-primary">C&apos;est simple et magique !</span>
           </h2>
-          <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
-            <div className="text-center space-y-6 group">
-              <div className="text-4xl font-bold text-primary border-2 border-primary/20 m-auto rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                1
+          <div className="grid lg:grid-cols-2 gap-y-24 items-center mx-auto">
+            <div className="space-y-12">
+              <div className="flex items-start gap-6 group">
+                <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                    Sélectionne le parfum de ta bougie
+                    <span className="text-3xl">✨</span>
+                  </h3>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-balance mb-2">
-                Sélectionne le parfum de ta bougie
-              </h3>
-              <p className="text-balance text-3xl">✨</p>
+              <div className="flex items-start gap-6 group">
+                <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                    Enregistre un message personnalisé
+                    <span className="text-3xl">🎙️</span>
+                  </h3>
+                </div>
+              </div>
+              <div className="flex items-start gap-6 group">
+                <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                    Choisis une animation en réalité augmentée
+                    <span className="text-3xl">🔮</span>
+                  </h3>
+                </div>
+              </div>
             </div>
-            <div className="text-center space-y-6 group">
-              <div className="text-4xl font-bold text-primary border-2 border-primary/20 m-auto rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                2
-              </div>
-              <h3 className="text-xl font-semibold text-balance mb-2">
-                Enregistre un message personnalisé
-              </h3>
-              <p className="text-balance text-3xl">🎙️</p>
-            </div>
-            <div className="text-center space-y-6 group">
-              <div className="text-4xl font-bold text-primary border-2 border-primary/20 m-auto rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                3
-              </div>
-              <h3 className="text-xl font-semibold text-balance mb-2">
-                Choisis une animation en réalité augmentée
-              </h3>
-              <p className="text-balance text-3xl">🔮</p>
+            <div className="relative aspect-video rounded-xl overflow-hidden ">
+              <video
+                className="w-full h-full object-cover"
+                width={1000}
+                height={1000}
+                autoPlay
+                muted
+                loop
+                playsInline
+              >
+                <source
+                  src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
+                  type="video/mp4"
+                />
+                Votre navigateur ne supporte pas la lecture de vidéos.
+              </video>
             </div>
           </div>
           <div className="text-center mt-16">
@@ -128,7 +153,7 @@ export default function Home() {
             Pourquoi choisir <span className="text-primary">UNIKCANDLE</span> ?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+            <Card className="text-center p-8  border-primary/10">
               <CardHeader>
                 <CardTitle
                   className={`${lora.className} text-primary text-2xl font-bold`}
@@ -142,7 +167,7 @@ export default function Home() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+            <Card className="text-center p-8  border-primary/10">
               <CardHeader>
                 <CardTitle
                   className={`${lora.className} text-primary text-2xl font-bold`}
@@ -157,22 +182,8 @@ export default function Home() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
-              <CardHeader>
-                <CardTitle
-                  className={`${lora.className} text-primary text-2xl font-bold`}
-                >
-                  Émotionnelle
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Un cadeau qui parle au cœur et crée des souvenirs
-                  inoubliables.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="text-center p-8 hover:shadow-xl transition-shadow border-primary/10">
+
+            <Card className="text-center p-8  border-primary/10">
               <CardHeader>
                 <CardTitle
                   className={`${lora.className} text-primary text-2xl font-bold`}
