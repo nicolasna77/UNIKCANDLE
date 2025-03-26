@@ -44,11 +44,10 @@ const HeroSection = () => {
               className="max-w-xl lg:max-w-md mx-auto lg:mx-0 space-y-4"
             >
               <p className="text-lg sm:text-xl md:text-2xl text-secondary-foreground font-light">
-                La bougie qui parle, qui éclaire, qui émeut.
+                Découvrez la première bougie qui parle avec votre voix.
               </p>
               <p className="text-sm sm:text-base md:text-lg text-secondary-foreground/80">
-                Une bougie, un message, une émotion. Découvrez la première
-                bougie qui porte vos mots et illumine vos souvenirs.
+                Une bougie, un message, une émotion.
               </p>
             </motion.div>
 

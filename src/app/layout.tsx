@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Montserrat } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/footer";
+import Header from "@/components/header";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
-        {/* <Header /> */}
+        <Header />
         {children}
         <Footer />
       </body>
