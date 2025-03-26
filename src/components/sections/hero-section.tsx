@@ -1,9 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Candle3D } from "@/components/Candle3D";
 import { Lora } from "next/font/google";
+import { Button } from "../ui/button";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -18,15 +17,15 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden bg-background">
-      <div className="relative py-12 sm:py-16 md:py-24 lg:py-32 mx-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-h-screen lg:py-0 mx-auto">
+        <div className="max-h-screen py-24 mx-auto px-4 ">
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 items-center">
             {/* Text content */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6 w-full"
+              className="flex flex-col items-center  text-center lg:items-center lg:text-left space-y-6 w-full"
             >
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
@@ -57,11 +56,7 @@ const HeroSection = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="w-full sm:w-auto"
               >
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto"
-                  variant="default"
-                >
+                <Button size="lg" variant="default">
                   Je m&apos;inscris pour être informé du lancement
                 </Button>
               </motion.div>
@@ -72,11 +67,23 @@ const HeroSection = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="w-full flex items-center justify-center"
+              className="w-full max-h-screen flex items-center justify-center"
             >
-              <div className="relative w-[300px] h-[300px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] lg:w-[450px] lg:h-[450px]">
-                <Candle3D />
-              </div>
+              <video
+                className="w-full h-full object-cover"
+                width={400}
+                height={400}
+                autoPlay
+                muted
+                loop
+                playsInline
+              >
+                <source
+                  src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
+                  type="video/mp4"
+                />
+                Votre navigateur ne supporte pas la lecture de vidéos.
+              </video>
             </motion.div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Lora } from "next/font/google";
-
+import { SocialIcon } from "react-social-icons";
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
@@ -22,28 +22,28 @@ const Footer = () => {
             </h5>
             <div className="mt-6 lg:mb-0 mb-6">
               <button
-                className="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <i className="fab fa-twitter"></i>
+                <SocialIcon url="www.twitter.com" />
               </button>
               <button
-                className="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <i className="fab fa-facebook-square"></i>
+                <SocialIcon url="www.facebook.com" />
               </button>
               <button
-                className="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                className="  font-normal items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <i className="fab fa-dribbble"></i>
+                <SocialIcon url="www.dribbble.com" />
               </button>
               <button
-                className="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <i className="fab fa-github"></i>
+                <SocialIcon url="www.github.com" />
               </button>
             </div>
           </div>

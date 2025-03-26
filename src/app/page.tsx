@@ -8,6 +8,7 @@ import { Sparkles } from "lucide-react";
 import { Lora } from "next/font/google";
 import HeroSection from "@/components/sections/hero-section";
 import TestimonialSection from "@/components/sections/testimonial-section";
+import { Candle3D } from "@/components/Candle3D";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -23,7 +24,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-muted text-muted-foreground rounded-full font-medium text-sm border shadow-sm">
+            <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-muted text-muted-foreground rounded-full font-medium text-sm border border-amber-400 shadow-sm">
               <Sparkles className="h-4 w-4 text-primary animate-pulse" />
               <span>Le Concept</span>
             </div>
@@ -83,7 +84,7 @@ export default function Home() {
           </h2>
           <div className="grid lg:grid-cols-2 gap-y-24 items-center mx-auto">
             <div className="space-y-12">
-              <div className="flex items-start gap-6 group">
+              <div className="flex items-center gap-6 group">
                 <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
                   1
                 </div>
@@ -94,7 +95,7 @@ export default function Home() {
                   </h3>
                 </div>
               </div>
-              <div className="flex items-start gap-6 group">
+              <div className="flex items-center gap-6 group">
                 <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
                   2
                 </div>
@@ -105,7 +106,7 @@ export default function Home() {
                   </h3>
                 </div>
               </div>
-              <div className="flex items-start gap-6 group">
+              <div className="flex items-center gap-6 group">
                 <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
                   3
                 </div>
@@ -118,21 +119,7 @@ export default function Home() {
               </div>
             </div>
             <div className="relative aspect-video rounded-xl overflow-hidden ">
-              <video
-                className="w-full h-full object-cover"
-                width={1000}
-                height={1000}
-                autoPlay
-                muted
-                loop
-                playsInline
-              >
-                <source
-                  src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
-                  type="video/mp4"
-                />
-                Votre navigateur ne supporte pas la lecture de vidéos.
-              </video>
+              <Candle3D />
             </div>
           </div>
           <div className="text-center mt-16">
