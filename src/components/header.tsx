@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useScroll } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { buttonVariants } from "./ui/button";
 
 export default function Header() {
   const scrolled = useScroll();
@@ -16,7 +17,7 @@ export default function Header() {
           : "bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-16  flex-1 items-center gap-8 px-4 sm:px-6 lg:px-8">
+      <nav className="container mx-auto px-4 flex items-center justify-between h-16">
         <Link
           href="/"
           className="text-xl bg-white border border-border rounded-xl p-1 font-bold"
@@ -29,7 +30,21 @@ export default function Header() {
             quality={100}
           />
         </Link>
-      </div>
+        <div className="flex-1 flex justify-center">
+          <Link
+            href="/"
+            className={buttonVariants({ variant: "link", size: "sm" })}
+          >
+            Accueil
+          </Link>
+          <Link
+            href="/about"
+            className={buttonVariants({ variant: "link", size: "sm" })}
+          >
+            À Propos
+          </Link>
+        </div>
+      </nav>
     </header>
   );
 }

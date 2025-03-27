@@ -4,6 +4,8 @@ import "./globals.css";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { Analytics } from "@vercel/analytics/react";
+import { Toaster } from "@/components/ui/sonner";
+
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
@@ -30,6 +32,7 @@ export default function RootLayout({
       <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
         <Header />
         {children}
+        <Toaster />
         <Footer />
       </body>
     </html>

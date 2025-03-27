@@ -55,28 +55,28 @@ const Footer = () => {
                 </span>
                 <ul className="list-unstyled">
                   <li>
-                    <a
+                    <Link
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="https://www.creative-tim.com/presentation?ref=njs-profile"
                     >
                       Contact
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
+                    <Link
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
-                      href="https://blog.creative-tim.com?ref=njs-profile"
+                      href="/cgu"
                     >
                       Conditions générales
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
+                    <Link
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="https://www.github.com/creativetimofficial?ref=njs-profile"
                     >
                       Politique de confidentialité
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>

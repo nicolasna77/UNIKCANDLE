@@ -4,9 +4,8 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Lora } from "next/font/google";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
-import { useState } from "react";
 import { useFormStatus } from "react-dom";
-
+import { toast } from "sonner";
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
@@ -23,23 +22,16 @@ function SubmitButton() {
 }
 
 const NewsletterSection = () => {
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
-
   async function handleSubmit(formData: FormData) {
     const result = await subscribeToNewsletter(formData);
 
     if (result.success) {
-      setMessage({
-        type: "success",
-        text: result.message || "Inscription réussie !",
+      toast.success("Inscription réussie", {
+        description: "Vous êtes désormais inscrit à la newsletter",
       });
     } else {
-      setMessage({
-        type: "error",
-        text: result.error || "Une erreur est survenue",
+      toast.error("Inscription échouée", {
+        description: result.error || "Une erreur est survenue",
       });
     }
   }
@@ -70,15 +62,6 @@ const NewsletterSection = () => {
               />
               <SubmitButton />
             </div>
-            {message && (
-              <p
-                className={`text-center ${
-                  message.type === "success" ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {message.text}
-              </p>
-            )}
           </form>
         </div>
       </div>
