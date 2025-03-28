@@ -50,16 +50,13 @@ const Footer = () => {
           <div className="w-full lg:w-6/12 px-4">
             <div className="flex flex-wrap items-top mb-6">
               <div className="w-full lg:w-4/12 px-4 ml-auto">
-                <span className="block uppercase text-secondary-foreground text-sm font-semibold mb-2">
-                  À propos
-                </span>
                 <ul className="list-unstyled">
                   <li>
                     <Link
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
-                      href="https://www.creative-tim.com/presentation?ref=njs-profile"
+                      href="/about"
                     >
-                      Contact
+                      À propos
                     </Link>
                   </li>
                   <li>
@@ -68,14 +65,6 @@ const Footer = () => {
                       href="/cgu"
                     >
                       Conditions générales
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
-                      href="https://www.github.com/creativetimofficial?ref=njs-profile"
-                    >
-                      Politique de confidentialité
                     </Link>
                   </li>
                 </ul>

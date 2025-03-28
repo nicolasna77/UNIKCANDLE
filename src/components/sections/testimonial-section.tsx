@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Lora } from "next/font/google";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -88,9 +89,12 @@ export default function TestimonialSection() {
           </motion.div>
         </div>
         <div className="text-center mt-16">
-          <Button size="lg" variant="default">
+          <Link
+            className={buttonVariants({ variant: "default", size: "lg" })}
+            href="#newsletter"
+          >
             Rejoignez la communauté UNIKCANDLE
-          </Button>
+          </Link>
         </div>
       </div>
     </section>

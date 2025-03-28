@@ -37,7 +37,10 @@ const NewsletterSection = () => {
   }
 
   return (
-    <section className="py-24 lg:py-32 bg-card relative overflow-hidden">
+    <section
+      id="newsletter"
+      className="py-24 lg:py-32 bg-card relative overflow-hidden"
+    >
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
       <div className="container mx-auto px-4 relative z-10">
         <h2

@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Flame } from "lucide-react";
 import { MessageCircle } from "lucide-react";
@@ -9,6 +9,7 @@ import HeroSection from "@/components/sections/hero-section";
 import TestimonialSection from "@/components/sections/testimonial-section";
 import { Candle3D } from "@/components/Candle3D";
 import NewsletterSection from "@/components/sections/newsletter";
+import Link from "next/link";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -66,9 +67,12 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <Button size="lg" variant="default">
+            <Link
+              className={buttonVariants({ variant: "default", size: "lg" })}
+              href="#newsletter"
+            >
               Je m&apos;inscris pour être informé du lancement
-            </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -123,9 +127,12 @@ export default function Home() {
             </div>
           </div>
           <div className="text-center mt-16">
-            <Button size="lg" variant="default">
+            <Link
+              className={buttonVariants({ variant: "default", size: "lg" })}
+              href="#newsletter"
+            >
               Prêt à vivre l&apos;expérience UNIKCANDLE ?
-            </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -187,9 +194,12 @@ export default function Home() {
             </Card>
           </div>
           <div className="text-center mt-16">
-            <Button size="lg" variant="default">
+            <Link
+              className={buttonVariants({ variant: "default", size: "lg" })}
+              href="#newsletter"
+            >
               Offrez ou offrez-vous une émotion unique
-            </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -2,7 +2,8 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Lora } from "next/font/google";
-import { Button } from "../ui/button";
+import { buttonVariants } from "../ui/button";
+import Link from "next/link";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -55,9 +56,12 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
-              <Button size="lg" variant="default">
+              <Link
+                className={buttonVariants({ variant: "default", size: "lg" })}
+                href="#newsletter"
+              >
                 Je m&apos;inscris pour le lancement
-              </Button>
+              </Link>
             </motion.div>
           </motion.div>
 
