@@ -17,7 +17,7 @@ const lora = Lora({
 
 export default function Home() {
   return (
-    <main className="bg-background min-h-screen">
+    <main className="bg-background  ">
       <HeroSection />
       {/* Section 1 : Le Concept */}
       <section className="py-24 lg:py-32 bg-background relative">
