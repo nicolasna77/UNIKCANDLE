@@ -2,6 +2,10 @@
 
 import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { Resend } from "resend";
+import NewsletterWelcomeEmail from "@/emails/newsletter-welcome";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const newsletterSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -39,6 +43,14 @@ export async function subscribeToNewsletter(formData: FormData) {
       data: {
         email: validatedFields.data.email,
       },
+    });
+
+    // Envoyer l'email de bienvenue
+    await resend.emails.send({
+      from: "UNIKCANDLE <contact@unikcandle.com>",
+      to: validatedFields.data.email,
+      subject: "Bienvenue dans l'aventure UNIKCANDLE !",
+      react: NewsletterWelcomeEmail(),
     });
 
     return {

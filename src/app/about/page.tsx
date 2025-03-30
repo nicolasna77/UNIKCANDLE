@@ -65,7 +65,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative h-[400px] rounded-lg overflow-hidden order-2 lg:order-1">
               <Image
-                src="/asset/IMG_20250328_111933.webp"
+                src="/asset/IMG_20250328_111936.webp"
                 alt="Notre processus"
                 fill
                 quality={100}
@@ -116,7 +116,7 @@ export default function AboutPage() {
             </div>
             <div className="relative h-[400px] rounded-lg overflow-hidden">
               <Image
-                src="/asset/IMG_20250328_111936.webp"
+                src="/asset/IMG_20250328_111933.webp"
                 alt="Notre engagement"
                 fill
                 quality={100}

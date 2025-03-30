@@ -69,7 +69,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative aspect-square rounded-xl overflow-hidden shadow-2xl"
+            className="relative aspect-square rounded-xl overflow-hidden "
           >
             <video
               className="w-full h-full object-cover"

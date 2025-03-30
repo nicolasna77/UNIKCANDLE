@@ -78,55 +78,55 @@ export default function Home() {
       </section>
 
       {/* Section 2 : Comment Ça Marche */}
-      <section className="py-24 lg:py-32 px-4 bg-muted/50">
-        <div className="container mx-auto ">
+      <section className="py-8 sm:py-24 lg:py-32 px-4 bg-muted/50">
+        <div className="container gap-y-16 flex flex-col mx-auto">
           <h2
-            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
+            className={`${lora.className} text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 lg:mb-16 text-foreground tracking-tight`}
           >
             Comment ça marche ? <br />
             <span className="text-primary">C&apos;est simple et magique !</span>
           </h2>
-          <div className="grid lg:grid-cols-2  items-center mx-auto">
-            <div className="space-y-12">
-              <div className="flex items-center gap-6 group">
-                <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mx-auto">
+            <div className="space-y-4 w-full">
+              <div className="flex items-start sm:items-center gap-4 sm:gap-6 group">
+                <div className="text-3xl sm:text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg shrink-0">
                   1
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2 flex items-center gap-2">
                     Sélectionne le parfum de ta bougie
-                    <span className="text-3xl">✨</span>
+                    <span className="text-2xl sm:text-3xl">✨</span>
                   </h3>
                 </div>
               </div>
-              <div className="flex items-center gap-6 group">
-                <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
+              <div className="flex items-start sm:items-center gap-4 sm:gap-6 group">
+                <div className="text-3xl sm:text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg shrink-0">
                   2
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2 flex items-center gap-2">
                     Enregistre un message personnalisé
-                    <span className="text-3xl">🎙️</span>
+                    <span className="text-2xl sm:text-3xl">🎙️</span>
                   </h3>
                 </div>
               </div>
-              <div className="flex items-center gap-6 group">
-                <div className="text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-16 h-16 flex items-center justify-center shadow-lg shrink-0">
+              <div className="flex items-start sm:items-center gap-4 sm:gap-6 group">
+                <div className="text-3xl sm:text-4xl font-bold text-primary border-2 border-primary/20 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg shrink-0">
                   3
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2 flex items-center gap-2">
                     Choisis une animation en réalité augmentée
-                    <span className="text-3xl">🔮</span>
+                    <span className="text-2xl sm:text-3xl">🔮</span>
                   </h3>
                 </div>
               </div>
             </div>
-            <div className="relative h-full w-full  ">
+            <div className="relative h-[250px] sm:h-[350px] lg:h-[500px] w-full max-w-[300px] sm:max-w-[400px] lg:max-w-none mx-auto">
               <Candle3D />
             </div>
           </div>
-          <div className="text-center mt-16">
+          <div className="text-center mt-16 lg:mt-20">
             <Link
               className={buttonVariants({ variant: "default", size: "lg" })}
               href="#newsletter"
