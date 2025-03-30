@@ -43,7 +43,14 @@ const Footer = () => {
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <SocialIcon url="www.github.com" />
+                <SocialIcon url="www.tiktok.com" />
+              </button>
+
+              <button
+                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                type="button"
+              >
+                <SocialIcon url="www.instagram.com" />
               </button>
             </div>
           </div>
