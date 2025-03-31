@@ -45,7 +45,7 @@ const Footer = () => {
               >
                 <SocialIcon url="www.tiktok.com" />
               </button>
-
+    
               <button
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
