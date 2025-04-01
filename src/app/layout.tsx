@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="scroll-smooth">
+    <html lang="fr" className="scroll-smooth w-full">
       <Analytics />
       <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
         <Header />

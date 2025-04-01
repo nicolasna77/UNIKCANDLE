@@ -47,10 +47,16 @@ export async function subscribeToNewsletter(formData: FormData) {
 
     // Envoyer l'email de bienvenue
     await resend.emails.send({
-      from: "UNIKCANDLE <contact@unikcandle.com>",
+      from: "UNIKCANDLE <noreply@unikcandle.com>",
       to: validatedFields.data.email,
       subject: "Bienvenue dans l'aventure UNIKCANDLE !",
       react: NewsletterWelcomeEmail(),
+      headers: {
+        "List-Unsubscribe": `<mailto:unsubscribe@unikcandle.com?subject=unsubscribe>, <https://unikcandle.com/unsubscribe>`,
+        Precedence: "bulk",
+        "X-Auto-Response-Suppress": "OOF, AutoReply",
+      },
+      tags: [{ name: "category", value: "welcome" }],
     });
 
     return {

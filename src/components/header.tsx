@@ -15,13 +15,13 @@ export default function Header() {
     <header>
       <div
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 px-4 w-full transition-all duration-300",
+          "fixed top-0 inset-x-0 z-50 transition-all duration-300",
           scrolled
             ? "bg-background/80 backdrop-blur-md shadow-sm"
             : "bg-transparent"
         )}
       >
-        <nav className="container mx-auto  flex items-center justify-between h-16">
+        <nav className="container mx-auto px-4 flex items-center justify-between h-16">
           <Link
             href="/"
             className="text-xl bg-white border border-border rounded-xl p-1 font-bold"
