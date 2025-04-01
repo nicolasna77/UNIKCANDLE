@@ -31,7 +31,7 @@ const Footer = () => {
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <SocialIcon url="www.facebook.com" />
+                <SocialIcon url="https://www.facebook.com/share/19YoQmV9km/?mibextid=wwXIfr" />
               </button>
               <button
                 className="  font-normal items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
@@ -43,14 +43,14 @@ const Footer = () => {
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <SocialIcon url="www.tiktok.com" />
+                <SocialIcon url="https://www.tiktok.com/@unikcandle1?_t=ZN-8vAiWKd4Sv8&_r=1" />
               </button>
-    
+
               <button
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <SocialIcon url="www.instagram.com" />
+                <SocialIcon url="https://www.instagram.com/unikcandle_labougiequiparle?igsh=anRqNDBzdjFhd3Ru&utm_source=qr" />
               </button>
             </div>
           </div>
