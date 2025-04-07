@@ -5,6 +5,8 @@ import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
+import QueryProvider from "@/providers/query-provider";
+import { CartProvider } from "@/context/CartContext";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -74,17 +76,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="fr" className="scroll-smooth w-full">
+    <html lang="fr" suppressHydrationWarning>
       <Analytics />
       <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
-        <Header />
-        {children}
-        <Toaster />
-        <Footer />
+        <CartProvider>
+          <QueryProvider>
+            <Header />
+            {children}
+            <Toaster />
+            <Footer />
+          </QueryProvider>
+        </CartProvider>
       </body>
     </html>
   );

@@ -78,7 +78,7 @@ export default function Home() {
       </section>
 
       {/* Section 2 : Comment Ça Marche */}
-      <section className="py-8 sm:py-24 lg:py-32 px-4 bg-muted/50">
+      <section className="py-8 sm:py-24 lg:py-32 px-4 bg-muted">
         <div className="container gap-y-16 flex flex-col mx-auto">
           <h2
             className={`${lora.className} text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 lg:mb-16 text-foreground tracking-tight`}
@@ -123,7 +123,16 @@ export default function Home() {
               </div>
             </div>
             <div className="relative h-[250px] sm:h-[350px] lg:h-[500px] w-full max-w-[300px] sm:max-w-[400px] lg:max-w-none mx-auto">
-              <Candle3D />
+              <Candle3D
+                selectedScent={{
+                  id: "candle",
+                  name: "Bougie",
+                  description: "Bougie",
+                  icon: "/logo/candle.png",
+                  color: "#000000",
+                  model3dUrl: "/logo/candleGlass.glb",
+                }}
+              />
             </div>
           </div>
           <div className="text-center mt-16 lg:mt-20">

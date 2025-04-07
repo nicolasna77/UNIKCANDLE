@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Lora } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
+import Video from "../video";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -65,26 +66,14 @@ const HeroSection = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative aspect-square rounded-xl overflow-hidden "
-          >
-            <video
+          <div className="relative aspect-square rounded-xl overflow-hidden ">
+            <Video
+              type="video/mp4"
               className="w-full h-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-            >
-              <source
-                src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
-                type="video/mp4"
-              />
-              Votre navigateur ne supporte pas la lecture de vidéos.
-            </video>
-          </motion.div>
+              src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
+              captions="./asset/captions.vtt"
+            />
+          </div>
         </div>
       </div>
     </section>
