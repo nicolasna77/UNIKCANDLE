@@ -15,8 +15,8 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
-    "db:generate": "prisma generate",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:generate": "npx prisma generate",
+    "db:seed": "npx prisma db seed"
   },
   "dependencies": {
     "@better-auth/cli": "^1.2.5",
