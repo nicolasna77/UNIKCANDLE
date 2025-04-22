@@ -49,7 +49,7 @@ const NewsletterSection = () => {
           Ne manquez pas le lancement de{" "}
           <span className={`${lora.className} text-primary`}>UNIKCANDLE</span> !
         </h2>
-        <p className="text-xl text-center text-balance mb-12 max-w-3xl mx-auto text-muted-foreground">
+        <p className="text-xl text-center text-balance mb-12 max-w-4xl mx-auto text-muted-foreground">
           Inscrivez-vous dès maintenant pour être informé en avant-première du
           lancement de UNIKCANDLE. Recevez des offres exclusives et soyez parmi
           les premiers à créer votre bougie unique.

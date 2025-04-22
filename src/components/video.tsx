@@ -10,7 +10,7 @@ const Video = ({
   type: string;
 }) => {
   return (
-    <video autoPlay muted loop playsInline preload="none" className={className}>
+    <video autoPlay muted loop playsInline preload="true" className={className}>
       <source src={src} type={type} />
       <track src={captions} kind="subtitles" srcLang="fr" label="Français" />
       Your browser does not support the video tag.

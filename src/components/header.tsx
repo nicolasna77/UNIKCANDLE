@@ -27,10 +27,10 @@ export default function Header() {
           <div className="hidden md:block absolute left-1/2 -translate-x-1/2">
             <HeaderMenu />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="relative gap-4">
+          <div className="flex items-center gap-5">
+            <div className="relative ">
               <Link href="/cart">
-                <ShoppingCartIcon className="w-6 h-6" />
+                <ShoppingCartIcon className="text-primary w-6 h-6" />
                 {totalItems > 0 && (
                   <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
                     {totalItems}

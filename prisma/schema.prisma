@@ -23,6 +23,10 @@ model User {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  banExpires    Int?
+  banReason     String?
+  banned        Boolean?  @default(false)
+  role          String?   @default("user")
   orders        Order[]
   reviews       Review[]
   accounts      Account[]
@@ -31,16 +35,26 @@ model User {
   @@map("user")
 }
 
+model Jwks {
+  id         String   @id @default(uuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime
+
+  @@map("jwks")
+}
+
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime
+  updatedAt      DateTime
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
 }
@@ -83,6 +97,7 @@ model Product {
   imageUrl    String
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
   orders      OrderItem[]
   variants    ProductVariant[]
   reviews     Review[]
@@ -128,18 +143,20 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
-  scentId   String
-  audioUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id])
-  scent     Scent    @relation(fields: [scentId], references: [id])
+  id          String   @id @default(uuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Float
+  scentId     String
+  audioUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  animationId String?
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
+  scent       Scent    @relation(fields: [scentId], references: [id])
+  qrCode      QRCode?
 }
 
 model Address {
@@ -165,6 +182,15 @@ model Review {
   updatedAt DateTime @updatedAt
   product   Product  @relation(fields: [productId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model QRCode {
+  id          String    @id @default(cuid())
+  orderItemId String    @unique
+  code        String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 }
 
 enum OrderStatus {

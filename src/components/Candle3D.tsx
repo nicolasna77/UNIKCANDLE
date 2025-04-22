@@ -74,7 +74,7 @@ export function Candle3D({ selectedScent }: Candle3DProps) {
     controlsRef.current = controls;
 
     // Ajout d'un éclairage optimal pour voir les couleurs et textures
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Réduit pour ne pas "laver" les couleurs
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Réduit pour ne pas "laver" les couleurs
     scene.add(ambientLight);
 
     // Lumière directionnelle principale pour créer du relief

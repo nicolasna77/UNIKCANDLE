@@ -5,23 +5,27 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Nettoyage de la base de données
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.address.deleteMany();
-  await prisma.review.deleteMany();
-  await prisma.productVariant.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.scent.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.$transaction([
+    prisma.orderItem.deleteMany(),
+    prisma.order.deleteMany(),
+    prisma.address.deleteMany(),
+    prisma.review.deleteMany(),
+    prisma.productVariant.deleteMany(),
+    prisma.product.deleteMany(),
+    prisma.scent.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 
-  // Création de quelques utilisateurs
+  // Création des utilisateurs
   const users = await Promise.all(
-    Array.from({ length: 5 }).map(async () => {
+    Array.from({ length: 20 }).map(async () => {
       return prisma.user.create({
         data: {
           id: faker.string.uuid(),
-          name: faker.person.fullName(),
           email: faker.internet.email(),
+          name: faker.person.fullName(),
+          role: "user",
+          image: faker.image.avatar(),
           emailVerified: true,
           createdAt: faker.date.past(),
           updatedAt: faker.date.recent(),
@@ -37,28 +41,35 @@ async function main() {
       description: "Doux et réconfortant",
       icon: "🌿",
       color: "#FFE5B4",
-      model3dUrl: "/logo/candleGlass.glb",
+      model3dUrl: "/models/vanilla.glb",
     },
     {
       name: "Lavande",
       description: "Apaisant et relaxant",
       icon: "💜",
       color: "#E6E6FA",
-      model3dUrl: "/logo/candleGlass.glb",
+      model3dUrl: "/models/lavender.glb",
     },
     {
       name: "Cannelle",
       description: "Chaud et épicé",
       icon: "🔥",
       color: "#D2691E",
-      model3dUrl: "/logo/candleGlass.glb",
+      model3dUrl: "/models/cinnamon.glb",
     },
     {
       name: "Jasmin",
       description: "Floral et élégant",
       icon: "🌸",
       color: "#F5F5DC",
-      model3dUrl: "/logo/candleGlass.glb",
+      model3dUrl: "/models/jasmine.glb",
+    },
+    {
+      name: "Citron",
+      description: "Frais et énergisant",
+      icon: "🍋",
+      color: "#FFFACD",
+      model3dUrl: "/models/lemon.glb",
     },
   ];
 
@@ -70,57 +81,130 @@ async function main() {
     )
   );
 
-  // Création des bougies
-  const candles = [
+  // Création des produits
+  const products = [
     {
       name: "Bougie Signature",
       description: "Notre bougie signature, élégante et raffinée",
       price: 49.99,
-      imageUrl: "/images/candles/signature/main.jpg",
+      imageUrl: "/images/candles/signature.jpg",
     },
     {
       name: "Bougie Luxe",
       description: "Une bougie luxueuse aux finitions dorées",
       price: 69.99,
-      imageUrl: "/images/candles/luxe/main.jpg",
+      imageUrl: "/images/candles/luxe.jpg",
     },
     {
       name: "Bougie Collection",
       description: "Edition limitée de notre collection premium",
       price: 59.99,
-      imageUrl: "/images/candles/collection/main.jpg",
+      imageUrl: "/images/candles/collection.jpg",
+    },
+    {
+      name: "Bougie Classique",
+      description: "Un classique intemporel",
+      price: 39.99,
+      imageUrl: "/images/candles/classique.jpg",
+    },
+    {
+      name: "Bougie Design",
+      description: "Design moderne et épuré",
+      price: 54.99,
+      imageUrl: "/images/candles/design.jpg",
     },
   ];
 
-  // Création des produits et leurs variantes
-  for (const candle of candles) {
-    const product = await prisma.product.create({
-      data: {
-        ...candle,
-        variants: {
-          create: createdScents.map((scent) => ({
-            scentId: scent.id,
-            imageUrl: `/images/candles/${candle.name.toLowerCase().replace(" ", "-")}/${scent.name.toLowerCase()}.jpg`,
-            isAvailable: true,
-          })),
+  const createdProducts = await Promise.all(
+    products.map((product) =>
+      prisma.product.create({
+        data: {
+          ...product,
+          variants: {
+            create: createdScents.map((scent) => ({
+              scentId: scent.id,
+              imageUrl: `/images/candles/${product.name.toLowerCase().replace(/\s+/g, "-")}/${scent.name.toLowerCase()}.jpg`,
+              isAvailable: true,
+            })),
+          },
         },
-      },
-    });
+      })
+    )
+  );
 
-    // Création de quelques avis pour chaque produit
-    const numberOfReviews = faker.number.int({ min: 3, max: 8 });
+  // Création des avis
+  for (const product of createdProducts) {
+    const numberOfReviews = faker.number.int({ min: 3, max: 10 });
     for (let i = 0; i < numberOfReviews; i++) {
       const randomUser = users[Math.floor(Math.random() * users.length)];
       await prisma.review.create({
         data: {
-          productId: product.id,
           userId: randomUser.id,
-          rating: faker.number.int({ min: 4, max: 5 }),
+          productId: product.id,
+          rating: faker.number.int({ min: 3, max: 5 }),
           comment: faker.lorem.paragraph(),
-          createdAt: faker.date.past(),
-          updatedAt: faker.date.recent(),
         },
       });
+    }
+  }
+
+  // Création des commandes
+  for (let i = 0; i < 30; i++) {
+    const randomUser = users[Math.floor(Math.random() * users.length)];
+    const randomProduct =
+      createdProducts[Math.floor(Math.random() * createdProducts.length)];
+    const randomScent =
+      createdScents[Math.floor(Math.random() * createdScents.length)];
+    const quantity = faker.number.int({ min: 1, max: 3 });
+    const total = randomProduct.price * quantity;
+
+    const order = await prisma.order.create({
+      data: {
+        userId: randomUser.id,
+        status: faker.helpers.arrayElement([
+          "PENDING",
+          "PROCESSING",
+          "SHIPPED",
+          "DELIVERED",
+          "CANCELLED",
+        ]),
+        total,
+        items: {
+          create: {
+            productId: randomProduct.id,
+            scentId: randomScent.id,
+            quantity,
+            price: randomProduct.price,
+          },
+        },
+        shippingAddress: {
+          create: {
+            street: faker.location.streetAddress(),
+            city: faker.location.city(),
+            state: faker.location.state(),
+            zipCode: faker.location.zipCode(),
+            country: "France",
+          },
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    // Création de QR codes pour certains articles de commande
+    if (order.status === "DELIVERED") {
+      for (const item of order.items) {
+        if (faker.datatype.boolean()) {
+          // 50% de chance de créer un QR code
+          await prisma.qRCode.create({
+            data: {
+              code: faker.string.alphanumeric(10),
+              orderItemId: item.id,
+            },
+          });
+        }
+      }
     }
   }
 

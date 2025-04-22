@@ -1,8 +1,6 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Lora, Montserrat } from "next/font/google";
-import "./globals.css";
-import Footer from "@/components/footer";
-import Header from "@/components/header";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/providers/query-provider";
@@ -85,10 +83,8 @@ export default function RootLayout({
       <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
         <CartProvider>
           <QueryProvider>
-            <Header />
             {children}
             <Toaster />
-            <Footer />
           </QueryProvider>
         </CartProvider>
       </body>

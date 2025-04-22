@@ -13,6 +13,6 @@ export function useProductName(productId: string | undefined) {
       return product?.name || null;
     },
     enabled: !!productId && !!products && !isProductsLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }

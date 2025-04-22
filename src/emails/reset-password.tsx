@@ -91,7 +91,7 @@ export const ResetPasswordEmail = ({
 
 ResetPasswordEmail.PreviewProps = {
   userFirstname: "Jean",
-  resetPasswordLink: "https://unikcandle.com/reset-password?token=xxx",
+  resetPasswordLink: "https://unikcandle.com/auth/reset-password?token=xxx",
 } as ResetPasswordEmailProps;
 
 export default ResetPasswordEmail;

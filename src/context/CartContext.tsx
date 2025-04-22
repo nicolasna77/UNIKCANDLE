@@ -1,7 +1,7 @@
 "use client";
 
-import { ProductWithDetails } from "@/app/products/[uid]/types";
-import { Scent } from "@/app/products/[uid]/types";
+import { ProductWithDetails } from "@/app/(local)/products/[uid]/types";
+import { Scent } from "@/app/(local)/products/[uid]/types";
 import { createContext, useContext, useState, useEffect } from "react";
 
 interface CartItem extends ProductWithDetails {
@@ -15,6 +15,7 @@ interface CartContextType {
   addToCart: (item: ProductWithDetails & { selectedScent: Scent }) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
 }
 
 // Creating CartContext with default value
@@ -77,9 +78,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setCart((prevCart) => prevCart.filter((cartItem) => cartItem.id !== id));
   };
 
+  const clearCart = () => {
+    setCart([]);
+  };
+
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, updateQuantity, removeFromCart }}
+      value={{
+        cart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

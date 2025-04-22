@@ -4,16 +4,17 @@ import { nextCookies } from "better-auth/next-js";
 import { PrismaClient } from "@/../generated/prisma";
 import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
-
+import { admin } from "better-auth/plugins";
 const prisma = new PrismaClient();
 export const auth = betterAuth({
+  baseUrl: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-
     requireEmailVerification: false,
     allowUnverifiedLogin: true,
     sendResetPassword: async ({ user, url }) => {
@@ -33,5 +34,11 @@ export const auth = betterAuth({
       });
     },
   },
-  plugins: [nextCookies()],
+
+  plugins: [
+    admin({
+      adminRoles: ["admin"],
+    }),
+    nextCookies(),
+  ],
 });

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient, useSession } from "@/lib/auth-client";
-import { User, Settings, LogOut, Mail, Calendar } from "lucide-react";
+import { User, Settings, LogOut, Mail, Calendar, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const AuthButton = () => {
@@ -27,12 +27,6 @@ const AuthButton = () => {
           className={buttonVariants({ variant: "default" })}
         >
           Connection
-        </Link>
-        <Link
-          href="/auth/signup"
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Inscription
         </Link>
       </div>
     );
@@ -72,6 +66,18 @@ const AuthButton = () => {
             <span>{session.user.email}</span>
           </div>
         </DropdownMenuLabel>
+        {session.user.role === "admin" && (
+          <>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center gap-2">
+                <Shield className="size-4" />
+                <span>Admin</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/profil" className="flex items-center gap-2">
