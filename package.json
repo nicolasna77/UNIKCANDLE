@@ -8,9 +8,15 @@
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma db push && prisma db seed && next build"
   },
+  "pkg": {
+    "assets": [
+      "node_modules/.prisma/client/*.node"
+    ]
+  },
   "scripts": {
     "dev": "next dev ",
     "build": "prisma generate && next build",
+    "prisma:generate": "prisma generate --schema=./prisma/schema.prisma",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
