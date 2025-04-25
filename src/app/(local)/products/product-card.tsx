@@ -41,8 +41,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   // Reset selectedScent when product changes
   useEffect(() => {
-    setSelectedScent(product.variants[0]?.scent);
-  }, [product.id]);
+    if (product.variants && product.variants.length > 0) {
+      setSelectedScent(product.variants[0].scent);
+    }
+  }, [product.variants]);
 
   return (
     <Card className="w-full h-full pt-0 overflow-hidden border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">

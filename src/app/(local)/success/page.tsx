@@ -13,11 +13,22 @@ export default function SuccessPage() {
   const { clearCart } = useCart();
 
   useEffect(() => {
-    if (sessionId) {
-      clearCart();
-      toast.success("Paiement effectué avec succès !");
-    }
-  }, [sessionId]);
+    const handleSuccess = async () => {
+      if (sessionId) {
+        try {
+          await clearCart();
+          toast.success("Paiement effectué avec succès !");
+        } catch (error) {
+          console.error("Erreur lors de la suppression du panier:", error);
+          toast.error(
+            "Une erreur est survenue lors du traitement de votre commande"
+          );
+        }
+      }
+    };
+
+    handleSuccess();
+  }, [sessionId, clearCart]);
 
   return (
     <section className="bg-white min-h-screen flex items-center justify-center py-8 antialiased dark:bg-gray-900 md:py-16">

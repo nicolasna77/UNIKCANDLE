@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -16,7 +16,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const id = params.id;
+    const id = (await params).id;
     const data = await request.json();
     const product = await prisma.product.update({
       where: {
@@ -61,13 +61,20 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
   try {
     await prisma.product.delete({
       where: {
-        id: params.id,
+        id: (await params).id,
       },
     });
     return NextResponse.json({ success: true });

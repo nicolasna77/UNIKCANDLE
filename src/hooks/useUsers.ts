@@ -192,7 +192,7 @@ export function useUsers() {
       return await authClient.admin.setRole(
         {
           userId,
-          role,
+          role: role as "user" | "admin",
         },
         {
           throw: true,

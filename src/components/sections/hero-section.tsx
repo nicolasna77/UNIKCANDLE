@@ -72,9 +72,9 @@ const HeroSection = () => {
                 id: "candle",
                 name: "Bougie",
                 description: "Bougie",
-                icon: "/logo/candle.png",
+                icon: "/models/candle.png",
                 color: "#000000",
-                model3dUrl: "/logo/candleGlass.glb",
+                model3dUrl: "/models/candleGlass.glb",
               }}
             />
           </div>

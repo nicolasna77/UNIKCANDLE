@@ -3,13 +3,13 @@ import prisma from "@/lib/prisma";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const data = await request.json();
     const scent = await prisma.scent.update({
       where: {
-        id: params.id,
+        id: (await params).id,
       },
       data: {
         name: data.name,
@@ -30,13 +30,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await prisma.scent.delete({
       where: {
-        id: params.id,
+        id: (await params).id,
       },
     });
     return NextResponse.json({ success: true });

@@ -49,9 +49,7 @@ interface UpdateProductData extends Partial<CreateProductData> {
 // Fonction pour récupérer tous les produits
 async function fetchProducts(id?: string) {
   try {
-    const response = await fetch(
-      id ? `/api/products?query=${id}` : "/api/products"
-    );
+    const response = await fetch(id ? `/api/products/${id}` : "/api/products");
     if (!response.ok) {
       if (response.status === 404) {
         return [];

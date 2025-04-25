@@ -26,7 +26,7 @@ const AuthButton = () => {
           href="/auth/signin"
           className={buttonVariants({ variant: "default" })}
         >
-          Connection
+          S&apos;identifier
         </Link>
       </div>
     );
