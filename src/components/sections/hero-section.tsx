@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Lora } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
-import Video from "../video";
+import { Candle3D } from "../Candle3D";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -59,19 +59,23 @@ const HeroSection = () => {
             >
               <Link
                 className={buttonVariants({ variant: "default", size: "lg" })}
-                href="#newsletter"
+                href="/products"
               >
-                Je m&apos;inscris pour le lancement
+                Découvrez nos produits
               </Link>
             </motion.div>
           </motion.div>
 
-          <div className="relative aspect-square rounded-xl overflow-hidden ">
-            <Video
-              type="video/mp4"
-              className="w-full h-full object-cover"
-              src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
-              captions="./asset/captions.vtt"
+          <div className="relative aspect-square rounded-xl  ">
+            <Candle3D
+              selectedScent={{
+                id: "candle",
+                name: "Bougie",
+                description: "Bougie",
+                icon: "/logo/candle.png",
+                color: "#000000",
+                model3dUrl: "/logo/candleGlass.glb",
+              }}
             />
           </div>
         </div>

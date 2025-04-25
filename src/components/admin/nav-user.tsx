@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  BellIcon,
-  CreditCardIcon,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UserCircleIcon,
-} from "lucide-react";
+import { LogOutIcon, MoreVerticalIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -98,21 +91,7 @@ export function NavUser({ user }: { user: User | null }) {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon className="mr-2 h-4 w-4" />
-                Mon compte
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon className="mr-2 h-4 w-4" />
-                Paiements
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon className="mr-2 h-4 w-4" />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => authClient.signOut()}>
               <LogOutIcon className="mr-2 h-4 w-4" />

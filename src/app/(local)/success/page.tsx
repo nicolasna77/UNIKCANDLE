@@ -1,49 +1,62 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 
 export default function SuccessPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
   const { clearCart } = useCart();
 
   useEffect(() => {
-    const sessionId = searchParams.get("session_id");
     if (sessionId) {
-      // Vider le panier après un paiement réussi
       clearCart();
+      toast.success("Paiement effectué avec succès !");
     }
-  }, [searchParams, clearCart]);
+  }, [sessionId]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted">
-      <div className="max-w-md w-full mx-auto p-6 text-center space-y-6">
-        <div className="space-y-2">
-          <div className="flex justify-center">
-            <CheckCircle2 className="h-16 w-16 text-green-500" />
+    <section className="bg-white min-h-screen flex items-center justify-center py-8 antialiased dark:bg-gray-900 md:py-16">
+      <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
+        <div className="mx-auto max-w-3xl">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+            <div className="mb-4 rounded-full bg-green-100 p-4 dark:bg-green-900">
+              <svg
+                className="h-8 w-8 text-green-500 dark:text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Commande confirmée !
+            </h3>
+            <p className="mb-4 text-gray-500 dark:text-gray-400">
+              Merci pour votre achat. Nous vous enverrons un email de
+              confirmation avec les détails de votre commande.
+            </p>
+            <div className="flex gap-4">
+              <Link href="/products">
+                <Button variant="outline">Continuer les achats</Button>
+              </Link>
+              <Link href="/profil/orders">
+                <Button>Voir mes commandes</Button>
+              </Link>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Paiement réussi !
-          </h1>
-          <p className="text-muted-foreground">
-            Merci pour votre achat. Vous recevrez un email de confirmation avec
-            les détails de votre commande.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={() => router.push("/products")}>
-            Continuer vos achats
-          </Button>
-          <Button variant="outline" onClick={() => router.push("/")}>
-            Retour à l&apos;accueil
-          </Button>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

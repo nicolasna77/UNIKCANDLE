@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tabs } from "@/components/ui/tabs";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 const page = [
   {
     label: "Profil",
@@ -19,7 +20,9 @@ const page = [
 ];
 
 const ProfilMenu = () => {
-  const [tab, setTab] = useState("/profil");
+  const pathname = usePathname();
+  const [tab, setTab] = useState(pathname);
+
   const onTabChange = (value: string) => {
     setTab(value);
   };

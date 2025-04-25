@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import { stripe } from "@/lib/stripe";
+import { getUser } from "@/lib/auth-session";
 
 interface CheckoutItem {
   id: string;
@@ -10,60 +11,97 @@ interface CheckoutItem {
     id: string;
     name: string;
   };
+  imageUrl: string;
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-03-31.basil",
-});
+interface CartItem {
+  id: string;
+  quantity: number;
+  scentId: string;
+  price: number;
+}
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
+  console.log("=== Création de session Stripe ===");
+
   try {
-    const { items } = await request.json();
+    const session = await getUser();
+    console.log("Session utilisateur:", session);
 
-    const lineItems = items.map((item: CheckoutItem) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: `${item.name} - ${item.selectedScent.name}`,
-          metadata: {
-            productId: item.id,
-            scentId: item.selectedScent.id,
+    const { cart } = await req.json();
+    console.log("Panier reçu:", cart);
+
+    if (!cart || cart.length === 0) {
+      console.error("Panier vide");
+      return new NextResponse("Le panier est vide", { status: 400 });
+    }
+
+    const lineItems = cart.map((item: CheckoutItem) => {
+      // Convertir l'URL de l'image en URL absolue si ce n'est pas déjà le cas
+      const imageUrl = item.imageUrl.startsWith("http")
+        ? item.imageUrl
+        : `${process.env.NEXT_PUBLIC_APP_URL}${item.imageUrl}`;
+
+      return {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: item.name,
+            description: `Senteur : ${item.selectedScent.name}`,
+            images: [imageUrl],
           },
+          unit_amount: Math.round(item.price * 100),
         },
-        unit_amount: Math.round(item.price * 100), // Convertir en centimes
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity || 1,
+      };
+    });
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+    console.log("Line items créés:", lineItems);
+
+    // Créer un identifiant unique pour cette commande
+    const orderId = `order_${Date.now()}`;
+
+    console.log("Création de la session Stripe avec les métadonnées:", {
+      orderId,
+      items: cart.map((item: CheckoutItem) => ({
+        id: item.id,
+        quantity: item.quantity || 1,
+        scentId: item.selectedScent.id,
+        price: item.price,
+      })),
+    });
+
+    const stripeSession = await stripe.checkout.sessions.create({
       line_items: lineItems,
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
+      client_reference_id: session?.id || "guest",
+      billing_address_collection: "required",
       shipping_address_collection: {
         allowed_countries: ["FR"],
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: {
-              amount: 0,
-              currency: "eur",
-            },
-            display_name: "Livraison gratuite",
-          },
-        },
-      ],
+      metadata: {
+        orderId,
+        items: JSON.stringify(
+          cart.map(
+            (item: CheckoutItem): CartItem => ({
+              id: item.id,
+              quantity: item.quantity || 1,
+              scentId: item.selectedScent.id,
+              price: item.price,
+            })
+          )
+        ),
+      },
     });
 
-    return NextResponse.json({ sessionId: session.id });
+    console.log("Session Stripe créée avec succès:", stripeSession.id);
+    console.log("URL de redirection:", stripeSession.url);
+
+    return NextResponse.json({ url: stripeSession.url });
   } catch (error) {
     console.error("Erreur lors de la création de la session Stripe:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la création de la session de paiement" },
-      { status: 500 }
-    );
+    return new NextResponse("Erreur interne du serveur", { status: 500 });
   }
 }

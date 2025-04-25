@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import ProductCard from "./product-card";
 import LoadingPage from "./loading";
 import { useProducts } from "@/hooks/useProducts";
-import { ProductWithDetails } from "./[uid]/types";
+import { ProductWithDetails } from "../../../types/types";
 import CardSkeleton from "@/components/skeleton/card-skeleton";
 import {
   Select,

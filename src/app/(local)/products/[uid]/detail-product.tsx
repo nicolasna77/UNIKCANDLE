@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import ReviewProduct from "./review-product";
-import { Scent, ProductVariant } from "./types";
+import { Scent, ProductVariant } from "../../../../types/types";
 import { useProduct } from "@/hooks/useProducts";
 import LoadingPage from "../loading";
 import { useCart } from "@/context/CartContext";

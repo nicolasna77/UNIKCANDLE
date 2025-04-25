@@ -195,15 +195,13 @@ async function main() {
     // Création de QR codes pour certains articles de commande
     if (order.status === "DELIVERED") {
       for (const item of order.items) {
-        if (faker.datatype.boolean()) {
-          // 50% de chance de créer un QR code
-          await prisma.qRCode.create({
-            data: {
-              code: faker.string.alphanumeric(10),
-              orderItemId: item.id,
-            },
-          });
-        }
+        // Création d'un QR code pour chaque article
+        await prisma.qRCode.create({
+          data: {
+            code: faker.string.alphanumeric(10),
+            orderItemId: item.id,
+          },
+        });
       }
     }
   }

@@ -66,13 +66,18 @@ export default function SignIn() {
         {
           onRequest: () => setLoading(true),
           onResponse: () => setLoading(false),
-          redirectTo: "/",
+          redirectTo: callbackUrl || "/",
+          onError: (ctx) => {
+            setLoading(false);
+            toast.error(ctx.error.message || "Une erreur est survenue");
+          },
           callbackUrl: callbackUrl || "/",
-          onSuccess: () => router.push("/"),
+          onSuccess: () => router.push(callbackUrl || "/"),
         }
       );
     } catch {
       setLoading(false);
+
       toast.error("Une erreur est survenue lors de la connexion");
     }
   }

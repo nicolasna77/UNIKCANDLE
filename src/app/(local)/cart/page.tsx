@@ -6,9 +6,14 @@ import { Star, Trash2, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const calculateTotal = () => {
     return cart.reduce(
@@ -26,6 +31,57 @@ export default function CartPage() {
   const handleRemoveItem = (id: string) => {
     removeFromCart(id);
     toast.error("Produit retiré du panier");
+  };
+
+  const handleCheckout = async () => {
+    try {
+      setIsLoading(true);
+      console.log("Début du processus de paiement");
+      console.log("Contenu du panier:", cart);
+
+      // Vérifier si l'utilisateur est connecté
+      const { data: session } = await authClient.getSession();
+      console.log("Session utilisateur:", session);
+
+      if (!session) {
+        console.log(
+          "Utilisateur non connecté, redirection vers la page de connexion"
+        );
+        router.push(`/auth/signin?callbackUrl=${encodeURIComponent("/cart")}`);
+        return;
+      }
+
+      console.log("Envoi de la requête à l'API Stripe");
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cart }),
+      });
+
+      console.log("Réponse de l'API Stripe:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Erreur détaillée:", errorData);
+        throw new Error("Erreur lors de la création de la session de paiement");
+      }
+
+      const { url } = await response.json();
+      console.log("URL de redirection Stripe:", url);
+
+      if (!url) {
+        throw new Error("URL de redirection manquante");
+      }
+
+      router.push(url);
+    } catch (error) {
+      console.error("Erreur lors du paiement:", error);
+      toast.error("Une erreur est survenue lors du paiement");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -214,8 +270,13 @@ export default function CartPage() {
                 </dl>
               </div>
 
-              <Button className="w-full" size="lg">
-                Passer à la caisse
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleCheckout}
+                disabled={isLoading}
+              >
+                {isLoading ? "Chargement..." : "Passer à la caisse"}
               </Button>
 
               <div className="flex items-center justify-center gap-2">

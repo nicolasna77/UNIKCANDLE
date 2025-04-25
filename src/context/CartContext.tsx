@@ -1,7 +1,7 @@
 "use client";
 
-import { ProductWithDetails } from "@/app/(local)/products/[uid]/types";
-import { Scent } from "@/app/(local)/products/[uid]/types";
+import { ProductWithDetails } from "@/types/types";
+import { Scent } from "@/types/types";
 import { createContext, useContext, useState, useEffect } from "react";
 
 interface CartItem extends ProductWithDetails {

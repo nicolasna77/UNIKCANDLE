@@ -38,6 +38,7 @@ export interface ProductWithDetails {
   variants: ProductVariant[];
   reviews: Review[];
   averageRating?: number;
+  createdAt: string;
   reviewCount?: number;
 }
 
@@ -47,5 +48,34 @@ export interface SessionData {
     name: string | null;
     email: string;
     image: string | null;
+  };
+}
+
+export interface Order {
+  id: string;
+  status: string;
+  total: number;
+  createdAt: string;
+  items: {
+    id: string;
+    quantity: number;
+    price: number;
+    product: {
+      name: string;
+      imageUrl: string;
+    };
+    scent: {
+      name: string;
+      color: string;
+    };
+    qrCode?: {
+      code: string;
+    };
+  }[];
+  shippingAddress: {
+    street: string;
+    city: string;
+    zipCode: string;
+    country: string;
   };
 }

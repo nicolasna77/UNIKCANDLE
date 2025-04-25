@@ -42,7 +42,7 @@ export function Candle3D({ selectedScent }: Candle3DProps) {
 
     // Création de la caméra avec un angle optimal pour voir les couleurs
     const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 1000); // Champ plus large
-    camera.position.set(2.5, 1, 2.5);
+    camera.position.set(2.5, 1.2, 2.5);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -105,11 +105,11 @@ export function Candle3D({ selectedScent }: Candle3DProps) {
         candleRef.current = candle;
 
         // Ajustement de la position et rotation
-        candle.position.set(0, -0.5, 0); // Position plus basse
+        candle.position.set(0, -0.3, 0);
         candle.rotation.set(0, 0, 0);
         candle.scale.set(0.2, 0.2, 0.2);
 
-        // Ne pas changer les couleurs ou matériaux, juste supprimer le sol
+        // Application des textures et matériaux
         candle.traverse((child: THREE.Object3D) => {
           if (child instanceof THREE.Mesh) {
             // Activer les ombres
@@ -125,6 +125,48 @@ export function Candle3D({ selectedScent }: Candle3DProps) {
             ) {
               child.visible = false;
             }
+
+            // Application des textures selon le nom de l'objet
+            if (
+              child.name.toLowerCase().includes("candle") ||
+              child.name.toLowerCase().includes("bougie")
+            ) {
+              // Matériau principal de la bougie
+              const material = new THREE.MeshPhysicalMaterial({
+                color: selectedScent.color,
+                roughness: 0.2,
+                metalness: 0.1,
+                clearcoat: 0.5,
+                clearcoatRoughness: 0.1,
+                transmission: 0.1,
+                thickness: 0.5,
+              });
+              child.material = material;
+            } else if (
+              child.name.toLowerCase().includes("wax") ||
+              child.name.toLowerCase().includes("cire")
+            ) {
+              // Matériau de la cire
+              const material = new THREE.MeshPhysicalMaterial({
+                color: selectedScent.color,
+                roughness: 0.3,
+                metalness: 0.05,
+                transmission: 0.2,
+                thickness: 0.3,
+              });
+              child.material = material;
+            } else if (
+              child.name.toLowerCase().includes("wick") ||
+              child.name.toLowerCase().includes("mèche")
+            ) {
+              // Matériau de la mèche
+              const material = new THREE.MeshStandardMaterial({
+                color: "#333333",
+                roughness: 0.8,
+                metalness: 0.1,
+              });
+              child.material = material;
+            }
           }
         });
 
@@ -132,11 +174,12 @@ export function Candle3D({ selectedScent }: Candle3DProps) {
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
         pmremGenerator.compileEquirectangularShader();
 
-        // Environnement lumineux blanc pour faire ressortir les textures
-        scene.environment = pmremGenerator.fromScene(
-          new THREE.Scene().add(new THREE.AmbientLight(0xffffff, 1))
-        ).texture;
-        scene.background = null; // Fond transparent
+        // Environnement lumineux avec la couleur de la senteur
+        const envScene = new THREE.Scene();
+        const envLight = new THREE.AmbientLight(selectedScent.color, 0.5);
+        envScene.add(envLight);
+        scene.environment = pmremGenerator.fromScene(envScene).texture;
+        scene.background = null;
       },
       (progress: ProgressEvent) => {
         console.log(

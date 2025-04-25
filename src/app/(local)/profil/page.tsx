@@ -6,6 +6,7 @@ import { DisplayNameForm } from "./display-name-form";
 import { authClient } from "@/lib/auth-client";
 import ChangePasswordForm from "./change-password-form";
 import DeleteAccountForm from "./delete-account-form";
+import Loading from "@/components/loading";
 export default function ProfilPage() {
   const {
     data: session,
@@ -17,7 +18,7 @@ export default function ProfilPage() {
         title="Profile"
         description="Manage your personal information."
       />
-      {isPending && <div>Loading...</div>}
+      {isPending && <Loading />}
       {session?.user && (
         <>
           <DisplayNameForm session={session.user} isPending={isPending} />

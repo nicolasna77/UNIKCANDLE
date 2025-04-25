@@ -7,10 +7,9 @@ import { Sparkles } from "lucide-react";
 import { Lora } from "next/font/google";
 import HeroSection from "@/components/sections/hero-section";
 import TestimonialSection from "@/components/sections/testimonial-section";
-import { Candle3D } from "@/components/Candle3D";
 import NewsletterSection from "@/components/sections/newsletter";
 import Link from "next/link";
-
+import { Video } from "@/components/ui/video";
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
@@ -150,15 +149,11 @@ export default function Home() {
             </div>
 
             <div className="relative w-full h-full max-h-[600px] max-w-[400px] sm:max-w-[400px] lg:max-w-none mx-auto">
-              <Candle3D
-                selectedScent={{
-                  id: "candle",
-                  name: "Bougie",
-                  description: "Bougie",
-                  icon: "/logo/candle.png",
-                  color: "#000000",
-                  model3dUrl: "/logo/candleGlass.glb",
-                }}
+              <Video
+                type="video/mp4"
+                className="w-full h-full object-cover"
+                src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
+                captions="./asset/captions.vtt"
               />
             </div>
           </div>

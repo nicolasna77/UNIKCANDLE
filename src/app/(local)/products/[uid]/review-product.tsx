@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import ItemReviewProduct from "./item-review-product";
-import { ProductWithDetails, Review } from "./types";
+import { ProductWithDetails, Review } from "../../../../types/types";
 import { authClient } from "@/lib/auth-client";
 import { useAddReview } from "@/hooks/useReviews";
 import { useQuery } from "@tanstack/react-query";
