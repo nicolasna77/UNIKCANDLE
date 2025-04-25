@@ -1,17 +1,13 @@
 "use client";
 import { PageHeader } from "@/components/page-header";
-
-// import { DeleteAccountForm } from "./delete-account-form";
 import { DisplayNameForm } from "./display-name-form";
 import { authClient } from "@/lib/auth-client";
 import ChangePasswordForm from "./change-password-form";
 import DeleteAccountForm from "./delete-account-form";
 import Loading from "@/components/loading";
+
 export default function ProfilPage() {
-  const {
-    data: session,
-    isPending, //loading state
-  } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   return (
     <div className="space-y-2">
       <PageHeader
