@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient, useSession } from "@/lib/auth-client";
-import { User, Settings, LogOut, Mail, Calendar, Shield } from "lucide-react";
+import { User, LogOut, Mail, Calendar, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const AuthButton = () => {
@@ -91,12 +91,7 @@ const AuthButton = () => {
             <span>Mes commandes</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/parametres" className="flex items-center gap-2">
-            <Settings className="size-4" />
-            <span>Paramètres</span>
-          </Link>
-        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"

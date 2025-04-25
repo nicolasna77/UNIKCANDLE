@@ -126,8 +126,8 @@ export default function Home() {
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mx-auto">
             <div className="space-y-8 w-full">
               {steps.map((step) => (
-                <div key={step.number} className="group">
-                  <div className="bg-background rounded-2xl p-6 shadow-lg border border-border/40   ">
+                <Card key={step.number} className="group">
+                  <CardContent className="   ">
                     <div className="flex  items-center gap-5">
                       <div
                         className={`bg-gradient-to-br ${step.color} text-white text-2xl sm:text-3xl font-bold rounded-xl w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center  shrink-0 `}
@@ -143,8 +143,8 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
 

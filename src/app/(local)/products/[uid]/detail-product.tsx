@@ -149,7 +149,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   }
 
   return (
-    <section className="bg-white py-8 dark:bg-gray-900 antialiased">
+    <section className="py-8 ">
       <div className="max-w-screen-xl  mx-auto ">
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
           <div className="w-full h-[500px] bg-gradient-to-b rounded-t-lg from-gray-300">

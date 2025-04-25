@@ -80,7 +80,9 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning className="smooth-scroll">
       <Analytics />
-      <body className={`${lora.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${lora.variable} ${geistMono.variable} antialiased bg-white`}
+      >
         <CartProvider>
           <QueryProvider>
             {children}

@@ -5,18 +5,31 @@ import { PrismaClient } from "@/../generated/prisma";
 import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { admin } from "better-auth/plugins";
+
 const prisma = new PrismaClient();
+
+// Déterminer l'URL de base en fonction de l'environnement
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
+    return process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+};
+
 export const auth = betterAuth({
-  baseUrl: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  baseUrl: getBaseUrl(),
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  trustedOrigins: ["http://localhost:3000", "https://*.vercel.app"],
 
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,
-    allowUnverifiedLogin: true,
     sendResetPassword: async ({ user, url }) => {
       await resend.emails.send({
         from: "noreply@unikcandle.com",

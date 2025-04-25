@@ -13,9 +13,9 @@ export default function Header() {
 
   return (
     <div>
-      <header className="fixed shadow-sm bg-background top-0 inset-x-0 z-50 transition-all duration-300">
+      <header className="fixed shadow-sm bg-white top-0 inset-x-0 z-50 transition-all duration-300">
         <nav className=" mx-auto max-w-screen-3xl px-4 flex items-center justify-between h-16">
-          <Link href="/" className="text-xl bg-white   font-bold">
+          <Link href="/" className="text-xl    font-bold">
             <Image
               src="/logo/logo-primary-color.png"
               alt="logo"
