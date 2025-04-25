@@ -1,12 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
-import { PrismaClient } from "@/../generated/prisma";
+import prisma from "../lib/prisma";
 import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { admin } from "better-auth/plugins";
-
-const prisma = new PrismaClient();
 
 // Déterminer l'URL de base en fonction de l'environnement
 const getBaseUrl = () => {
