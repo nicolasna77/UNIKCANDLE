@@ -8,7 +8,7 @@ export default function UnauthorizedPage() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] space-y-4">
       <ShieldAlert className="h-16 w-16 text-red-500" />
       <h1 className="text-2xl font-bold">Accès non autorisé</h1>
       <p className="text-muted-foreground text-center max-w-md">
