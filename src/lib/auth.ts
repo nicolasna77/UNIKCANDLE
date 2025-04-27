@@ -1,15 +1,13 @@
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
-import prisma from "@/../generated/prisma";
 import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { admin } from "better-auth/plugins";
 
 // Déterminer l'URL de base en fonction de l'environnement
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
-    return process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL;
   }
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
@@ -19,9 +17,6 @@ const getBaseUrl = () => {
 
 export const auth = betterAuth({
   baseUrl: getBaseUrl(),
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
-  }),
   trustedOrigins: ["http://localhost:3000", "https://*.vercel.app"],
 
   emailAndPassword: {
