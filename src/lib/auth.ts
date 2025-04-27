@@ -4,11 +4,17 @@ import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { admin } from "better-auth/plugins";
 
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { PrismaClient } from "@/generated/prisma";
+const prisma = new PrismaClient();
 // Déterminer l'URL de base en fonction de l'environnement
 const baseUrl = process.env.BETTER_AUTH_URL;
 
 export const auth = betterAuth({
   baseUrl: baseUrl,
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
   trustedOrigins: ["http://localhost:3000", "https://*.vercel.app"],
 
   emailAndPassword: {
