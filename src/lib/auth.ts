@@ -5,18 +5,10 @@ import { ResetPasswordEmail } from "@/emails/reset-password";
 import { admin } from "better-auth/plugins";
 
 // Déterminer l'URL de base en fonction de l'environnement
-const getBaseUrl = () => {
-  if (process.env.BETTER_AUTH_URL) {
-    return process.env.BETTER_AUTH_URL;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
-};
+const baseUrl = process.env.BETTER_AUTH_URL;
 
 export const auth = betterAuth({
-  baseUrl: getBaseUrl(),
+  baseUrl: baseUrl,
   trustedOrigins: ["http://localhost:3000", "https://*.vercel.app"],
 
   emailAndPassword: {

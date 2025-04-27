@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { faker } from "@faker-js/faker/locale/fr";
 
 const prisma = new PrismaClient();
@@ -74,10 +74,17 @@ async function main() {
   ];
 
   const createdScents = await Promise.all(
-    scents.map((scent) =>
-      prisma.scent.create({
-        data: scent,
-      })
+    scents.map(
+      (scent: {
+        name: string;
+        description: string;
+        icon: string;
+        color: string;
+        model3dUrl: string;
+      }) =>
+        prisma.scent.create({
+          data: scent,
+        })
     )
   );
 
