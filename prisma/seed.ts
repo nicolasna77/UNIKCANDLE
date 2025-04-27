@@ -1,21 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import { faker } from "@faker-js/faker/locale/fr";
+import { PrismaClient } from "@/../generated/prisma";
 
 const prisma = new PrismaClient();
-
 async function main() {
-  // Nettoyage de la base de données
-  await prisma.$transaction([
-    prisma.orderItem.deleteMany(),
-    prisma.order.deleteMany(),
-    prisma.address.deleteMany(),
-    prisma.review.deleteMany(),
-    prisma.productVariant.deleteMany(),
-    prisma.product.deleteMany(),
-    prisma.scent.deleteMany(),
-    prisma.user.deleteMany(),
-  ]);
-
   // Création des utilisateurs
   const users = await Promise.all(
     Array.from({ length: 20 }).map(async () => {
@@ -74,17 +61,10 @@ async function main() {
   ];
 
   const createdScents = await Promise.all(
-    scents.map(
-      (scent: {
-        name: string;
-        description: string;
-        icon: string;
-        color: string;
-        model3dUrl: string;
-      }) =>
-        prisma.scent.create({
-          data: scent,
-        })
+    scents.map((scent) =>
+      prisma.scent.create({
+        data: scent,
+      })
     )
   );
 
