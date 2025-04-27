@@ -1,6 +1,6 @@
 import Dashboard from "../dashboard";
 
-function Admin() {
+const Admin = () => {
   return <Dashboard />;
-}
+};
 export default Admin;
