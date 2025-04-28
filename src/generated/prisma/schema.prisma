@@ -6,7 +6,7 @@ datasource db {
 generator client {
   provider      = "prisma-client-js"
   output        = "../src/generated/prisma"
-  binaryTargets = ["rhel-openssl-3.0.x"]
+  binaryTargets = ["debian-openssl-1.1.x"]
 }
 
 model Newsletter {
