@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import Image from "next/image";
-import { Loader2, X } from "lucide-react";
+import { AlertCircle, Loader2, X } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z
   .object({
@@ -54,6 +55,7 @@ export default function SignUp() {
   const [apercuImage, setApercuImage] = useState<string | null>(null);
   const router = useRouter();
   const [chargement, setChargement] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -91,7 +93,7 @@ export default function SignUp() {
           onResponse: () => setChargement(false),
           onRequest: () => setChargement(true),
           onError: (ctx) => {
-            toast.error(ctx.error.message);
+            setError(ctx.error.message);
             setChargement(false);
           },
           onSuccess: () => router.push("/"),
@@ -114,6 +116,15 @@ export default function SignUp() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className=" py-4 ">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">

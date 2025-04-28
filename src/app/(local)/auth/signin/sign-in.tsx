@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -30,6 +30,8 @@ import { ControllerRenderProps, Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert } from "@/components/ui/alert";
 
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -42,6 +44,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function SignIn() {
   const callbackUrl = useSearchParams().get("callbackUrl");
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -69,7 +72,7 @@ export default function SignIn() {
           redirectTo: callbackUrl || "/",
           onError: (ctx) => {
             setLoading(false);
-            toast.error(ctx.error.message || "Une erreur est survenue");
+            setError(ctx.error.message || "Une erreur est survenue");
           },
           callbackUrl: callbackUrl || "/",
           onSuccess: () => router.push(callbackUrl || "/"),
@@ -93,6 +96,15 @@ export default function SignIn() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className=" py-4 ">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
