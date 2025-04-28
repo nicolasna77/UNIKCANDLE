@@ -1,8 +1,8 @@
 import path from "node:path";
 import type { PrismaConfig } from "prisma";
-import * as dotenv from "dotenv";
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
 export default {
   earlyAccess: true,
