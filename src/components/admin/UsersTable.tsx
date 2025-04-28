@@ -20,7 +20,7 @@ export function UsersTable({
   onUpdateRole,
 }: UsersTableProps) {
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md bg-white border">
       <table className="w-full">
         <thead>
           <tr className="border-b">

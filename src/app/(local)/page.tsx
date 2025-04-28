@@ -21,19 +21,16 @@ export default function Home() {
       number: 1,
       title: "Sélectionne le parfum de ta bougie",
       emoji: "✨",
-      color: "from-pink-400 to-rose-300",
     },
     {
       number: 2,
       title: "Enregistre un message personnalisé",
       emoji: "🎙️",
-      color: "from-violet-400 to-purple-300",
     },
     {
       number: 3,
       title: "Choisis une animation en réalité augmentée",
       emoji: "🔮",
-      color: "from-blue-400 to-cyan-300",
     },
   ];
 
@@ -100,7 +97,7 @@ export default function Home() {
       {/* Section 2 : Comment Ça Marche */}
       <section
         id="how-it-works"
-        className="py-16 sm:py-24 lg:py-32 px-4 bg-gradient-to-b from-muted/50 to-muted relative overflow-hidden"
+        className="py-16 sm:py-24 lg:py-32 px-4 bg-secondary relative overflow-hidden"
       >
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -124,13 +121,13 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mx-auto">
-            <div className="space-y-8 w-full">
+            <div className="space-y-8 ">
               {steps.map((step) => (
-                <Card key={step.number} className="group">
+                <Card key={step.number} className="group ">
                   <CardContent className="   ">
-                    <div className="flex  items-center gap-5">
+                    <div className="flex items-center gap-5">
                       <div
-                        className={`bg-gradient-to-br ${step.color} text-white text-2xl sm:text-3xl font-bold rounded-xl w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center  shrink-0 `}
+                        className={`border-primary border-2 text-primary text-2xl sm:text-3xl font-bold rounded-xl w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center  shrink-0 `}
                       >
                         {step.number}
                       </div>
@@ -148,15 +145,16 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="relative w-full h-full max-h-[600px] max-w-[400px] sm:max-w-[400px] lg:max-w-none mx-auto">
+            <div className=" max-w-full lg:max-w-none mx-auto">
               <Video
-                type="video/mp4"
+                type="mp4"
                 className="w-full h-full object-cover"
                 src="./asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
-                captions="./asset/captions.vtt"
+                captions="/asset/captions.vtt"
               />
             </div>
           </div>
+
           <div className="text-center mt-16 lg:mt-20">
             <Link
               className={buttonVariants({ variant: "default", size: "lg" })}

@@ -40,15 +40,19 @@ export function Video({ src, type, className, captions }: VideoProps) {
   return (
     <div className="relative">
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="absolute inset-0 bg-muted rounded-lg animate-pulse">
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-muted-foreground/20 rounded-full"></div>
+          </div>
         </div>
       )}
       <video
         ref={videoRef}
-        className={className}
-        controls
-        preload="auto"
+        className={`${className} max-h-[700px] max-w-[600px] sm:max-w-[600px] lg:max-w-none mx-auto`}
+        controls={false}
+        autoPlay={true}
+        muted={true}
+        loop={true}
         onError={handleError}
         onLoadedData={handleLoad}
       >
