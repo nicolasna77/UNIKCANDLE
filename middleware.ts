@@ -17,7 +17,6 @@ export default async function authMiddleware(request: NextRequest) {
     {
       baseURL: process.env.BETTER_AUTH_URL,
       headers: {
-        //get the cookie from the request
         cookie: request.headers.get("cookie") || "",
       },
     }
@@ -44,4 +43,3 @@ export default async function authMiddleware(request: NextRequest) {
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
 };
-
