@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -11,19 +11,21 @@ export default function SuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { clearCart } = useCart();
+  const processedRef = useRef(false);
 
   useEffect(() => {
     const handleSuccess = async () => {
-      if (sessionId) {
-        try {
-          await clearCart();
-          toast.success("Paiement effectué avec succès !");
-        } catch (error) {
-          console.error("Erreur lors de la suppression du panier:", error);
-          toast.error(
-            "Une erreur est survenue lors du traitement de votre commande"
-          );
-        }
+      if (!sessionId || processedRef.current) return;
+
+      try {
+        processedRef.current = true;
+        await clearCart();
+        toast.success("Paiement effectué avec succès !");
+      } catch (error) {
+        console.error("Erreur lors du traitement:", error);
+        toast.error(
+          "Une erreur est survenue lors du traitement de votre commande"
+        );
       }
     };
 

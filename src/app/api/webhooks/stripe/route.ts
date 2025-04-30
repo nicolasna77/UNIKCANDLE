@@ -60,33 +60,23 @@ export async function POST(req: Request) {
       console.log("Métadonnées:", session.metadata);
 
       try {
-        if (!session.metadata) {
-          console.error("Erreur: Pas de métadonnées dans la session");
-          throw new Error("Métadonnées de session manquantes");
-        }
-
-        const { orderId, items } = session.metadata;
-        console.log("Order ID:", orderId);
-        console.log("Items bruts:", items);
-
-        const cartItems: CartItem[] = JSON.parse(items);
-        console.log("Items parsés:", cartItems);
-
-        // Vérifier si la commande existe déjà
-        const existingOrder = await prisma.order.findUnique({
-          where: { id: orderId },
+        console.log("Données de la session:", {
+          metadata: session.metadata,
+          amount_total: session.amount_total,
+          shipping_details: session.shipping_details,
         });
 
-        if (existingOrder) {
-          console.log("Commande déjà existante, arrêt du traitement");
-          return new NextResponse(null, { status: 200 });
+        // Vérifier que toutes les données nécessaires sont présentes
+        if (!session.metadata?.userId) {
+          throw new Error("userId manquant dans les métadonnées");
         }
 
-        // Calculer le total
-        const total = cartItems.reduce((sum: number, item: CartItem) => {
-          return sum + item.price * item.quantity;
-        }, 0);
-        console.log("Total calculé:", total);
+        if (!session.metadata?.items) {
+          throw new Error("items manquant dans les métadonnées");
+        }
+
+        const cartItems: CartItem[] = JSON.parse(session.metadata.items);
+        console.log("Items du panier parsés:", cartItems);
 
         // Vérifier la connexion à la base de données
         try {
@@ -98,7 +88,7 @@ export async function POST(req: Request) {
         }
 
         // Créer la commande dans la base de données
-        const order = await prisma.order.create({
+        await prisma.order.create({
           data: {
             userId: session.metadata.userId,
             total: session.amount_total ? session.amount_total / 100 : 0,
@@ -125,11 +115,6 @@ export async function POST(req: Request) {
             shippingAddress: true,
           },
         });
-
-        console.log(
-          "Commande créée avec succès:",
-          JSON.stringify(order, null, 2)
-        );
 
         return new NextResponse(null, { status: 200 });
       } catch (error) {

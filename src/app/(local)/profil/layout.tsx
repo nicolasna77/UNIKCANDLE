@@ -1,13 +1,10 @@
 import UnauthorizedPage from "@/app/unauthorized";
 import ProfilMenu from "./profil-menu";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getUser } from "@/lib/auth-session";
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session?.user) {
+  const session = await getUser();
+  if (!session) {
     return <UnauthorizedPage />;
   }
   return (

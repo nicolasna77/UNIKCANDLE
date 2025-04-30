@@ -14,13 +14,6 @@ interface CheckoutItem {
   imageUrl: string;
 }
 
-interface CartItem {
-  id: string;
-  quantity: number;
-  scentId: string;
-  price: number;
-}
-
 export async function POST(req: Request) {
   console.log("=== Création de session Stripe ===");
 
@@ -72,27 +65,25 @@ export async function POST(req: Request) {
     });
 
     const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
       client_reference_id: session?.id || "guest",
-      billing_address_collection: "required",
+      metadata: {
+        userId: session?.id || "guest",
+        items: JSON.stringify(
+          cart.map((item: CheckoutItem) => ({
+            id: item.id,
+            quantity: item.quantity || 1,
+            price: item.price,
+            scentId: item.selectedScent.id,
+          }))
+        ),
+      },
       shipping_address_collection: {
         allowed_countries: ["FR"],
-      },
-      metadata: {
-        orderId,
-        items: JSON.stringify(
-          cart.map(
-            (item: CheckoutItem): CartItem => ({
-              id: item.id,
-              quantity: item.quantity || 1,
-              scentId: item.selectedScent.id,
-              price: item.price,
-            })
-          )
-        ),
       },
     });
 
