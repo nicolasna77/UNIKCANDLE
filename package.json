@@ -20,7 +20,7 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && next build && prisma migrate deploy",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "db:generate": "npx prisma generate",
     "db:seed": "npx prisma db seed"
   },
@@ -104,7 +104,7 @@
     "@types/three": "^0.174.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
-    "prisma": "^6.6.0",
+    "prisma": "^6.7.0",
     "react-email": "4.0.7",
     "tailwindcss": "^4",
     "tailwindcss-bg-patterns": "^0.3.0",
