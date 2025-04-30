@@ -1,5 +1,5 @@
 {
-  "name": "prisma-client-5d587558ddd7027e2262dce7eab78f9254be94069504b854c8d19136dba93a2b",
+  "name": "prisma-client-eaf6c13774405bc6df9cb4a11cd69a6ab8b11622dfed96b24dca506e173ecedc",
   "main": "index.js",
   "types": "index.d.ts",
   "browser": "index-browser.js",
@@ -135,6 +135,6 @@
     },
     "./*": "./*"
   },
-  "version": "6.6.0",
+  "version": "6.7.0",
   "sideEffects": false
 }
