@@ -1,6 +1,7 @@
 import { betterFetch } from "@better-fetch/fetch";
 import { NextResponse, type NextRequest } from "next/server";
-import type { Session } from "@/lib/auth";
+import { auth, type Session } from "@/lib/auth";
+import { headers } from "next/headers";
 
 const authRoutes = ["/sign-in", "/sign-up"];
 const passwordRoutes = ["/reset-password", "/forgot-password"];
@@ -12,15 +13,9 @@ export default async function authMiddleware(request: NextRequest) {
   const isPasswordRoute = passwordRoutes.includes(pathName);
   const isAdminRoute = adminRoutes.includes(pathName);
 
-  const { data: session } = await betterFetch<Session>(
-    "/api/auth/get-session",
-    {
-      baseURL: process.env.BETTER_AUTH_URL,
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    }
-  );
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session) {
     if (isAuthRoute || isPasswordRoute) {
