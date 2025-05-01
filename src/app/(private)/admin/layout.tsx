@@ -2,7 +2,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
-import UnauthorizedPage from "@/app/unauthorized";
+import Forbidden from "@/app/forbidden";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -15,7 +15,7 @@ export default async function AdminLayout({
     headers: await headers(),
   });
   if (session?.user.role !== "admin") {
-    return <UnauthorizedPage />;
+    return <Forbidden />;
   }
   return (
     <SidebarProvider>
