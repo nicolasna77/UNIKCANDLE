@@ -3,10 +3,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 generator client {
-  provider = "prisma-client-js"
+ provider = "prisma-client-js"
   output   = "./generated/prisma-client-js"
-}
 
+}
 
 
 model Newsletter {
