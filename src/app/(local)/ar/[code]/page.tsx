@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { Candle3D } from "@/components/Candle3D";
-import { BirdAnimation } from "@/components/BirdAnimation";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
@@ -102,11 +101,6 @@ export default function ARPage() {
                 </h2>
                 <p className="text-gray-300 mt-2">{data.scent.description}</p>
               </div>
-            </div>
-
-            {/* Animation de l'oiseau */}
-            <div className="h-64">
-              <BirdAnimation />
             </div>
 
             {/* Lecteur audio */}
