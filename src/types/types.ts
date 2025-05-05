@@ -40,6 +40,9 @@ export interface ProductWithDetails {
   averageRating?: number;
   createdAt: string;
   reviewCount?: number;
+  subTitle: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 export interface SessionData {
