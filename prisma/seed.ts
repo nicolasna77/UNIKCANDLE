@@ -2,24 +2,18 @@ import { faker } from "@faker-js/faker/locale/fr";
 import { PrismaClient } from "../src/generated/client";
 
 const prisma = new PrismaClient();
+
 async function main() {
-  // Création des utilisateurs
-  const users = await Promise.all(
-    Array.from({ length: 20 }).map(async () => {
-      return prisma.user.create({
-        data: {
-          id: faker.string.uuid(),
-          email: faker.internet.email(),
-          name: faker.person.fullName(),
-          role: "user",
-          image: faker.image.avatar(),
-          emailVerified: true,
-          createdAt: faker.date.past(),
-          updatedAt: faker.date.recent(),
-        },
-      });
-    })
-  );
+  // Suppression des données dans l'ordre inverse des dépendances
+  await prisma.qRCode.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.address.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.productVariant.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.scent.deleteMany();
+  await prisma.user.deleteMany();
 
   // Création des senteurs
   const scents = [
@@ -68,56 +62,150 @@ async function main() {
     )
   );
 
+  console.log(
+    "Senteurs créées:",
+    createdScents.map((s) => s.id)
+  );
+
+  // Création des utilisateurs
+  const users = await Promise.all(
+    Array.from({ length: 20 }).map(async () => {
+      return prisma.user.create({
+        data: {
+          id: faker.string.uuid(),
+          email: faker.internet.email(),
+          name: faker.person.fullName(),
+          role: "user",
+          image: faker.image.avatar(),
+          emailVerified: true,
+          createdAt: faker.date.past(),
+          updatedAt: faker.date.recent(),
+        },
+      });
+    })
+  );
+
   // Création des produits
   const products = [
     {
       name: "Bougie Signature",
+      subTitle: "L'essence du raffinement",
       description: "Notre bougie signature, élégante et raffinée",
       price: 49.99,
       imageUrl: "/asset/IMG_20250328_111936.webp",
+      variants: [
+        {
+          scentId: createdScents[0].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+        {
+          scentId: createdScents[1].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+      ],
     },
     {
       name: "Bougie Luxe",
+      subTitle: "Le luxe à l'état pur",
       description: "Une bougie luxueuse aux finitions dorées",
       price: 69.99,
       imageUrl: "/asset/IMG_20250328_111936.webp",
+      variants: [
+        {
+          scentId: createdScents[2].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+        {
+          scentId: createdScents[3].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+      ],
     },
     {
       name: "Bougie Collection",
+      subTitle: "Une collection d'exception",
       description: "Edition limitée de notre collection premium",
       price: 59.99,
       imageUrl: "/asset/IMG_20250328_111936.webp",
+      variants: [
+        {
+          scentId: createdScents[4].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+        {
+          scentId: createdScents[0].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+      ],
     },
     {
       name: "Bougie Classique",
-      description: "Un classique intemporel",
-      price: 39.99,
+      subTitle: "Une bougie élégante pour votre intérieur",
+      description:
+        "Une bougie parfumée de haute qualité, fabriquée à la main avec de la cire naturelle.",
+      price: 29.99,
       imageUrl: "/asset/IMG_20250328_111936.webp",
+      variants: [
+        {
+          scentId: createdScents[0].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+        {
+          scentId: createdScents[1].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+      ],
     },
     {
       name: "Bougie Design",
-      description: "Design moderne et épuré",
-      price: 54.99,
+      subTitle: "Une bougie moderne pour votre décoration",
+      description:
+        "Une bougie design qui apportera une touche moderne à votre intérieur.",
+      price: 39.99,
       imageUrl: "/asset/IMG_20250328_111936.webp",
+      variants: [
+        {
+          scentId: createdScents[2].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+        {
+          scentId: createdScents[3].id,
+          imageUrl: "/asset/IMG_20250328_111936.webp",
+          isAvailable: true,
+        },
+      ],
     },
   ];
 
-  const createdProducts = await Promise.all(
-    products.map((product) =>
-      prisma.product.create({
-        data: {
-          ...product,
-          variants: {
-            create: createdScents.map((scent) => ({
-              scentId: scent.id,
-              imageUrl: `/images/candles/${product.name.toLowerCase().replace(/\s+/g, "-")}/${scent.name.toLowerCase()}.jpg`,
-              isAvailable: true,
-            })),
-          },
+  const createdProducts = [];
+  for (const product of products) {
+    console.log("Création du produit avec les variants:", product.variants);
+    const createdProduct = await prisma.product.create({
+      data: {
+        name: product.name,
+        subTitle: product.subTitle,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        variants: {
+          create: product.variants,
         },
-      })
-    )
-  );
+      },
+      include: {
+        variants: true,
+      },
+    });
+    createdProducts.push(createdProduct);
+  }
 
   // Création des avis
   for (const product of createdProducts) {
@@ -135,17 +223,19 @@ async function main() {
     }
   }
 
-  // Création des commandes
+  // Création des commandes avec QR codes
   for (let i = 0; i < 30; i++) {
     const randomUser = users[Math.floor(Math.random() * users.length)];
     const randomProduct =
       createdProducts[Math.floor(Math.random() * createdProducts.length)];
-    const randomScent =
-      createdScents[Math.floor(Math.random() * createdScents.length)];
+    const randomVariant =
+      randomProduct.variants[
+        Math.floor(Math.random() * randomProduct.variants.length)
+      ];
     const quantity = faker.number.int({ min: 1, max: 3 });
     const total = randomProduct.price * quantity;
 
-    const order = await prisma.order.create({
+    await prisma.order.create({
       data: {
         userId: randomUser.id,
         status: faker.helpers.arrayElement([
@@ -159,9 +249,14 @@ async function main() {
         items: {
           create: {
             productId: randomProduct.id,
-            scentId: randomScent.id,
+            scentId: randomVariant.scentId,
             quantity,
             price: randomProduct.price,
+            qrCode: {
+              create: {
+                code: faker.string.alphanumeric(10),
+              },
+            },
           },
         },
         shippingAddress: {
@@ -174,23 +269,7 @@ async function main() {
           },
         },
       },
-      include: {
-        items: true,
-      },
     });
-
-    // Création de QR codes pour certains articles de commande
-    if (order.status === "DELIVERED") {
-      for (const item of order.items) {
-        // Création d'un QR code pour chaque article
-        await prisma.qRCode.create({
-          data: {
-            code: faker.string.alphanumeric(10),
-            orderItemId: item.id,
-          },
-        });
-      }
-    }
   }
 
   console.log("Base de données peuplée avec succès !");

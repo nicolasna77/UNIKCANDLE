@@ -31,6 +31,7 @@ export async function GET() {
         name: "asc",
       },
     });
+    revalidatePath("/admin/products");
     return NextResponse.json(products);
   } catch (error) {
     console.error("Erreur lors de la récupération des produits:", error);
@@ -55,19 +56,89 @@ export async function DELETE(request: Request) {
   const product = await prisma.product.delete({
     where: { id },
   });
-
+  revalidatePath("/admin/products");
   return NextResponse.json(product);
 }
 
 export async function POST(request: Request) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const data = await request.json();
+    console.log("Données reçues:", data);
+
+    // Validation des données
+    if (
+      !data.name ||
+      !data.description ||
+      !data.price ||
+      !data.imageUrl ||
+      !data.subTitle
+    ) {
+      console.log("Validation échouée:", {
+        name: !!data.name,
+        description: !!data.description,
+        price: !!data.price,
+        imageUrl: !!data.imageUrl,
+        subTitle: !!data.subTitle,
+      });
+      return NextResponse.json(
+        { error: "Tous les champs sont obligatoires" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof data.price !== "number" || data.price <= 0) {
+      console.log("Prix invalide:", data.price);
+      return NextResponse.json(
+        { error: "Le prix doit être un nombre positif" },
+        { status: 400 }
+      );
+    }
+
+    if (!Array.isArray(data.selectedScents)) {
+      console.log("Senteurs invalides:", data.selectedScents);
+      return NextResponse.json(
+        { error: "Les senteurs doivent être un tableau" },
+        { status: 400 }
+      );
+    }
+
+    // Vérification que les senteurs existent
+    const existingScents = await prisma.scent.findMany({
+      where: {
+        id: {
+          in: data.selectedScents,
+        },
+      },
+    });
+
+    console.log("Senteurs trouvées:", existingScents);
+
+    if (existingScents.length !== data.selectedScents.length) {
+      console.log("Certaines senteurs n'existent pas:", {
+        requested: data.selectedScents,
+        found: existingScents.map((s) => s.id),
+      });
+      return NextResponse.json(
+        { error: "Certaines senteurs n'existent pas" },
+        { status: 400 }
+      );
+    }
+
     const product = await prisma.product.create({
       data: {
         name: data.name,
         description: data.description,
         price: data.price,
         imageUrl: data.imageUrl,
+        subTitle: data.subTitle,
         variants: {
           create: data.selectedScents.map((scentId: string) => ({
             scentId,
@@ -89,6 +160,8 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    console.log("Produit créé:", product);
 
     revalidatePath("/admin/products");
     return NextResponse.json(product);

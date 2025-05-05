@@ -1,14 +1,13 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/client"
+  binaryTargets = ["native", "windows", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-generator client {
- provider = "prisma-client-js"
-  output   = "../src/generated/client"
-  binaryTargets = ["native", "windows", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
-
-}
-
 
 model Newsletter {
   id        String   @id @default(uuid())
@@ -97,6 +96,7 @@ model Product {
   description String
   price       Float
   imageUrl    String
+  subTitle    String
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   deletedAt   DateTime?
@@ -187,12 +187,12 @@ model Review {
 }
 
 model QRCode {
-  id          String    @id @default(cuid())
-  orderItemId String    @unique
-  code        String    @unique
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  id          String     @id @default(cuid())
+  orderItemId String     @unique
+  code        String     @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  orderItem   OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 }
 
 enum OrderStatus {

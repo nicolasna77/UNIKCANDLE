@@ -1,172 +1,159 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import type { ProductWithDetails } from "../../../types/types";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Product, ProductVariant, Scent } from "@/generated/client";
+import Image from "next/image";
+import Link from "next/link";
+import { ShoppingCartIcon } from "lucide-react";
 
-type ProductCardProps = {
+interface ProductWithDetails extends Product {
+  variants: (ProductVariant & {
+    scent: Scent;
+  })[];
+  subTitle: string;
+}
+
+interface ProductCardProps {
   product: ProductWithDetails;
-};
+}
 
-const ProductCard = ({ product }: ProductCardProps) => {
+export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
-  const [selectedScent, setSelectedScent] = useState(
-    product.variants[0]?.scent
-  );
+  const [selectedScent, setSelectedScent] = useState<Scent | null>(null);
 
-  const handleAddToCart = () => {
-    if (selectedScent) {
-      addToCart({ ...product, selectedScent });
-      toast.success(`${product.name} ajouté au panier`);
-    } else {
-      toast.error("Veuillez sélectionner un parfum");
-    }
-  };
-
-  const handleScentChange = (value: string) => {
-    const scent = product.variants.find((v) => v.scent.id === value)?.scent;
-    if (scent) {
-      setSelectedScent(scent);
-    }
-  };
-
-  // Reset selectedScent when product changes
   useEffect(() => {
-    if (product.variants && product.variants.length > 0) {
+    if (product.variants.length > 0 && !selectedScent) {
       setSelectedScent(product.variants[0].scent);
     }
-  }, [product.variants]);
+  }, [product.variants, selectedScent]);
+
+  const handleAddToCart = () => {
+    if (!selectedScent) {
+      toast.error("Veuillez sélectionner un parfum");
+      return;
+    }
+
+    const variant = product.variants.find(
+      (v) => v.scent.id === selectedScent.id
+    );
+
+    if (!variant) {
+      toast.error("Variant non trouvé");
+      return;
+    }
+
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: variant.imageUrl,
+      selectedScent: selectedScent,
+      description: product.description,
+      variants: product.variants,
+      reviews: [],
+      createdAt: new Date(product.createdAt).toISOString(),
+    });
+
+    toast.success("Produit ajouté au panier");
+  };
 
   return (
-    <Card className="w-full h-full pt-0 overflow-hidden border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
-      <Link
-        href={`/products/${product.id}`}
-        className="overflow-hidden"
-        aria-label={`Voir les détails de ${product.name}`}
-      >
-        <div className="relative  h-90 overflow-hidden group">
-          <Image
-            className="w-full h-full  object-cover transition-transform duration-300 group-hover:scale-105"
-            src={product.imageUrl || "/placeholder.svg"}
-            width={400}
-            height={400}
-            priority
-            quality={90}
-            alt={product.name}
-          />
-          {new Date(product.createdAt) >
-            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) && (
-            <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md">
-              Nouveau
-            </span>
+    <Card className="overflow-hidden p-0 ">
+      <Link href={`/products/${product.id}`}>
+        <div className="aspect-square  relative">
+          {selectedScent && (
+            <Image
+              src={product.imageUrl || ""}
+              alt={product.name}
+              className="object-cover w-full h-full"
+              width={500}
+              height={500}
+            />
           )}
         </div>
       </Link>
-
-      <CardContent className="flex-grow flex flex-col gap-3 p-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <Link
-              href={`/products/${product.id}`}
-              className="hover:underline focus:outline-none focus:underline"
-            >
-              <h3 className="text-lg font-medium line-clamp-2">
+      <CardContent>
+        <Link href={`/products/${product.id}`} className="group">
+          <div className="flex relative  justify-between gap-2">
+            <div className="w-2/3 gap-2">
+              <h3 className="font-semibold group-hover:underline text-lg">
                 {product.name}
               </h3>
-            </Link>
-            <div className="flex items-center gap-1 mt-1">
-              <div
-                className="flex"
-                aria-label={`Note: ${product.averageRating || 0} sur 5`}
-              >
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={14}
-                    className={cn(
-                      "text-gray-300",
-                      star <= Math.round(product.averageRating || 0) &&
-                        "text-yellow-500 fill-yellow-500"
-                    )}
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground ml-1">
-                ({product.reviewCount || 0})
-              </span>
+              <p className="text-muted-foreground text-sm mt-1">
+                {product.description}
+              </p>
+            </div>
+            <div className="font-semibold text-lg mt-2">
+              {product.price.toFixed(2)} €
             </div>
           </div>
-          <p className="text-lg font-semibold">{product.price.toFixed(2)}€</p>
+        </Link>
+
+        <div className="flex justify-between gap-2">
+          <div className="w-2/3 gap-2">
+            <p className="text-muted-foreground text-sm">
+              {product.variants.map((variant) => variant.scent.name).length >
+                1 &&
+                product.variants.map((variant) => variant.scent.name).length}
+              {"  "}
+              parfums disponibles
+            </p>
+          </div>
         </div>
 
         {product.variants.length > 0 && (
-          <div className="mt-1 w-full">
-            <Label className="text-sm font-medium mb-1 block">Parfum</Label>
-            <RadioGroup
+          <div className="mt-4">
+            <Select
               value={selectedScent?.id}
-              onValueChange={handleScentChange}
-              defaultValue={product.variants[0]?.scent.id}
-              className="grid grid-cols-2 gap-2 px-2"
+              onValueChange={(value) => {
+                const variant = product.variants.find(
+                  (v) => v.scent.id === value
+                );
+                if (variant) {
+                  setSelectedScent(variant.scent);
+                }
+              }}
             >
-              {product.variants.map((variant) => (
-                <div key={`${product.id}-${variant.id}`} className="relative">
-                  <Label
-                    htmlFor={`scent-${product.id}-${variant.scent.id}`}
-                    className={cn(
-                      "flex items-center justify-center text-sm border rounded-md py-1.5 px-2 cursor-pointer transition-colors",
-                      "hover:bg-muted/50",
-                      selectedScent?.id === variant.scent.id
-                        ? "bg-primary/10 border-primary"
-                        : "border-input"
-                    )}
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choisir un parfum" />
+              </SelectTrigger>
+              <SelectContent>
+                {product.variants.map((variant) => (
+                  <SelectItem
+                    key={`${product.id}-${variant.id}`}
+                    value={variant.scent.id}
                   >
-                    <RadioGroupItem
-                      value={variant.scent.id}
-                      id={`scent-${product.id}-${variant.scent.id}`}
-                      className="sr-only"
-                    />
                     {variant.scent.name}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </CardContent>
-
-      <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-2">
+      <CardFooter className="p-4 pt-0">
         <Button
-          variant="outline"
+          className="w-full"
           size="lg"
-          className="w-full cursor-pointer"
-          aria-label="Ajouter aux favoris"
-        >
-          <Heart className="size-4 mr-1.5" />
-          <span className="hidden sm:inline">Favoris</span>
-        </Button>
-        <Button
           onClick={handleAddToCart}
-          variant="default"
-          size="lg"
-          className="w-full cursor-pointer"
           disabled={!selectedScent}
-          aria-label="Ajouter au panier"
         >
-          <ShoppingCart className="size-4 mr-1.5" />
-          <span className="hidden sm:inline">Panier</span>
+          <ShoppingCartIcon className="w-4 h-4 mr-2" /> Ajouter au panier
         </Button>
       </CardFooter>
     </Card>
   );
-};
+}
 
 export default ProductCard;

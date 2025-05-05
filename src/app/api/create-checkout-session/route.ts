@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getUser } from "@/lib/auth-session";
+import { nanoid } from "nanoid";
 
 interface CheckoutItem {
   id: string;
@@ -29,25 +30,33 @@ export async function POST(req: Request) {
       return new NextResponse("Le panier est vide", { status: 400 });
     }
 
-    const lineItems = cart.map((item: CheckoutItem) => {
-      // Convertir l'URL de l'image en URL absolue si ce n'est pas déjà le cas
-      const imageUrl = item.imageUrl.startsWith("http")
-        ? item.imageUrl
-        : `${process.env.NEXT_PUBLIC_APP_URL}${item.imageUrl}`;
+    // Générer des codes uniques pour chaque article
+    const cartItemsWithCodes = cart.map((item: CheckoutItem) => ({
+      ...item,
+      qrCodeId: nanoid(10), // Générer un code unique de 10 caractères
+    }));
 
-      return {
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: item.name,
-            description: `Senteur : ${item.selectedScent.name}`,
-            images: [imageUrl],
+    const lineItems = cartItemsWithCodes.map(
+      (item: CheckoutItem & { qrCodeId: string }) => {
+        // Convertir l'URL de l'image en URL absolue si ce n'est pas déjà le cas
+        const imageUrl = item.imageUrl.startsWith("http")
+          ? item.imageUrl
+          : `${process.env.NEXT_PUBLIC_APP_URL}${item.imageUrl}`;
+
+        return {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: item.name,
+              description: `Senteur : ${item.selectedScent.name}`,
+              images: [imageUrl],
+            },
+            unit_amount: Math.round(item.price * 100),
           },
-          unit_amount: Math.round(item.price * 100),
-        },
-        quantity: item.quantity || 1,
-      };
-    });
+          quantity: item.quantity || 1,
+        };
+      }
+    );
 
     console.log("Line items créés:", lineItems);
 
@@ -56,12 +65,15 @@ export async function POST(req: Request) {
 
     console.log("Création de la session Stripe avec les métadonnées:", {
       orderId,
-      items: cart.map((item: CheckoutItem) => ({
-        id: item.id,
-        quantity: item.quantity || 1,
-        scentId: item.selectedScent.id,
-        price: item.price,
-      })),
+      items: cartItemsWithCodes.map(
+        (item: CheckoutItem & { qrCodeId: string }) => ({
+          id: item.id,
+          quantity: item.quantity || 1,
+          scentId: item.selectedScent.id,
+          price: item.price,
+          qrCodeId: item.qrCodeId,
+        })
+      ),
     });
 
     const stripeSession = await stripe.checkout.sessions.create({
@@ -74,12 +86,15 @@ export async function POST(req: Request) {
       metadata: {
         userId: session?.id || "guest",
         items: JSON.stringify(
-          cart.map((item: CheckoutItem) => ({
-            id: item.id,
-            quantity: item.quantity || 1,
-            price: item.price,
-            scentId: item.selectedScent.id,
-          }))
+          cartItemsWithCodes.map(
+            (item: CheckoutItem & { qrCodeId: string }) => ({
+              id: item.id,
+              quantity: item.quantity || 1,
+              price: item.price,
+              scentId: item.selectedScent.id,
+              qrCodeId: item.qrCodeId,
+            })
+          )
         ),
       },
       shipping_address_collection: {

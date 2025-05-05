@@ -13,10 +13,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient, useSession } from "@/lib/auth-client";
 import { User, LogOut, Mail, Calendar, Shield } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 const AuthButton = () => {
-  const router = useRouter();
   const { data: session } = useSession();
 
   if (!session?.user) {
@@ -34,11 +32,7 @@ const AuthButton = () => {
 
   const handleSignOut = async () => {
     await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/auth/signin");
-        },
-      },
+      fetchOptions: {},
     });
   };
 

@@ -51,7 +51,21 @@ export default function CartPage() {
         return;
       }
 
-      console.log("Envoi de la requête à l'API Stripe");
+      // Vérifier que le panier n'est pas vide
+      if (cart.length === 0) {
+        toast.error("Votre panier est vide");
+        return;
+      }
+
+      // Vérifier que tous les articles ont une quantité valide
+      const invalidItems = cart.filter(
+        (item) => !item.quantity || item.quantity < 1
+      );
+      if (invalidItems.length > 0) {
+        toast.error("Certains articles ont une quantité invalide");
+        return;
+      }
+
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: {
@@ -59,8 +73,6 @@ export default function CartPage() {
         },
         body: JSON.stringify({ cart }),
       });
-
-      console.log("Réponse de l'API Stripe:", response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -75,7 +87,8 @@ export default function CartPage() {
         throw new Error("URL de redirection manquante");
       }
 
-      router.push(url);
+      // Rediriger vers la page de paiement Stripe
+      window.location.href = url;
     } catch (error) {
       console.error("Erreur lors du paiement:", error);
       toast.error("Une erreur est survenue lors du paiement");

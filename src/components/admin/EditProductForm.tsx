@@ -1,62 +1,90 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUpdateProduct } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Upload } from "lucide-react";
+import Image from "next/image";
+import { Product } from "@/generated/client";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 
 interface EditProductFormProps {
   productId: string;
   onSuccess: () => void;
+  initialData: Product;
 }
 
-export function EditProductForm({
+const EditProductForm = ({
   productId,
   onSuccess,
-}: EditProductFormProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    imageUrl: "",
-  });
-
+  initialData,
+}: EditProductFormProps) => {
+  const [editingProduct, setEditingProduct] = useState<Product>(initialData);
+  const [isUploading, setIsUploading] = useState(false);
   const updateProduct = useUpdateProduct();
 
-  useEffect(() => {
-    // Charger les données du produit
-    const fetchProduct = async () => {
-      try {
-        const response = await fetch(`/api/products/${productId}`);
-        if (!response.ok) {
-          throw new Error("Erreur lors de la récupération du produit");
-        }
-        const product = await response.json();
-        setFormData({
-          name: product.name,
-          description: product.description,
-          price: product.price.toString(),
-          imageUrl: product.imageUrl,
-        });
-      } catch {
-        console.error("Erreur lors de la récupération du produit");
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("L'image ne doit pas dépasser 5MB");
       }
-    };
 
-    fetchProduct();
-  }, [productId]);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/products/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Erreur lors du téléchargement");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setEditingProduct((prev) => ({ ...prev, imageUrl: data.url }));
+      toast.success("Image téléchargée avec succès");
+    },
+    onError: (error: Error) => {
+      console.error("Erreur lors du téléchargement:", error);
+      toast.error(error.message || "Erreur lors du téléchargement de l'image");
+    },
+  });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Le fichier doit être une image");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      await uploadMutation.mutateAsync(file);
+    } finally {
+      setIsUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await updateProduct.mutateAsync({
         id: productId,
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        imageUrl: formData.imageUrl,
+        name: editingProduct.name,
+        description: editingProduct.description,
+        price: editingProduct.price,
+        imageUrl: editingProduct.imageUrl,
       });
       onSuccess();
     } catch {
@@ -67,11 +95,16 @@ export function EditProductForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Nom du produit</Label>
+        <Label htmlFor="name">Nom</Label>
         <Input
           id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          value={editingProduct.name}
+          onChange={(e) =>
+            setEditingProduct({
+              ...editingProduct,
+              name: e.target.value,
+            })
+          }
           required
         />
       </div>
@@ -80,36 +113,78 @@ export function EditProductForm({
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
-          value={formData.description}
+          value={editingProduct.description}
           onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
+            setEditingProduct({
+              ...editingProduct,
+              description: e.target.value,
+            })
           }
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="price">Prix (€)</Label>
+        <Label htmlFor="price">Prix</Label>
         <Input
           id="price"
           type="number"
-          step="0.01"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          value={editingProduct.price}
+          onChange={(e) =>
+            setEditingProduct({
+              ...editingProduct,
+              price: Number(e.target.value),
+            })
+          }
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="imageUrl">URL de l&apos;image</Label>
-        <Input
-          id="imageUrl"
-          value={formData.imageUrl}
-          onChange={(e) =>
-            setFormData({ ...formData, imageUrl: e.target.value })
-          }
-          required
-        />
+        <Label htmlFor="imageUrl">Image du produit</Label>
+        <div className="flex items-center gap-2">
+          <Input
+            id="imageUrl"
+            value={editingProduct.imageUrl}
+            onChange={(e) =>
+              setEditingProduct({
+                ...editingProduct,
+                imageUrl: e.target.value,
+              })
+            }
+            readOnly
+          />
+          <Button
+            variant="outline"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("image-upload")?.click();
+            }}
+            disabled={isUploading}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {isUploading ? "Téléchargement..." : "Télécharger"}
+          </Button>
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+        </div>
+        {editingProduct.imageUrl && (
+          <div className="mt-2">
+            <Image
+              src={editingProduct.imageUrl}
+              alt="Aperçu"
+              width={100}
+              height={100}
+              className="rounded-md"
+            />
+          </div>
+        )}
       </div>
 
       <Button type="submit" className="w-full">
@@ -117,4 +192,6 @@ export function EditProductForm({
       </Button>
     </form>
   );
-}
+};
+
+export default EditProductForm;

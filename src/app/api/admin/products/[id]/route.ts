@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(
   request: Request,
@@ -49,7 +50,7 @@ export async function PATCH(
         },
       },
     });
-
+    revalidatePath("/admin/products");
     return NextResponse.json(product);
   } catch (error) {
     console.error("Erreur lors de la mise à jour du produit:", error);
@@ -77,6 +78,7 @@ export async function DELETE(
         id: (await params).id,
       },
     });
+    revalidatePath("/admin/products");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur lors de la suppression du produit:", error);

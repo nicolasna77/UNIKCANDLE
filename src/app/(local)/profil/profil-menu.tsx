@@ -28,7 +28,7 @@ const ProfilMenu = () => {
   };
 
   return (
-    <div className="flex flex-col m-auto w-full justify-center items-center   bg-muted rounded-lg p-4  gap-4">
+    <div className="flex flex-col m-auto w-full justify-center items-center border-b border-border   bg-muted rounded-lg py-2  gap-4">
       <Tabs defaultValue={tab} onValueChange={onTabChange}>
         <TabsList className="flex gap-4">
           {page.map((item) => (

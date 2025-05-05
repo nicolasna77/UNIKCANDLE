@@ -18,6 +18,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import Loading from "@/components/loading";
 
 const REVIEWS_PER_PAGE = 5;
 
@@ -212,9 +213,7 @@ const ReviewProduct = ({ product }: { product: ProductWithDetails }) => {
 
         {/* Liste des avis */}
         {isLoading ? (
-          <div className="p-6 border border-gray-200 rounded-lg text-center dark:border-gray-700">
-            <p className="dark:text-white">Chargement des avis...</p>
-          </div>
+          <Loading />
         ) : currentReviews.length > 0 ? (
           <div className="space-y-6">
             {currentReviews.map((review: Review) => (
