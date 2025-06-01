@@ -15,6 +15,7 @@ export async function GET() {
           include: {
             product: true,
             scent: true,
+            qrCode: true,
           },
         },
         shippingAddress: true,

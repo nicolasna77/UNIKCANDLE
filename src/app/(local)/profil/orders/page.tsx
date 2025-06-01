@@ -17,8 +17,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Icons
 import { Package, XCircle, CheckCircle2, Clock } from "lucide-react";
 import OrderItemCard from "./order-item-card";
-import { Order } from "@/types/types";
 import DatePickerWithRange from "@/components/ui/date-range-picker";
+import { PageHeader } from "@/components/page-header";
+import {
+  Order,
+  Scent,
+  Product,
+  OrderItem,
+  Image,
+  Address,
+  QRCode,
+} from "@/generated/client";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -186,79 +195,89 @@ export default function OrdersPage() {
 
   return (
     <section className="">
-      <div className="container max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Historique des commandes
-          </h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <PageHeader
+          title="Historique des commandes"
+          description="Voir les commandes passées."
+        />
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/products")}
-            >
-              <Package className="mr-2 h-4 w-4" />
-              Découvrir nos produits
-            </Button>
-          </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/products")}
+          >
+            <Package className="mr-2 h-4 w-4" />
+            Découvrir nos produits
+          </Button>
         </div>
+      </div>
 
-        <div className="bg-white rounded-xl shadow-sm border mb-8">
-          <div className="p-4 md:p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <Tabs
-                defaultValue="all"
-                value={activeTab}
-                onValueChange={handleTabChange}
-                className="w-full lg:w-auto"
-              >
-                <TabsList className="grid grid-cols-3 w-full lg:w-auto">
-                  <TabsTrigger value="all">Toutes</TabsTrigger>
-                  <TabsTrigger value="PROCESSING">En cours</TabsTrigger>
-                  <TabsTrigger value="DELIVERED">Livrées</TabsTrigger>
-                </TabsList>
-              </Tabs>
+      <div className="bg-white rounded-xl shadow-sm border mb-8">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <Tabs
+              defaultValue="all"
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="w-full lg:w-auto"
+            >
+              <TabsList className="grid grid-cols-3 w-full lg:w-auto">
+                <TabsTrigger value="all">Toutes</TabsTrigger>
+                <TabsTrigger value="PROCESSING">En cours</TabsTrigger>
+                <TabsTrigger value="DELIVERED">Livrées</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <DatePickerWithRange
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <DatePickerWithRange
+                className="w-full sm:w-auto"
+                date={dateRange}
+                onDateChange={handleDateChange}
+              />
+              {(dateRange?.from || dateRange?.to || activeTab !== "all") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setDateRange(undefined);
+                    setActiveTab("all");
+                    router.push("?");
+                  }}
                   className="w-full sm:w-auto"
-                  date={dateRange}
-                  onDateChange={handleDateChange}
-                />
-                {(dateRange?.from || dateRange?.to || activeTab !== "all") && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setDateRange(undefined);
-                      setActiveTab("all");
-                      router.push("?");
-                    }}
-                    className="w-full sm:w-auto"
-                  >
-                    Effacer les filtres
-                  </Button>
-                )}
-              </div>
+                >
+                  Effacer les filtres
+                </Button>
+              )}
             </div>
           </div>
         </div>
-
-        {!orders?.length ? (
-          <EmptyOrdersState />
-        ) : (
-          <div className="space-y-6">
-            {orders.map((order) => (
-              <OrderItemCard
-                key={order.id}
-                order={order}
-                getStatusDetails={getStatusDetails}
-              />
-            ))}
-          </div>
-        )}
       </div>
+
+      {!orders?.length ? (
+        <EmptyOrdersState />
+      ) : (
+        <div className="space-y-6">
+          {orders.map((order) => (
+            <OrderItemCard
+              key={order.id}
+              order={
+                order as Order & {
+                  items: (OrderItem & {
+                    product: Product & {
+                      images: Image[];
+                    };
+                    scent: Scent;
+                    qrCode: QRCode | null;
+                  })[];
+                  shippingAddress: Address;
+                }
+              }
+              getStatusDetails={getStatusDetails}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

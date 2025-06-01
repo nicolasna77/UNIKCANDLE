@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       try {
         console.log("Session complétée - ID:", session.id);
         console.log("Métadonnées de la session:", session.metadata);
+        console.log("Détails du client:", session.customer_details);
 
         // Vérifier que toutes les données nécessaires sont présentes
         if (!session.metadata?.userId) {
@@ -89,6 +90,18 @@ export async function POST(req: Request) {
           console.error("Erreur de connexion à la base de données:", error);
           throw error;
         }
+
+        // Récupérer l'utilisateur
+        const user = await prisma.user.findUnique({
+          where: { id: session.metadata.userId },
+        });
+
+        if (!user) {
+          console.error("Utilisateur non trouvé:", session.metadata.userId);
+          throw new Error("Utilisateur non trouvé");
+        }
+
+        console.log("Utilisateur trouvé:", user);
 
         console.log("Création de la commande...");
         // Créer la commande dans la base de données
@@ -115,7 +128,13 @@ export async function POST(req: Request) {
             },
           },
           include: {
-            items: true,
+            items: {
+              include: {
+                product: true,
+                scent: true,
+              },
+            },
+            user: true,
           },
         });
 

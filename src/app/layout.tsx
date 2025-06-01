@@ -86,7 +86,7 @@ export default function RootLayout({
         <CartProvider>
           <QueryProvider>
             {children}
-            <Toaster />
+            <Toaster theme="system" position="top-center" />
           </QueryProvider>
         </CartProvider>
       </body>

@@ -23,7 +23,6 @@ import {
   Truck,
   CheckCircle2,
   XCircle,
-  ShoppingCart,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -31,49 +30,36 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import Loading from "@/components/loading";
+  Address,
+  Order,
+  OrderItem,
+  Product,
+  QRCode,
+  Scent,
+  User,
+  Image,
+} from "@/generated/client";
 
-interface Order {
-  id: string;
-  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
-  total: number;
-  createdAt: string;
-  user: {
-    name: string;
-    email: string;
-  };
-  items: {
-    id: string;
-    quantity: number;
-    price: number;
-    product: {
-      name: string;
-    };
-    scent: {
-      name: string;
-    };
-  }[];
-  shippingAddress: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  } | null;
-}
+import Loading from "@/components/loading";
+import DialogDetailOrder from "./dialog-detail-order";
 
 export default function OrdersPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [, setSelectedOrder] = useState<Order | null>(null);
 
-  const { data: orders, isLoading } = useQuery<Order[]>({
+  const { data: orders, isLoading } = useQuery<
+    (Order & {
+      user: User;
+      items: (OrderItem & {
+        product: Product & {
+          images: Image[];
+        };
+        scent: Scent;
+        qrCode: QRCode;
+      })[];
+      shippingAddress: Address;
+    })[]
+  >({
     queryKey: ["orders"],
     queryFn: async () => {
       const response = await fetch("/api/admin/orders");
@@ -184,15 +170,14 @@ export default function OrdersPage() {
               <TableHead>Montant</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Articles</TableHead>
+              <TableHead></TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredOrders?.map((order) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">
-                  #{order.id.slice(0, 8)}
-                </TableCell>
+                <TableCell className="font-medium">#{order.id}</TableCell>
                 <TableCell>
                   <div>
                     <div className="font-medium">{order.user.name}</div>
@@ -211,80 +196,7 @@ export default function OrdersPage() {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        {order.items.reduce(
-                          (acc, item) => acc + item.quantity,
-                          0
-                        )}{" "}
-                        articles
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>
-                          Détails de la commande #{order.id.slice(0, 8)}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <h3 className="font-medium">Articles commandés</h3>
-                          <div className="space-y-2">
-                            {order.items.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center justify-between border-b pb-2"
-                              >
-                                <div>
-                                  <p className="font-medium">
-                                    {item.product.name}
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    Senteur: {item.scent.name}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-medium">
-                                    {item.quantity} x {item.price.toFixed(2)}€
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    Total:{" "}
-                                    {(item.quantity * item.price).toFixed(2)}€
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-medium">Adresse de livraison</h3>
-                          {order.shippingAddress ? (
-                            <div className="text-sm">
-                              <p>{order.shippingAddress.street}</p>
-                              <p>
-                                {order.shippingAddress.zipCode}{" "}
-                                {order.shippingAddress.city}
-                              </p>
-                              <p>
-                                {order.shippingAddress.state},{" "}
-                                {order.shippingAddress.country}
-                              </p>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-gray-500">
-                              Aucune adresse de livraison fournie
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <DialogDetailOrder order={order} />
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>

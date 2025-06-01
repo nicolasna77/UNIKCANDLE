@@ -10,7 +10,6 @@ export async function GET() {
         description: true,
         icon: true,
         color: true,
-        model3dUrl: true,
       },
     });
 

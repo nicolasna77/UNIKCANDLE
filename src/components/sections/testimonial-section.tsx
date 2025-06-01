@@ -49,7 +49,7 @@ const testimonials: Testimonial[] = [
 
 export default function TestimonialSection() {
   return (
-    <section className="py-24 lg:py-32 bg-muted/50 overflow-hidden">
+    <section className="py-24 lg:py-32 bg-secondary overflow-hidden">
       <div className="container mx-auto px-4">
         <h2
           className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}

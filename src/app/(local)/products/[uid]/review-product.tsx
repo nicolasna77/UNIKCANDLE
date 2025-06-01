@@ -5,7 +5,6 @@ import { Star } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import ItemReviewProduct from "./item-review-product";
-import { ProductWithDetails, Review } from "../../../../types/types";
 import { authClient } from "@/lib/auth-client";
 import { useAddReview } from "@/hooks/useReviews";
 import { useQuery } from "@tanstack/react-query";
@@ -19,10 +18,11 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import Loading from "@/components/loading";
+import { Product, Review, User } from "@/generated/client";
 
-const REVIEWS_PER_PAGE = 5;
+const REVIEWS_PER_PAGE = 6;
 
-const ReviewProduct = ({ product }: { product: ProductWithDetails }) => {
+const ReviewProduct = ({ product }: { product: Product }) => {
   const { data: session } = authClient.useSession();
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
@@ -204,7 +204,7 @@ const ReviewProduct = ({ product }: { product: ProductWithDetails }) => {
             </p>
             <Link
               className={buttonVariants({ variant: "outline" })}
-              href="/auth/signin"
+              href={`/auth/signin?callbackUrl=/products/${product.id}`}
             >
               Se connecter
             </Link>
@@ -215,12 +215,14 @@ const ReviewProduct = ({ product }: { product: ProductWithDetails }) => {
         {isLoading ? (
           <Loading />
         ) : currentReviews.length > 0 ? (
-          <div className="space-y-6">
-            {currentReviews.map((review: Review) => (
-              <ItemReviewProduct key={review.id} review={review} />
-            ))}
+          <>
+            <div className="space-y-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentReviews.map((review: Review & { user: User }) => (
+                <ItemReviewProduct key={review.id} review={review} />
+              ))}
+            </div>
             {renderPagination()}
-          </div>
+          </>
         ) : (
           <div className="p-6 border border-gray-200 rounded-lg text-center dark:border-gray-700">
             <p className="dark:text-white">

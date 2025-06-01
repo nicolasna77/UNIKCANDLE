@@ -17,21 +17,23 @@ interface CheckoutItem {
 
 export async function POST(req: Request) {
   console.log("=== Création de session Stripe ===");
-
   try {
     const session = await getUser();
     console.log("Session utilisateur:", session);
 
-    const { cart } = await req.json();
-    console.log("Panier reçu:", cart);
+    const body = await req.json();
+    const { cartItems, returnUrl } = body;
+    console.log("returnUrl", returnUrl);
+    console.log("cartItems", cartItems);
+    console.log("Panier reçu:", cartItems);
 
-    if (!cart || cart.length === 0) {
+    if (!cartItems || cartItems.length === 0) {
       console.error("Panier vide");
       return new NextResponse("Le panier est vide", { status: 400 });
     }
 
     // Générer des codes uniques pour chaque article
-    const cartItemsWithCodes = cart.map((item: CheckoutItem) => ({
+    const cartItemsWithCodes = cartItems.map((item: CheckoutItem) => ({
       ...item,
       qrCodeId: nanoid(10), // Générer un code unique de 10 caractères
     }));
@@ -65,6 +67,7 @@ export async function POST(req: Request) {
 
     console.log("Création de la session Stripe avec les métadonnées:", {
       orderId,
+      userId: session?.id,
       items: cartItemsWithCodes.map(
         (item: CheckoutItem & { qrCodeId: string }) => ({
           id: item.id,
@@ -80,11 +83,37 @@ export async function POST(req: Request) {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
+      success_url: `${req.headers.get("origin")}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${returnUrl}`,
       client_reference_id: session?.id || "guest",
+      shipping_address_collection: {
+        allowed_countries: ["FR"],
+      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: 0,
+              currency: "eur",
+            },
+            display_name: "Livraison standard",
+            delivery_estimate: {
+              minimum: {
+                unit: "business_day",
+                value: 5,
+              },
+              maximum: {
+                unit: "business_day",
+                value: 20,
+              },
+            },
+          },
+        },
+      ],
       metadata: {
         userId: session?.id || "guest",
+        orderId: orderId,
         items: JSON.stringify(
           cartItemsWithCodes.map(
             (item: CheckoutItem & { qrCodeId: string }) => ({
@@ -97,15 +126,15 @@ export async function POST(req: Request) {
           )
         ),
       },
-      shipping_address_collection: {
-        allowed_countries: ["FR"],
-      },
     });
 
-    console.log("Session Stripe créée avec succès:", stripeSession.id);
+    console.log("Session Stripe créée avec succès:", {
+      id: stripeSession.id,
+      metadata: stripeSession.metadata,
+    });
     console.log("URL de redirection:", stripeSession.url);
 
-    return NextResponse.json({ url: stripeSession.url });
+    return NextResponse.json({ sessionId: stripeSession.id });
   } catch (error) {
     console.error("Erreur lors de la création de la session Stripe:", error);
     return new NextResponse("Erreur interne du serveur", { status: 500 });

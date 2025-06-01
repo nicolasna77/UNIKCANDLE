@@ -4,17 +4,17 @@ import { DisplayNameForm } from "./display-name-form";
 import { authClient } from "@/lib/auth-client";
 import ChangePasswordForm from "./change-password-form";
 import DeleteAccountForm from "./delete-account-form";
-import Loading from "@/components/loading";
+import LoadingPage from "../loading";
 
 export default function ProfilPage() {
   const { data: session, isPending } = authClient.useSession();
   return (
     <div className="space-y-2">
       <PageHeader
-        title="Profile"
-        description="Manage your personal information."
+        title="Profil"
+        description="Gérer vos informations personnelles."
       />
-      {isPending && <Loading />}
+      {isPending && <LoadingPage />}
       {session?.user && (
         <>
           <DisplayNameForm session={session.user} isPending={isPending} />
@@ -22,8 +22,6 @@ export default function ProfilPage() {
           <DeleteAccountForm />
         </>
       )}
-
-      {/* <DeleteAccountForm session={session || ({} as User)} /> */}
     </div>
   );
 }

@@ -73,7 +73,9 @@ export default function ARPage() {
                   description: data.scent.description,
                   icon: "/logo/candleGlass.glb",
                   color: data.scent.color,
-                  model3dUrl: "/logo/candleGlass.glb",
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  notes: [],
                 }}
               />
             ) : (

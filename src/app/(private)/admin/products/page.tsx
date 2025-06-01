@@ -11,9 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useAdminProducts } from "@/hooks/useProducts";
+import { Pencil, Trash2 } from "lucide-react";
+import { useProducts } from "@/hooks/useProducts";
+import { useScents } from "@/hooks/useScents";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -24,50 +24,41 @@ import {
 } from "@/components/ui/dialog";
 
 import Image from "next/image";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
+import { Image as ProductImage, Scent } from "@/generated/client";
 import CreateProductForm from "./create-product-form";
+import EditProductForm from "./EditProductForm";
 
 interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
-  variants: {
+  subTitle: string;
+  slogan: string;
+  category: {
     id: string;
-    scent: {
-      id: string;
-      name: string;
-      color: string;
-    };
-  }[];
+    name: string;
+    description: string;
+    icon: string;
+    color: string;
+  };
+  arAnimation: string;
+  scent: Scent;
+  images: ProductImage[];
 }
 
 export default function ProductsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(
-    null
-  );
-  const { data: products = [], isLoading: isProductsLoading } =
-    useAdminProducts();
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const { data: products = { products: [] }, isLoading: isProductsLoading } =
+    useProducts();
+  const { data: scents = [], isLoading: isScentsLoading } = useScents();
   const queryClient = useQueryClient();
-
-  const filteredProducts = products.filter((product: Product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const { data: scents = [], isLoading: isScentsLoading } = useQuery({
-    queryKey: ["scents"],
-    queryFn: async () => {
-      const response = await fetch("/api/admin/scents");
-      return response.json();
-    },
-  });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -82,11 +73,6 @@ export default function ProductsPage() {
     },
   });
 
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setIsCreateDialogOpen(true);
-  };
-
   if (isProductsLoading || isScentsLoading) {
     return <Loading />;
   }
@@ -97,96 +83,121 @@ export default function ProductsPage() {
         <h1 className="text-3xl font-bold">Gestion des produits</h1>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Ajouter un produit
-            </Button>
+            <Button>Créer un produit</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle>
-                {editingProduct?.id
-                  ? "Modifier le produit"
-                  : "Ajouter un produit"}
-              </DialogTitle>
+              <DialogTitle>Créer un produit</DialogTitle>
             </DialogHeader>
             <CreateProductForm
+              onSuccess={() => setIsCreateDialogOpen(false)}
               scents={scents}
-              onSuccess={() => {
-                setIsCreateDialogOpen(false);
-                setEditingProduct(null);
-              }}
             />
           </DialogContent>
         </Dialog>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <Input
-          placeholder="Rechercher un produit..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
-        />
       </div>
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead></TableHead>
+              <TableHead className="w-[100px]">Image</TableHead>
               <TableHead>Nom</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Catégorie</TableHead>
+              <TableHead>Parfum</TableHead>
               <TableHead>Prix</TableHead>
-              <TableHead>Senteurs</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.map((product: Product) => (
+            {products.products?.map((product: Product) => (
               <TableRow key={product.id}>
                 <TableCell>
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="h-30 w-30 object-cover rounded"
-                    width={100}
-                    height={100}
-                  />
+                  {product.images[0] && (
+                    <Image
+                      src={product.images[0].url}
+                      alt={product.name}
+                      className="h-20 w-20 object-cover rounded"
+                      width={80}
+                      height={80}
+                    />
+                  )}
                 </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell className="max-w-xs text-balance whitespace-normal break-words">
-                  {product.description}
-                </TableCell>
-                <TableCell>{product.price}€</TableCell>
                 <TableCell>
-                  <div className="flex gap-1">
-                    {product.variants.map((variant) => (
-                      <TooltipProvider key={variant.id}>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <div
-                              className="w-4 h-4 rounded-full"
-                              style={{ backgroundColor: variant.scent.color }}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{variant.scent.name}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
+                  <div className="space-y-1">
+                    <p className="font-medium">{product.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {product.subTitle}
+                    </p>
                   </div>
                 </TableCell>
                 <TableCell>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: product.category.color }}
+                          />
+                          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                            {product.category.name}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{product.category.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
+                <TableCell>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: product.scent.color }}
+                          />
+                          <span>{product.scent.name}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{product.scent.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
+                <TableCell>{product.price.toFixed(2)}€</TableCell>
+                <TableCell>
                   <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(product)}
+                    <Dialog
+                      open={editingProduct?.id === product.id}
+                      onOpenChange={(open) => !open && setEditingProduct(null)}
                     >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingProduct(product)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent style={{ maxWidth: "1000px" }}>
+                        <DialogHeader>
+                          <DialogTitle>Modifier le produit</DialogTitle>
+                        </DialogHeader>
+
+                        <EditProductForm
+                          productId={product.id}
+                          initialData={product}
+                          onSuccess={() => setEditingProduct(null)}
+                          scents={scents}
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant="ghost"
                       size="icon"

@@ -32,7 +32,7 @@ const Breadscrumb = () => {
 
     // Si nous sommes sur la page d'un produit spécifique et avons récupéré son nom
     if (index === 1 && pathnames[0] === "products" && productName) {
-      return productName;
+      return productName.name;
     } else if (index === 1 && pathnames[0] === "products" && isLoading) {
       return "Chargement...";
     }

@@ -1,39 +1,16 @@
 "use client";
 import { StarIcon } from "lucide-react";
-import Image from "next/image";
+import { Review, User } from "@/generated/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface ReviewItemProps {
-  review: {
-    id: string;
-    rating: number;
-    comment: string;
-    createdAt: string;
-    user: {
-      name: string | null;
-      image: string | null;
-    };
-  };
-}
-
-const ItemReviewProduct = ({ review }: ReviewItemProps) => {
+const ItemReviewProduct = ({ review }: { review: Review & { user: User } }) => {
   return (
     <article className="p-6 border border-gray-200 rounded-lg dark:border-gray-700 mb-4">
-      <div className="flex items-center mb-4">
-        {review.user.image ? (
-          <Image
-            className="w-10 h-10 me-4 rounded-full"
-            src={review.user.image ?? undefined}
-            alt={review.user.name || "Utilisateur"}
-            width={40}
-            height={40}
-          />
-        ) : (
-          <div className="w-10 h-10 me-4 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500">
-              {(review.user.name || "?").charAt(0)}
-            </span>
-          </div>
-        )}
+      <div className="flex items-center gap-4">
+        <Avatar>
+          <AvatarImage src={review.user.image ?? undefined} />
+          <AvatarFallback>{review.user.name?.charAt(0) || "?"}</AvatarFallback>
+        </Avatar>
         <div className="font-medium dark:text-white">
           <p>
             {review.user.name || "Utilisateur anonyme"}{" "}

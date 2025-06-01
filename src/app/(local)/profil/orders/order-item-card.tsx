@@ -19,14 +19,31 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import { Order } from "@/types/types";
 import Link from "next/link";
+import {
+  Order,
+  OrderItem,
+  Product,
+  Scent,
+  Image as PrismaImage,
+  Address,
+  QRCode,
+} from "@/generated/client";
 
 const OrderItemCard = ({
   order,
   getStatusDetails,
 }: {
-  order: Order;
+  order: Order & {
+    items: (OrderItem & {
+      product: Product & {
+        images: PrismaImage[];
+      };
+      scent: Scent;
+      qrCode: QRCode | null;
+    })[];
+    shippingAddress: Address;
+  };
   getStatusDetails: (status: string) => {
     label: string;
     color: string;
@@ -80,24 +97,45 @@ const OrderItemCard = ({
               <div key={item.id} className="flex items-center gap-4">
                 <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-gray-50">
                   <Image
-                    src={item.product.imageUrl || "/placeholder.svg"}
-                    alt={item.product.name}
+                    src={item.product?.images?.[0]?.url || "/placeholder.svg"}
+                    alt={item.product?.name || "Produit"}
                     fill
                     className="object-cover"
                   />
                 </div>
-                <div>
-                  <h5 className="font-medium">{item.product.name}</h5>
+                <div className="flex-1">
+                  <h5 className="font-medium">{item.product?.name}</h5>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div
                       className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: item.scent.color || "#CBD5E1" }}
+                      style={{
+                        backgroundColor: item.scent?.color || "#CBD5E1",
+                      }}
                     />
-                    <span>{item.scent.name}</span>
+                    <span>{item.scent?.name}</span>
                   </div>
                   <p className="text-sm mt-1">
                     {item.quantity} × {item.price.toFixed(2)}€
                   </p>
+                  {item.qrCode && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Link
+                        href={`/ar/${item.qrCode.code}`}
+                        className="text-sm text-blue-600 hover:underline"
+                        prefetch
+                      >
+                        Voir en réalité augmentée
+                      </Link>
+                    </div>
+                  )}
+                  {item.animationId && (
+                    <div className="mt-1 flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        Lieu: {item.animationId}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

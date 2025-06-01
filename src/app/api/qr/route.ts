@@ -87,10 +87,10 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      product: qrCode.orderItem.product,
-      audioUrl: qrCode.orderItem.audioUrl,
-      animationId: qrCode.orderItem.animationId,
-      scent: qrCode.orderItem.scent,
+      product: qrCode.orderItem?.product,
+      audioUrl: qrCode.orderItem?.audioUrl,
+      animationId: qrCode.orderItem?.animationId,
+      scent: qrCode.orderItem?.scent,
     });
   } catch (error) {
     console.error("Erreur lors de la récupération du QR code:", error);

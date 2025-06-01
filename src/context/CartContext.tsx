@@ -1,18 +1,28 @@
 "use client";
 
-import { ProductWithDetails } from "@/types/types";
-import { Scent } from "@/types/types";
+import { Scent, Category } from "@/generated/client";
 import { createContext, useContext, useState, useEffect } from "react";
 
-interface CartItem extends ProductWithDetails {
-  quantity: number;
+interface CartItem {
+  id: string;
+  name: string;
+  imageUrl: string;
+  price: number;
   selectedScent: Scent;
+  category: Category;
+  quantity: number;
+  description: string;
+  subTitle: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 // Cart context interface
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: ProductWithDetails & { selectedScent: Scent }) => void;
+  addToCart: (item: CartItem) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -39,7 +49,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [cart]);
 
   // Function to add items to the cart
-  const addToCart = (item: ProductWithDetails & { selectedScent: Scent }) => {
+  const addToCart = (item: CartItem) => {
     console.log("Adding item:", item);
     setCart((prevCart) => {
       const existingItem = prevCart.find(

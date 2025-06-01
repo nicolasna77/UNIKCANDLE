@@ -3,6 +3,20 @@ import { auth } from "@/lib/auth"; // path to your Better Auth server instance
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+// Schéma de validation pour la création d'un produit
+const createProductSchema = z.object({
+  name: z.string().min(1, "Le nom est requis"),
+  description: z.string().min(1, "La description est requise"),
+  price: z.number().positive("Le prix doit être positif"),
+  subTitle: z.string().min(1, "Le sous-titre est requis"),
+  slogan: z.string().min(1, "Le slogan est requis"),
+  category: z.string().min(1, "La catégorie est requise"),
+  arAnimation: z.string().min(1, "L'animation AR est requise"),
+  scentId: z.string().min(1, "Le parfum est requis"),
+  imageUrl: z.string().url("L'URL de l'image doit être valide"),
+});
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -15,17 +29,8 @@ export async function GET() {
   try {
     const products = await prisma.product.findMany({
       include: {
-        variants: {
-          include: {
-            scent: {
-              select: {
-                id: true,
-                name: true,
-                color: true,
-              },
-            },
-          },
-        },
+        scent: true,
+        images: true,
       },
       orderBy: {
         name: "asc",
@@ -42,24 +47,6 @@ export async function GET() {
   }
 }
 
-export async function DELETE(request: Request) {
-  const session = await auth.api.getSession({
-    headers: await headers(), // you need to pass the headers object.
-  });
-
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await request.json();
-
-  const product = await prisma.product.delete({
-    where: { id },
-  });
-  revalidatePath("/admin/products");
-  return NextResponse.json(product);
-}
-
 export async function POST(request: Request) {
   try {
     const session = await auth.api.getSession({
@@ -73,91 +60,52 @@ export async function POST(request: Request) {
     const data = await request.json();
     console.log("Données reçues:", data);
 
-    // Validation des données
-    if (
-      !data.name ||
-      !data.description ||
-      !data.price ||
-      !data.imageUrl ||
-      !data.subTitle
-    ) {
-      console.log("Validation échouée:", {
-        name: !!data.name,
-        description: !!data.description,
-        price: !!data.price,
-        imageUrl: !!data.imageUrl,
-        subTitle: !!data.subTitle,
-      });
+    // Validation des données avec Zod
+    const validationResult = createProductSchema.safeParse(data);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Tous les champs sont obligatoires" },
-        { status: 400 }
-      );
-    }
-
-    if (typeof data.price !== "number" || data.price <= 0) {
-      console.log("Prix invalide:", data.price);
-      return NextResponse.json(
-        { error: "Le prix doit être un nombre positif" },
-        { status: 400 }
-      );
-    }
-
-    if (!Array.isArray(data.selectedScents)) {
-      console.log("Senteurs invalides:", data.selectedScents);
-      return NextResponse.json(
-        { error: "Les senteurs doivent être un tableau" },
-        { status: 400 }
-      );
-    }
-
-    // Vérification que les senteurs existent
-    const existingScents = await prisma.scent.findMany({
-      where: {
-        id: {
-          in: data.selectedScents,
+        {
+          error: "Données invalides",
+          details: validationResult.error.errors,
         },
-      },
+        { status: 400 }
+      );
+    }
+
+    // Vérification que le parfum existe
+    const existingScent = await prisma.scent.findUnique({
+      where: { id: data.scentId },
     });
 
-    console.log("Senteurs trouvées:", existingScents);
-
-    if (existingScents.length !== data.selectedScents.length) {
-      console.log("Certaines senteurs n'existent pas:", {
-        requested: data.selectedScents,
-        found: existingScents.map((s) => s.id),
-      });
+    if (!existingScent) {
       return NextResponse.json(
-        { error: "Certaines senteurs n'existent pas" },
+        { error: "Le parfum sélectionné n'existe pas" },
         { status: 400 }
       );
     }
 
+    // Création du produit
     const product = await prisma.product.create({
       data: {
         name: data.name,
         description: data.description,
         price: data.price,
-        imageUrl: data.imageUrl,
         subTitle: data.subTitle,
-        variants: {
-          create: data.selectedScents.map((scentId: string) => ({
-            scentId,
-            imageUrl: data.imageUrl,
-          })),
+        slogan: data.slogan,
+        category: data.category,
+        arAnimation: data.arAnimation,
+        scent: {
+          connect: { id: data.scentId },
+        },
+        images: {
+          create: {
+            url: data.imageUrl,
+          },
         },
       },
       include: {
-        variants: {
-          include: {
-            scent: {
-              select: {
-                id: true,
-                name: true,
-                color: true,
-              },
-            },
-          },
-        },
+        scent: true,
+        images: true,
       },
     });
 

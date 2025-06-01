@@ -1,118 +1,54 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Product, Category, Scent, Image, Review } from "@/generated/client";
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  variants: ProductVariant[];
-}
-
-interface ProductVariant {
-  id: string;
-  productId: string;
-  scentId: string;
-  imageUrl: string;
-  isAvailable: boolean;
+interface ProductWithDetails extends Product {
+  category: Category;
   scent: Scent;
+  images: Image[];
+  reviews: Review[];
+  averageRating: number;
+  reviewCount: number;
 }
 
-interface Scent {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-  model3dUrl: string;
+interface PaginatedResponse {
+  products: ProductWithDetails[];
+  pagination: {
+    total: number;
+    pages: number;
+    page: number;
+    limit: number;
+  };
 }
 
-interface CreateProductData {
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  variants: {
-    scentId: string;
-    imageUrl: string;
-  }[];
-}
-
-interface UpdateProductData extends Partial<CreateProductData> {
-  id: string;
-}
-
-// Fonction pour récupérer tous les produits
-async function fetchProducts(id?: string) {
-  try {
-    const response = await fetch(id ? `/api/products/${id}` : "/api/products");
-    if (!response.ok) {
-      if (response.status === 404) {
-        return [];
-      }
-      throw new Error("Erreur lors de la récupération des produits");
-    }
-    const data = await response.json();
-    return Array.isArray(data) ? data : [data];
-  } catch (error) {
-    console.error("Erreur lors de la récupération des produits:", error);
-    return [];
-  }
-}
-
-// Fonction pour créer un produit
-async function createProduct(data: CreateProductData): Promise<Product> {
-  const response = await fetch("/api/products", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error("Erreur lors de la création du produit");
-  }
-  return response.json();
-}
-
-// Fonction pour mettre à jour un produit
-async function updateProduct(data: UpdateProductData): Promise<Product> {
-  const response = await fetch(`/api/products/${data.id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error("Erreur lors de la mise à jour du produit");
-  }
-  return response.json();
-}
-
-// Fonction pour supprimer un produit
-async function deleteProduct(id: string): Promise<void> {
-  const response = await fetch(`/api/products`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id }),
-  });
-  if (!response.ok) {
-    throw new Error("Erreur lors de la suppression du produit");
-  }
+interface UseProductsParams {
+  page?: number;
+  categoryId?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 // Hook pour récupérer les produits
-export function useProducts(id?: string) {
-  return useQuery({
-    queryKey: ["products", id],
-    queryFn: () => (id ? fetchProducts(id) : fetchProducts()),
+export function useProducts(params?: UseProductsParams) {
+  const { page = 1, categoryId, sortBy, sortOrder } = params || {};
+
+  return useQuery<PaginatedResponse>({
+    queryKey: ["products", page, categoryId, sortBy, sortOrder],
+    queryFn: async () => {
+      const searchParams = new URLSearchParams({
+        page: page.toString(),
+        limit: "12",
+        ...(categoryId && { categoryId }),
+        ...(sortBy && { sortBy }),
+        ...(sortOrder && { sortOrder }),
+      });
+
+      const response = await fetch(`/api/products?${searchParams.toString()}`);
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des produits");
+      }
+      return response.json();
+    },
   });
 }
 
@@ -120,7 +56,29 @@ export function useProducts(id?: string) {
 export function useCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createProduct,
+    mutationFn: async (data: {
+      name: string;
+      description: string;
+      price: number;
+      subTitle: string;
+      slogan: string;
+      categoryId: string;
+      arAnimation: string;
+      scentId: string;
+      images: { url: string }[];
+    }) => {
+      const response = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors de la création du produit");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Produit créé avec succès");
@@ -135,7 +93,30 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateProduct,
+    mutationFn: async (data: {
+      id: string;
+      name?: string;
+      description?: string;
+      price?: number;
+      subTitle?: string;
+      slogan?: string;
+      categoryId?: string;
+      arAnimation?: string;
+      scentId?: string;
+      images?: { url: string }[];
+    }) => {
+      const response = await fetch(`/api/admin/products/${data.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour du produit");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Produit mis à jour avec succès");
@@ -150,7 +131,14 @@ export function useUpdateProduct() {
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteProduct,
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/products/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Erreur lors de la suppression du produit");
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Produit supprimé avec succès");
@@ -161,32 +149,37 @@ export function useDeleteProduct() {
   });
 }
 
-export function useAdminProducts() {
-  return useQuery({
-    queryKey: ["adminProducts"],
+// Hook pour récupérer un produit spécifique
+export const useProduct = (productId: string) => {
+  return useQuery<ProductWithDetails>({
+    queryKey: ["productdetail", productId],
     queryFn: async () => {
-      const response = await fetch(
-        `${window.location.origin}/api/admin/products`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("better-auth-session")}`,
-          },
-        }
-      );
+      console.log("Fetching product with ID:", productId);
+      const response = await fetch(`/api/products/${productId}`);
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des produits");
+        const error = await response.json();
+        console.error("Error response:", error);
+        throw new Error(
+          error.error || "Erreur lors de la récupération du produit"
+        );
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log("Received data:", data);
+
+      // Vérification des données requises
+      if (!data.category || !data.scent || !data.images) {
+        console.error("Données manquantes dans la réponse:", {
+          category: data.category,
+          scent: data.scent,
+          images: data.images,
+        });
+        throw new Error("Données du produit incomplètes");
+      }
+
+      return data;
     },
   });
-}
-
-// Hook pour récupérer un produit spécifique
-export function useProduct(id: string) {
-  return useQuery({
-    queryKey: ["product", id],
-    queryFn: () => fetchProducts(id).then((products) => products[0]),
-  });
-}
+};

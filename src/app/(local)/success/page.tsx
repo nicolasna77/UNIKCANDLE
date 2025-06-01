@@ -1,36 +1,68 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
+import confetti from "canvas-confetti";
+import { useSearchParams } from "next/navigation";
+import { createOrder } from "./confirm.action";
 
-export default function SuccessPage() {
-  const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
+const SuccessPage = () => {
+  const params = useSearchParams();
+  const sessionId = params.get("session_id");
   const { clearCart } = useCart();
-  const processedRef = useRef(false);
+  const hasClearedCart = useRef(false);
+
+  const handleCreateOrder = useCallback(async () => {
+    if (sessionId) {
+      await createOrder({ sessionId: sessionId });
+    }
+  }, [sessionId]);
 
   useEffect(() => {
-    const handleSuccess = async () => {
-      if (!sessionId || processedRef.current) return;
+    handleCreateOrder();
+  }, [handleCreateOrder]);
 
-      try {
-        processedRef.current = true;
-        await clearCart();
-        toast.success("Paiement effectué avec succès !");
-      } catch (error) {
-        console.error("Erreur lors du traitement:", error);
-        toast.error(
-          "Une erreur est survenue lors du traitement de votre commande"
-        );
-      }
+  const fireConfetti = useCallback(() => {
+    const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+    const end = Date.now() + 3 * 1000; // 3 seconds
+    const frame = () => {
+      if (Date.now() > end) return;
+
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 0, y: 0.5 },
+        colors: colors,
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 1, y: 0.5 },
+        colors: colors,
+      });
+
+      requestAnimationFrame(frame);
     };
 
-    handleSuccess();
-  }, [sessionId, clearCart]);
+    frame();
+  }, []);
+
+  useEffect(() => {
+    fireConfetti();
+  }, [fireConfetti]);
+
+  useEffect(() => {
+    if (!hasClearedCart.current) {
+      clearCart();
+      hasClearedCart.current = true;
+    }
+  }, [clearCart]);
 
   return (
     <section className="bg-white min-h-screen flex items-center justify-center py-8 antialiased dark:bg-gray-900 md:py-16">
@@ -72,4 +104,6 @@ export default function SuccessPage() {
       </div>
     </section>
   );
-}
+};
+
+export default SuccessPage;

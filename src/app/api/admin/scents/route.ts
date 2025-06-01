@@ -27,7 +27,6 @@ export async function POST(request: Request) {
         description: data.description,
         icon: data.icon,
         color: data.color,
-        model3dUrl: data.model3dUrl,
       },
     });
     return NextResponse.json(scent);

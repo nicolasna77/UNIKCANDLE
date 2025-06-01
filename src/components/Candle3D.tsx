@@ -3,15 +3,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-
-interface Scent {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-  model3dUrl: string;
-}
+import { Scent } from "@/generated/client";
 
 interface Candle3DProps {
   selectedScent: Scent;
@@ -98,7 +90,7 @@ export function Candle3D({ selectedScent }: Candle3DProps) {
     // Chargement du modèle 3D
     const loader = new GLTFLoader();
     loader.load(
-      selectedScent.model3dUrl,
+      "/models/candleGlass.glb",
       (gltf) => {
         const candle = gltf.scene;
         scene.add(candle);

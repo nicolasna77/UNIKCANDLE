@@ -2,13 +2,14 @@
 
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
-import { Star, Trash2, Plus, Minus } from "lucide-react";
+import { Trash2, Plus, Minus, Truck, Package, Shield } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { PageHeader } from "@/components/page-header";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
@@ -36,8 +37,6 @@ export default function CartPage() {
   const handleCheckout = async () => {
     try {
       setIsLoading(true);
-      console.log("Début du processus de paiement");
-      console.log("Contenu du panier:", cart);
 
       // Vérifier si l'utilisateur est connecté
       const { data: session } = await authClient.getSession();
@@ -66,29 +65,50 @@ export default function CartPage() {
         return;
       }
 
+      console.log("Contenu du panier avant envoi:", cart);
+
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ cart }),
+        body: JSON.stringify({
+          cartItems: cart,
+          returnUrl: `${window.location.origin}/success`,
+        }),
       });
 
+      console.log("Réponse du serveur:", response.status);
+      const responseText = await response.text();
+      console.log("Contenu de la réponse:", responseText);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Erreur détaillée:", errorData);
+        console.error("Erreur détaillée:", responseText);
         throw new Error("Erreur lors de la création de la session de paiement");
       }
 
-      const { url } = await response.json();
-      console.log("URL de redirection Stripe:", url);
-
-      if (!url) {
-        throw new Error("URL de redirection manquante");
+      const data = JSON.parse(responseText);
+      if (!data.sessionId) {
+        throw new Error("Session ID manquant");
       }
 
-      // Rediriger vers la page de paiement Stripe
-      window.location.href = url;
+      // Ouvrir le paiement dans un nouvel onglet
+      const checkoutWindow = window.open(
+        `${window.location.origin}/checkout?session_id=${data.sessionId}`,
+        "_blank"
+      );
+
+      // Vérifier périodiquement si l'onglet est fermé
+      const checkWindow = setInterval(() => {
+        if (checkoutWindow?.closed) {
+          clearInterval(checkWindow);
+          // Rediriger vers la page de succès dans l'onglet principal
+          router.push("/success");
+        }
+      }, 1000);
+
+      // Nettoyer l'intervalle si le composant est démonté
+      return () => clearInterval(checkWindow);
     } catch (error) {
       console.error("Erreur lors du paiement:", error);
       toast.error("Une erreur est survenue lors du paiement");
@@ -101,9 +121,7 @@ export default function CartPage() {
     return (
       <section className=" py-8 antialiased dark:bg-gray-900 md:py-16">
         <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-            Panier
-          </h2>
+          <PageHeader title="Panier" description="" />
           <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
             <div className="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
               <svg
@@ -157,11 +175,11 @@ export default function CartPage() {
                     >
                       <div className="relative h-20 w-20 overflow-hidden rounded-lg">
                         <Image
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          className="object-cover transition-transform duration-300 "
                           src={item.imageUrl}
                           alt={item.name}
-                          width={80}
-                          height={80}
+                          width={100}
+                          height={100}
                           priority
                         />
                       </div>
@@ -218,18 +236,20 @@ export default function CartPage() {
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           Senteur : {item.selectedScent.name}
                         </p>
+                        {item.category && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: item.category.color }}
+                            />
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                              {item.category.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                        >
-                          <Star className="mr-1.5 h-5 w-5" />
-                          Ajouter aux favoris
-                        </Button>
-
                         <Button
                           variant="ghost"
                           size="sm"
@@ -283,13 +303,28 @@ export default function CartPage() {
                 </dl>
               </div>
 
+              {/* Features */}
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <Package className="text-primary h-4 w-4" />
+                  <span>Free returns within 30 days</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Shield className="text-primary h-4 w-4" />
+                  <span>Secure payment</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Truck className="text-primary h-4 w-4" />
+                  <span>Fast delivery</span>
+                </div>
+              </div>
               <Button
                 className="w-full"
                 size="lg"
                 onClick={handleCheckout}
                 disabled={isLoading}
               >
-                {isLoading ? "Chargement..." : "Passer à la caisse"}
+                {isLoading ? "Chargement..." : "Payer"}
               </Button>
 
               <div className="flex items-center justify-center gap-2">

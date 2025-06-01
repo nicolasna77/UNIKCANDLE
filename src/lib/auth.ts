@@ -17,8 +17,6 @@ export const auth = betterAuth({
   }),
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
-    // BUG: Prob a bug with updateAge method. It throws an error - Argument `where` of type SessionWhereUniqueInput needs at least one of `id` arguments.
-    // As a workaround, set updateAge to a large value for now.
     updateAge: 60 * 60 * 24 * 7, // 7 days (every 7 days the session expiration is updated)
     cookieCache: {
       enabled: true,
@@ -51,7 +49,7 @@ export const auth = betterAuth({
 
   plugins: [
     admin({
-      adminRoles: ["admin"],
+      adminRoles: ["ADMIN"],
     }),
     nextCookies(),
   ],

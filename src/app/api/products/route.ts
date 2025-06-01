@@ -1,47 +1,67 @@
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const products = await prisma.product.findMany({
-      include: {
-        variants: {
-          include: {
-            scent: true,
-          },
-        },
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "12");
+    const categoryId = searchParams.get("categoryId");
+    const sortBy = searchParams.get("sortBy") || "name";
+    const sortOrder = searchParams.get("sortOrder") || "asc";
 
-        reviews: {
-          include: {
-            user: {
-              select: {
-                name: true,
-                image: true,
-              },
+    const skip = (page - 1) * limit;
+
+    const where = {
+      deletedAt: null,
+      ...(categoryId && { categoryId }),
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          category: true,
+          scent: true,
+          images: true,
+          reviews: {
+            select: {
+              rating: true,
             },
           },
         },
-      },
-    });
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
 
-    // Calcul de la moyenne des avis pour chaque produit
-    const productsWithRating = products.map((product) => {
+    const productsWithStats = products.map((product) => {
+      const ratings = product.reviews.map((review) => review.rating);
       const averageRating =
-        product.reviews.length > 0
-          ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
-            product.reviews.length
+        ratings.length > 0
+          ? ratings.reduce((a, b) => a + b, 0) / ratings.length
           : 0;
 
       return {
         ...product,
-        variants: product.variants || [],
-        reviews: product.reviews || [],
-        averageRating: Number(averageRating.toFixed(1)),
-        reviewCount: product.reviews.length,
+        averageRating,
+        reviewCount: ratings.length,
       };
     });
 
-    return NextResponse.json(productsWithRating);
+    return NextResponse.json({
+      products: productsWithStats,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        page,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("Erreur lors de la récupération des produits:", error);
     return NextResponse.json(

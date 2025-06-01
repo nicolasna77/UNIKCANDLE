@@ -3,6 +3,45 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const updateProductSchema = z.object({
+  name: z.string().min(1, "Le nom est requis"),
+  description: z.string().min(1, "La description est requise"),
+  price: z.number().min(0, "Le prix doit être positif"),
+  scents: z.array(z.string()),
+  images: z.array(z.object({ url: z.string().url() })),
+});
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.role || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    await prisma.product.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    revalidatePath("/admin/products");
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Erreur lors de la suppression du produit:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression du produit" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(
   request: Request,
@@ -13,77 +52,54 @@ export async function PATCH(
       headers: await headers(),
     });
 
-    if (!session || session.user.role !== "admin") {
+    if (!session?.user?.role || session.user.role !== "admin") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const id = (await params).id;
+    const { id } = await params;
     const data = await request.json();
-    const product = await prisma.product.update({
-      where: {
-        id: id,
-      },
-      data: {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        imageUrl: data.imageUrl,
-        variants: {
-          deleteMany: {},
-          create: data.selectedScents.map((scentId: string) => ({
-            scentId,
-            imageUrl: data.imageUrl,
-          })),
-        },
-      },
-      include: {
-        variants: {
-          include: {
-            scent: {
-              select: {
-                id: true,
-                name: true,
-                color: true,
-              },
-            },
+
+    // Validation des données
+    const validatedData = updateProductSchema.parse(data);
+
+    const product = await prisma.$transaction(async (tx) => {
+      // Mise à jour du produit avec les nouvelles données
+      return tx.product.update({
+        where: { id },
+        data: {
+          name: validatedData.name,
+          description: validatedData.description,
+          price: validatedData.price,
+          scents: {
+            set: [], // Déconnecter toutes les senteurs existantes
+            connect: validatedData.scents.map((scentId) => ({ id: scentId })),
+          },
+          images: {
+            deleteMany: {},
+            create: validatedData.images.map((image) => ({ url: image.url })),
           },
         },
-      },
+        include: {
+          scents: true,
+          images: true,
+        },
+      });
     });
+
     revalidatePath("/admin/products");
     return NextResponse.json(product);
   } catch (error) {
     console.error("Erreur lors de la mise à jour du produit:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Erreur lors de la mise à jour du produit" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
-  try {
-    await prisma.product.delete({
-      where: {
-        id: (await params).id,
-      },
-    });
-    revalidatePath("/admin/products");
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Erreur lors de la suppression du produit:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la suppression du produit" },
       { status: 500 }
     );
   }
