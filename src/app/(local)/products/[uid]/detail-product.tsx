@@ -107,26 +107,27 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   const { addToCart } = useCart();
 
   if (isLoading) {
-    return <LoadingPage />;
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <LoadingPage />
+      </div>
+    );
   }
 
   if (error || !product) {
     console.error("Erreur ou produit non trouvé:", { error, product });
     return (
-      <div className="flex justify-center p-8 text-red-500">
-        Erreur lors du chargement du produit
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="text-red-500 text-xl font-semibold">
+          Erreur lors du chargement du produit
+        </div>
+        <p className="text-muted-foreground">
+          Le produit que vous recherchez n&apos;existe pas ou n&apos;est plus
+          disponible.
+        </p>
       </div>
     );
   }
-
-  console.log("Product data:", {
-    name: product.name,
-    subTitle: product.subTitle,
-    description: product.description,
-    category: product.category,
-    scent: product.scent,
-    images: product.images,
-  });
 
   const handleAddToCart = () => {
     if (!product.price) {
