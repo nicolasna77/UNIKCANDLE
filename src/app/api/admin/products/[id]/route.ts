@@ -9,7 +9,7 @@ const updateProductSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
   description: z.string().min(1, "La description est requise"),
   price: z.number().min(0, "Le prix doit être positif"),
-  scents: z.array(z.string()),
+  scentId: z.string(),
   images: z.array(z.object({ url: z.string().url() })),
 });
 
@@ -70,17 +70,14 @@ export async function PATCH(
           name: validatedData.name,
           description: validatedData.description,
           price: validatedData.price,
-          scents: {
-            set: [], // Déconnecter toutes les senteurs existantes
-            connect: validatedData.scents.map((scentId) => ({ id: scentId })),
-          },
+          scentId: validatedData.scentId,
           images: {
             deleteMany: {},
             create: validatedData.images.map((image) => ({ url: image.url })),
           },
         },
         include: {
-          scents: true,
+          scent: true,
           images: true,
         },
       });
