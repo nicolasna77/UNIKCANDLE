@@ -3,14 +3,17 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     console.log("Recherche du produit avec l'ID:", id);
 
-    const product = await prisma.product.findUnique({
-      where: { id },
+    const product = await prisma.product.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
       include: {
         images: true,
         scent: true,
@@ -27,8 +30,6 @@ export async function GET(
         },
       },
     });
-
-    console.log("Produit trouvé:", product);
 
     if (!product) {
       console.log("Produit non trouvé");
@@ -64,8 +65,6 @@ export async function GET(
       averageRating: Number(averageRating.toFixed(1)),
       reviewCount: product.reviews?.length || 0,
     };
-
-    console.log("Réponse finale:", response);
 
     return NextResponse.json(response);
   } catch (error) {

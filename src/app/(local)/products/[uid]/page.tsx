@@ -17,12 +17,16 @@ class ProductNotFoundError extends Error {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const product = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`
-    ).then((res) => {
-      if (!res.ok) throw new ProductNotFoundError();
-      return res.json();
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new ProductNotFoundError();
+    }
+
+    const product = await response.json();
 
     return {
       title: product.name,
@@ -38,12 +42,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   try {
-    const product = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`
-    ).then((res) => {
-      if (!res.ok) throw new ProductNotFoundError();
-      return res.json();
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new ProductNotFoundError();
+    }
+
+    const product = await response.json();
 
     if (!product) {
       notFound();
@@ -54,7 +62,8 @@ export default async function ProductPage({ params }: Props) {
         <DetailProduct productId={params.uid} />
       </Suspense>
     );
-  } catch {
+  } catch (error) {
+    console.error("Erreur lors de la récupération du produit:", error);
     notFound();
   }
 }
