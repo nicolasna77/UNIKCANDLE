@@ -11,16 +11,23 @@ export default async function ProductPage({ params }: Props) {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`,
-      { cache: "no-store" }
+      {
+        cache: "no-store",
+        next: { revalidate: 0 },
+      }
     );
 
     if (!response.ok) {
+      console.error(
+        `Erreur ${response.status} lors de la récupération du produit`
+      );
       notFound();
     }
 
     const product = await response.json();
 
-    if (!product) {
+    if (!product || !product.id) {
+      console.error("Produit non trouvé ou invalide:", product);
       notFound();
     }
 
