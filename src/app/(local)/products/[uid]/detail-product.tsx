@@ -119,12 +119,19 @@ const DetailProduct = ({ productId }: { productId: string }) => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
         <div className="text-red-500 text-xl font-semibold">
-          Erreur lors du chargement du produit
+          {error?.message || "Erreur lors du chargement du produit"}
         </div>
         <p className="text-muted-foreground">
           Le produit que vous recherchez n&apos;existe pas ou n&apos;est plus
           disponible.
         </p>
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="mt-4"
+        >
+          Réessayer
+        </Button>
       </div>
     );
   }

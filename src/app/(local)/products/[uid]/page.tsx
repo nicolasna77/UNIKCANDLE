@@ -8,9 +8,11 @@ type Props = {
 };
 
 export default async function ProductPage({ params }: Props) {
+  const uid = await params.uid;
+
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`,
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${uid}`,
       {
         cache: "no-store",
         next: { revalidate: 0 },
@@ -33,7 +35,7 @@ export default async function ProductPage({ params }: Props) {
 
     return (
       <Suspense fallback={<LoadingPage />}>
-        <DetailProduct productId={params.uid} />
+        <DetailProduct productId={uid} />
       </Suspense>
     );
   } catch (error) {

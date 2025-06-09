@@ -155,14 +155,22 @@ export const useProduct = (productId: string) => {
     queryKey: ["productdetail", productId],
     queryFn: async () => {
       console.log("Fetching product with ID:", productId);
-      const response = await fetch(`/api/products/${productId}`);
+      const response = await fetch(`/api/products/${productId}`, {
+        cache: "no-store",
+        next: { revalidate: 0 },
+      });
       console.log("Response status:", response.status);
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response
+          .json()
+          .catch(() => ({
+            error: "Erreur lors de la récupération du produit",
+          }));
         console.error("Error response:", error);
         throw new Error(
-          error.error || "Erreur lors de la récupération du produit"
+          error.error ||
+            `Erreur ${response.status} lors de la récupération du produit`
         );
       }
 
@@ -181,5 +189,7 @@ export const useProduct = (productId: string) => {
 
       return data;
     },
+    retry: 1,
+    retryDelay: 1000,
   });
 };
