@@ -154,19 +154,24 @@ export const useProduct = (productId: string) => {
   return useQuery<ProductWithDetails>({
     queryKey: ["productdetail", productId],
     queryFn: async () => {
+      const apiUrl = `/api/products/${productId}`;
+      console.log("URL de l'API:", apiUrl);
       console.log("Fetching product with ID:", productId);
-      const response = await fetch(`/api/products/${productId}`, {
+
+      const response = await fetch(apiUrl, {
         cache: "no-store",
         next: { revalidate: 0 },
       });
       console.log("Response status:", response.status);
+      console.log(
+        "Response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
 
       if (!response.ok) {
-        const error = await response
-          .json()
-          .catch(() => ({
-            error: "Erreur lors de la récupération du produit",
-          }));
+        const error = await response.json().catch(() => ({
+          error: "Erreur lors de la récupération du produit",
+        }));
         console.error("Error response:", error);
         throw new Error(
           error.error ||

@@ -6,9 +6,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log("Route API appelée avec params:", params);
     const resolvedParams = await params;
     const id = resolvedParams.id;
-    console.log("Recherche du produit avec l'ID:", id);
+    console.log("ID du produit recherché:", id);
 
     const product = await prisma.product.findFirst({
       where: {
@@ -31,6 +32,8 @@ export async function GET(
         },
       },
     });
+
+    console.log("Produit trouvé:", product ? "Oui" : "Non");
 
     if (!product) {
       console.log("Produit non trouvé");
@@ -67,6 +70,7 @@ export async function GET(
       reviewCount: product.reviews?.length || 0,
     };
 
+    console.log("Réponse envoyée:", response);
     return NextResponse.json(response);
   } catch (error) {
     console.error("Erreur lors de la récupération du produit:", error);
