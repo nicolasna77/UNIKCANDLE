@@ -7,10 +7,11 @@ export async function PATCH(
 ) {
   try {
     const { status } = await request.json();
+    const id = (await params).id;
 
     const order = await prisma.order.update({
       where: {
-        id: (await params).id,
+        id,
       },
       data: {
         status,

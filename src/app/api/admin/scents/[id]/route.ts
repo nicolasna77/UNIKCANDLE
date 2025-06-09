@@ -3,13 +3,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const data = await request.json();
+    const id = await params.id;
+
     const scent = await prisma.scent.update({
       where: {
-        id: (await params).id,
+        id,
       },
       data: {
         name: data.name,

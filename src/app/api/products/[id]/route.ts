@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = await params.id;
+    const id = (await params).id;
     console.log("Recherche du produit avec l'ID:", id);
 
     const product = await prisma.product.findFirst({

@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default async function ProductPage({ params }: Props) {
-  const uid = await params.uid;
+  const uid = (await params).uid;
 
   try {
     const response = await fetch(

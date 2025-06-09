@@ -6,9 +6,11 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const uid = (await params).uid;
+
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.uid}`,
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${uid}`,
       {
         cache: "no-store",
         next: { revalidate: 0 },
