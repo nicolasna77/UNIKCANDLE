@@ -4,11 +4,12 @@ import LoadingPage from "../loading";
 import { notFound } from "next/navigation";
 
 type Props = {
-  params: { uid: string };
+  params: Promise<{ uid: string }>;
 };
 
 export default async function ProductPage({ params }: Props) {
-  const uid = (await params).uid;
+  const resolvedParams = await params;
+  const uid = resolvedParams.uid;
 
   try {
     const response = await fetch(

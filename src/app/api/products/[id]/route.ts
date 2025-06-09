@@ -6,7 +6,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = (await params).id;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
     console.log("Recherche du produit avec l'ID:", id);
 
     const product = await prisma.product.findFirst({
