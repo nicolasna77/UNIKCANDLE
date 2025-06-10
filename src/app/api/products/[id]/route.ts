@@ -8,7 +8,7 @@ export async function GET(
   try {
     console.log("Route API appelée avec params:", params);
     const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const { id } = resolvedParams;
     console.log("ID du produit recherché:", id);
 
     const product = await prisma.product.findFirst({
