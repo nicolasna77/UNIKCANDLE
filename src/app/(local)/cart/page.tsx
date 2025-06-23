@@ -2,19 +2,32 @@
 
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, Truck, Package, Shield } from "lucide-react";
+import { Trash2, Plus, Minus, Truck, Package, Shield, Mic } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { loadStripe } from "@stripe/stripe-js";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Vérifier si l'utilisateur revient d'un paiement annulé
+  useEffect(() => {
+    const canceled = searchParams.get("canceled");
+    if (canceled === "true") {
+      toast.info("Paiement annulé", {
+        description: "Vous pouvez modifier votre panier et réessayer",
+      });
+    }
+  }, [searchParams]);
 
   const calculateTotal = () => {
     return cart.reduce(
@@ -74,7 +87,7 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           cartItems: cart,
-          returnUrl: `${window.location.origin}/success`,
+          returnUrl: `${window.location.origin}/cart`,
         }),
       });
 
@@ -92,23 +105,33 @@ export default function CartPage() {
         throw new Error("Session ID manquant");
       }
 
-      // Ouvrir le paiement dans un nouvel onglet
-      const checkoutWindow = window.open(
-        `${window.location.origin}/checkout?session_id=${data.sessionId}`,
-        "_blank"
-      );
+      // Rediriger directement vers Stripe
+      const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      console.log("Clé Stripe:", stripeKey ? "Présente" : "Manquante");
 
-      // Vérifier périodiquement si l'onglet est fermé
-      const checkWindow = setInterval(() => {
-        if (checkoutWindow?.closed) {
-          clearInterval(checkWindow);
-          // Rediriger vers la page de succès dans l'onglet principal
-          router.push("/success");
-        }
-      }, 1000);
+      const stripe = await loadStripe(stripeKey || "");
+      if (!stripe) {
+        console.error("Stripe n'a pas pu être initialisé");
+        throw new Error("Stripe n'a pas pu être initialisé");
+      }
 
-      // Nettoyer l'intervalle si le composant est démonté
-      return () => clearInterval(checkWindow);
+      console.log("Stripe initialisé, redirection vers:", data.sessionId);
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId,
+      });
+
+      if (error) {
+        console.error("Erreur détaillée Stripe:", {
+          message: error.message,
+          type: error.type,
+          code: error.code,
+        });
+        toast.error(
+          `Erreur lors de la redirection vers le paiement: ${error.message}`
+        );
+      } else {
+        console.log("Redirection Stripe réussie");
+      }
     } catch (error) {
       console.error("Erreur lors du paiement:", error);
       toast.error("Une erreur est survenue lors du paiement");
@@ -236,6 +259,14 @@ export default function CartPage() {
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           Senteur : {item.selectedScent.name}
                         </p>
+                        {item.audioUrl && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <Mic className="w-4 h-4 text-green-600" />
+                            <Badge variant="outline" className="text-xs">
+                              Message enregistré
+                            </Badge>
+                          </div>
+                        )}
                         {item.category && (
                           <div className="flex items-center gap-2 mt-1">
                             <div

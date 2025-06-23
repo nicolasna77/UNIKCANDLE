@@ -80,18 +80,7 @@ const HeroSection = () => {
           </motion.div>
 
           <div className="relative aspect-square rounded-xl  ">
-            <Candle3D
-              selectedScent={{
-                id: "candle",
-                name: "Bougie",
-                description: "Bougie",
-                icon: "/models/candle.png",
-                color: "#000000",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                notes: [],
-              }}
-            />
+            <Candle3D />
           </div>
         </div>
       </div>

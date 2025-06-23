@@ -13,6 +13,7 @@ interface CheckoutItem {
     name: string;
   };
   imageUrl: string;
+  audioUrl?: string; // URL de l'audio enregistré
 }
 
 export async function POST(req: Request) {
@@ -26,6 +27,15 @@ export async function POST(req: Request) {
     console.log("returnUrl", returnUrl);
     console.log("cartItems", cartItems);
     console.log("Panier reçu:", cartItems);
+    console.log(
+      "Détail des items avec audio:",
+      cartItems.map((item: CheckoutItem) => ({
+        id: item.id,
+        name: item.name,
+        audioUrl: item.audioUrl,
+        hasAudio: !!item.audioUrl,
+      }))
+    );
 
     if (!cartItems || cartItems.length === 0) {
       console.error("Panier vide");
@@ -37,6 +47,15 @@ export async function POST(req: Request) {
       ...item,
       qrCodeId: nanoid(10), // Générer un code unique de 10 caractères
     }));
+
+    console.log(
+      "Items avec codes QR:",
+      cartItemsWithCodes.map((item: CheckoutItem & { qrCodeId: string }) => ({
+        id: item.id,
+        audioUrl: item.audioUrl,
+        qrCodeId: item.qrCodeId,
+      }))
+    );
 
     const lineItems = cartItemsWithCodes.map(
       (item: CheckoutItem & { qrCodeId: string }) => {
@@ -65,7 +84,7 @@ export async function POST(req: Request) {
     // Créer un identifiant unique pour cette commande
     const orderId = `order_${Date.now()}`;
 
-    console.log("Création de la session Stripe avec les métadonnées:", {
+    console.log("Métadonnées finales:", {
       orderId,
       userId: session?.id,
       items: cartItemsWithCodes.map(
@@ -75,6 +94,7 @@ export async function POST(req: Request) {
           scentId: item.selectedScent.id,
           price: item.price,
           qrCodeId: item.qrCodeId,
+          audioUrl: item.audioUrl,
         })
       ),
     });
@@ -122,6 +142,7 @@ export async function POST(req: Request) {
               price: item.price,
               scentId: item.selectedScent.id,
               qrCodeId: item.qrCodeId,
+              audioUrl: item.audioUrl,
             })
           )
         ),
@@ -131,6 +152,9 @@ export async function POST(req: Request) {
     console.log("Session Stripe créée avec succès:", {
       id: stripeSession.id,
       metadata: stripeSession.metadata,
+      itemsInMetadata: stripeSession.metadata?.items
+        ? JSON.parse(stripeSession.metadata.items)
+        : [],
     });
     console.log("URL de redirection:", stripeSession.url);
 

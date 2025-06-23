@@ -12,6 +12,7 @@ interface CartItem {
   price: number;
   scentId: string;
   qrCodeId: string;
+  audioUrl?: string;
 }
 
 export async function POST(req: Request) {
@@ -81,6 +82,14 @@ export async function POST(req: Request) {
 
         const cartItems: CartItem[] = JSON.parse(session.metadata.items);
         console.log("Items du panier parsés:", cartItems);
+        console.log(
+          "Détail des items avec audio:",
+          cartItems.map((item) => ({
+            id: item.id,
+            audioUrl: item.audioUrl,
+            hasAudio: !!item.audioUrl,
+          }))
+        );
 
         // Vérifier la connexion à la base de données
         try {
@@ -110,12 +119,19 @@ export async function POST(req: Request) {
             userId: session.metadata.userId,
             total: session.amount_total ? session.amount_total / 100 : 0,
             items: {
-              create: cartItems.map((item: CartItem) => ({
-                productId: item.id,
-                quantity: item.quantity,
-                price: item.price,
-                scentId: item.scentId,
-              })),
+              create: cartItems.map((item: CartItem) => {
+                console.log("Création item avec audioUrl:", {
+                  productId: item.id,
+                  audioUrl: item.audioUrl,
+                });
+                return {
+                  productId: item.id,
+                  quantity: item.quantity,
+                  price: item.price,
+                  scentId: item.scentId,
+                  audioUrl: item.audioUrl,
+                };
+              }),
             },
             shippingAddress: {
               create: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
@@ -8,15 +8,40 @@ import confetti from "canvas-confetti";
 import { useSearchParams } from "next/navigation";
 import { createOrder } from "./confirm.action";
 
+interface OrderItem {
+  id: string;
+  product?: {
+    name: string;
+  };
+  audioUrl?: string;
+}
+
+interface OrderDetails {
+  id: string;
+  total: number;
+  items?: OrderItem[];
+}
+
 const SuccessPage = () => {
   const params = useSearchParams();
   const sessionId = params.get("session_id");
   const { clearCart } = useCart();
   const hasClearedCart = useRef(false);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleCreateOrder = useCallback(async () => {
     if (sessionId) {
-      await createOrder({ sessionId: sessionId });
+      try {
+        setIsLoading(true);
+        const order = await createOrder({ sessionId: sessionId });
+        setOrderDetails(order);
+        console.log("Commande créée:", order);
+      } catch (error) {
+        console.error("Erreur lors de la création de la commande:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }, [sessionId]);
 
@@ -91,6 +116,48 @@ const SuccessPage = () => {
               Merci pour votre achat. Nous vous enverrons un email de
               confirmation avec les détails de votre commande.
             </p>
+
+            {/* Debug: Affichage des détails de la commande */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="w-full mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-left">
+                <h4 className="font-semibold mb-2">
+                  Debug - Détails de la commande:
+                </h4>
+                {isLoading ? (
+                  <p>Chargement...</p>
+                ) : orderDetails ? (
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      <strong>ID:</strong> {orderDetails.id}
+                    </p>
+                    <p>
+                      <strong>Total:</strong> {orderDetails.total}€
+                    </p>
+                    <p>
+                      <strong>Items:</strong>
+                    </p>
+                    <ul className="ml-4 space-y-1">
+                      {orderDetails.items?.map(
+                        (item: OrderItem, index: number) => (
+                          <li key={index}>
+                            - {item.product?.name} (Audio:{" "}
+                            {item.audioUrl ? "✅" : "❌"})
+                            {item.audioUrl && (
+                              <span className="text-green-600 ml-2">
+                                URL: {item.audioUrl.substring(0, 50)}...
+                              </span>
+                            )}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="text-red-500">Aucune commande trouvée</p>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-4">
               <Link href="/products">
                 <Button variant="outline">Continuer les achats</Button>

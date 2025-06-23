@@ -13,7 +13,7 @@ interface CartItem {
   quantity: number;
   description: string;
   subTitle: string;
-
+  audioUrl?: string; // URL de l'audio enregistré
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -26,6 +26,8 @@ interface CartContextType {
   updateQuantity: (id: string, quantity: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
+  updateItemAudio: (id: string, audioUrl: string) => void;
+  removeItemAudio: (id: string) => void;
 }
 
 // Creating CartContext with default value
@@ -88,6 +90,24 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setCart((prevCart) => prevCart.filter((cartItem) => cartItem.id !== id));
   };
 
+  // Function to update audio URL for a specific item
+  const updateItemAudio = (id: string, audioUrl: string) => {
+    setCart((prevCart) =>
+      prevCart.map((cartItem) =>
+        cartItem.id === id ? { ...cartItem, audioUrl } : cartItem
+      )
+    );
+  };
+
+  // Function to remove audio from a specific item
+  const removeItemAudio = (id: string) => {
+    setCart((prevCart) =>
+      prevCart.map((cartItem) =>
+        cartItem.id === id ? { ...cartItem, audioUrl: undefined } : cartItem
+      )
+    );
+  };
+
   const clearCart = () => {
     setCart([]);
   };
@@ -100,6 +120,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         updateQuantity,
         removeFromCart,
         clearCart,
+        updateItemAudio,
+        removeItemAudio,
       }}
     >
       {children}

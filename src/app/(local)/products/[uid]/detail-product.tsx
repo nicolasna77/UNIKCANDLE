@@ -17,6 +17,7 @@ import {
   Image as PrismaImage,
   Review,
 } from "@/generated/client";
+import { useState } from "react";
 
 interface ProductWithDetails extends Product {
   category: Category;
@@ -105,6 +106,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
     error: Error | null;
   };
   const { addToCart } = useCart();
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>();
 
   if (isLoading) {
     return (
@@ -151,6 +153,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       description: product.description,
       subTitle: product.subTitle,
       category: product.category,
+      audioUrl: currentAudioUrl,
       createdAt: new Date(product.createdAt),
       updatedAt: new Date(product.updatedAt),
       deletedAt: product.deletedAt ? new Date(product.deletedAt) : null,
@@ -204,7 +207,10 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             <ScentDisplay scent={product.scent} />
 
             {/* Message personnalisé */}
-            <AudioRecord />
+            <AudioRecord
+              productId={product.id}
+              onAudioChange={setCurrentAudioUrl}
+            />
 
             {/* Boutons d'action */}
             <div className="flex gap-4">

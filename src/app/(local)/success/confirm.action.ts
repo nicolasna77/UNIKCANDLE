@@ -36,6 +36,7 @@ type OrderItemMetadata = {
   scentId: string;
   quantity: number;
   price: number;
+  audioUrl?: string;
 };
 
 export const sendConfirmationEmail = async (order: Order) => {
@@ -210,6 +211,7 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
                 scentId: item.scentId,
                 quantity: item.quantity,
                 price: item.price,
+                audioUrl: item.audioUrl,
                 qrCode: {
                   create: {
                     code: JSON.stringify(qrCodeData),

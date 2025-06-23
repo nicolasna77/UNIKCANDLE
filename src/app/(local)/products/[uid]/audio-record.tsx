@@ -4,6 +4,7 @@ import {
   MicIcon,
   VoicemailIcon,
   AudioWaveformIcon as Waveform,
+  Upload,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -19,17 +20,64 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/CartContext";
 
-const AudioRecord = () => {
+interface AudioRecordProps {
+  productId: string;
+  onAudioChange?: (audioUrl: string | undefined) => void;
+}
+
+const AudioRecord = ({ productId, onAudioChange }: AudioRecordProps) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { updateItemAudio, removeItemAudio, cart } = useCart();
+
+  // Trouver l'item du panier correspondant au produit
+  const cartItem = cart.find((item) => item.id === productId);
+
+  // Initialiser l'audioUrl depuis le panier si disponible
+  useEffect(() => {
+    if (cartItem?.audioUrl) {
+      setAudioUrl(cartItem.audioUrl);
+      onAudioChange?.(cartItem.audioUrl);
+    }
+  }, [cartItem?.audioUrl, onAudioChange]);
+
+  // Fonction pour uploader l'audio vers Vercel Blob
+  const uploadAudio = async (audioBlob: Blob): Promise<string | null> => {
+    try {
+      setIsUploading(true);
+
+      const formData = new FormData();
+      formData.append("file", audioBlob, `audio-${Date.now()}.wav`);
+
+      const response = await fetch("/api/upload/audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'upload");
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error("Erreur upload audio:", error);
+      toast.error("Erreur lors de l'upload de l'audio");
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Fonction pour démarrer l'enregistrement
   const startRecording = async () => {
@@ -54,15 +102,31 @@ const AudioRecord = () => {
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/wav",
         });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        toast.success("Message enregistré avec succès !", {
-          description: "Vous pouvez maintenant l'écouter ou le supprimer",
-        });
+
+        // Upload vers Vercel Blob
+        const uploadedUrl = await uploadAudio(audioBlob);
+
+        if (uploadedUrl) {
+          setAudioUrl(uploadedUrl);
+          // Sauvegarder dans le panier
+          updateItemAudio(productId, uploadedUrl);
+          onAudioChange?.(uploadedUrl);
+          toast.success("Message enregistré et sauvegardé avec succès !", {
+            description: "Votre message sera lu à l'allumage de la bougie",
+          });
+        } else {
+          // Fallback vers URL locale si l'upload échoue
+          const localUrl = URL.createObjectURL(audioBlob);
+          setAudioUrl(localUrl);
+          onAudioChange?.(localUrl);
+          toast.success("Message enregistré avec succès !", {
+            description: "Vous pouvez maintenant l'écouter ou le supprimer",
+          });
+        }
       };
 
       mediaRecorder.start();
@@ -99,7 +163,7 @@ const AudioRecord = () => {
   // Nettoyage des ressources
   useEffect(() => {
     return () => {
-      if (audioUrl) {
+      if (audioUrl && audioUrl.startsWith("blob:")) {
         URL.revokeObjectURL(audioUrl);
       }
       if (timerRef.current) {
@@ -141,7 +205,9 @@ const AudioRecord = () => {
   // Fonction pour supprimer l'enregistrement
   const deleteRecording = () => {
     if (audioUrl) {
-      URL.revokeObjectURL(audioUrl);
+      if (audioUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(audioUrl);
+      }
       setAudioUrl(null);
       setRecordingTime(0);
       if (audioRef.current) {
@@ -149,6 +215,9 @@ const AudioRecord = () => {
         setIsPlaying(false);
         audioRef.current = null;
       }
+      // Supprimer du panier
+      removeItemAudio(productId);
+      onAudioChange?.(undefined);
       toast.success("Message supprimé");
     }
   };
@@ -177,6 +246,17 @@ const AudioRecord = () => {
               {audioUrl && (
                 <Badge variant="secondary" className="ml-2">
                   Enregistré
+                </Badge>
+              )}
+              {isUploading && (
+                <Badge variant="outline" className="ml-2">
+                  <Upload className="w-3 h-3 mr-1 animate-spin" />
+                  Upload...
+                </Badge>
+              )}
+              {audioUrl && !audioUrl.startsWith("blob:") && (
+                <Badge variant="default" className="ml-2 bg-green-500">
+                  Sauvegardé
                 </Badge>
               )}
             </CardTitle>
@@ -223,7 +303,7 @@ const AudioRecord = () => {
                   !isEnabled && "cursor-not-allowed"
                 )}
                 onClick={isRecording ? stopRecording : startRecording}
-                disabled={!isEnabled}
+                disabled={!isEnabled || isUploading}
               >
                 {/* Effet de pulsation pendant l'enregistrement */}
                 {isRecording && (
@@ -247,7 +327,7 @@ const AudioRecord = () => {
               )}
             </div>
 
-            <div className="text-center space-y-2">
+            <div className="text-center">
               <p
                 className={cn(
                   "text-sm font-medium transition-colors",
@@ -313,7 +393,7 @@ const AudioRecord = () => {
           )}
 
           {/* Instructions */}
-          <div className="text-center space-y-2 p-4 bg-muted/50 rounded-lg">
+          <div className="text-center space-y-2">
             <p className="text-xs text-muted-foreground">
               💡 <strong>Conseil :</strong> Parlez clairement et proche du
               microphone
