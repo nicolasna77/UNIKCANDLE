@@ -132,7 +132,7 @@ export function AudioPlayer({
 
   return (
     <div
-      className={`bg-card/50 rounded-lg p-4 backdrop-blur-sm border ${className}`}
+      className={`bg-card/50 rounded-lg p-4 backdrop-blur-sm border border-border ${className}`}
     >
       <audio ref={audioRef} src={audioUrl} loop={loop} preload="metadata" />
 

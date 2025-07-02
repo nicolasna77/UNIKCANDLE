@@ -18,7 +18,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative isolate min-h-screen bg-secondary flex items-center justify-center overflow-hidden ">
+    <section className="relative isolate min-h-screen  flex items-center justify-center overflow-hidden ">
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"

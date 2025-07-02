@@ -75,7 +75,7 @@ export default function ARPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background">
+    <div className="relative min-h-screen flex items-center justify-center ">
       {/* Fond animé */}
       <div
         aria-hidden="true"
@@ -110,7 +110,7 @@ export default function ARPage() {
               </p>
 
               {/* Information sur le parfum */}
-              <div className="mt-4 p-4 rounded-lg bg-card border">
+              <div className="mt-4 p-4 rounded-lg bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground">
                   Parfum : {data.scent.name}
                 </h2>
@@ -189,7 +189,7 @@ export default function ARPage() {
 
             {/* Message si pas d'audio */}
             {!data.audioUrl && (
-              <div className="bg-muted border rounded-lg p-4">
+              <div className="bg-muted border border-border rounded-lg p-4">
                 <div className="flex items-center gap-3">
                   <Mic className="w-5 h-5 text-muted-foreground" />
                   <div>

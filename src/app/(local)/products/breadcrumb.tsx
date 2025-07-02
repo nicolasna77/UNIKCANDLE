@@ -27,7 +27,7 @@ const Breadscrumb = () => {
   const getBreadcrumbName = (path: string, index: number) => {
     const breadcrumbNames: { [key: string]: string } = {
       "": "Accueil",
-      products: "Nos Produits",
+      products: "Produits",
     };
 
     // Si nous sommes sur la page d'un produit spécifique et avons récupéré son nom

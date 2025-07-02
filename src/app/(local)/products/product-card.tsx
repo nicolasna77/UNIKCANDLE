@@ -60,7 +60,7 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
   };
 
   return (
-    <Card className="overflow-hidden justify-between pt-0">
+    <Card className="overflow-hidden border-border justify-between pt-0">
       <Link href={`/products/${product.id}`}>
         <div className="aspect-square relative">
           {product.images[0] && (

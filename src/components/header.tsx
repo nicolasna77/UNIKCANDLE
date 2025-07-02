@@ -7,6 +7,7 @@ import HeaderMenu from "./header-menu";
 import { buttonVariants } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import CartButton from "./cart-button";
+import NoSSR from "./no-ssr";
 import {
   Sheet,
   SheetContent,
@@ -17,7 +18,8 @@ import {
 
 const links = [
   { href: "/", label: "Accueil" },
-  { href: "/products", label: "Nos produits" },
+  { href: "/products", label: "Produits" },
+  { href: "/contact", label: "Contact" },
   { href: "/about", label: "À Propos" },
 ];
 
@@ -39,7 +41,9 @@ export default function Header() {
           <HeaderMenu links={links} />
         </div>
         <div className="flex items-center gap-5">
-          <CartButton />
+          <NoSSR>
+            <CartButton />
+          </NoSSR>
           <AuthButton />
 
           <Sheet>

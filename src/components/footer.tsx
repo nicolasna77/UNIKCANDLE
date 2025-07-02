@@ -8,7 +8,7 @@ const lora = Lora({
 
 const Footer = () => {
   return (
-    <footer className="relative bg-secondary pt-8 pb-6">
+    <footer className="relative bg-primary-background pt-8 pb-6">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap text-left lg:text-left">
           <div className="w-full lg:w-6/12 px-4">
@@ -25,20 +25,9 @@ const Footer = () => {
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
               >
-                <SocialIcon url="www.x.com" />
-              </button>
-              <button
-                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button"
-              >
                 <SocialIcon url="https://www.facebook.com/share/19YoQmV9km/?mibextid=wwXIfr" />
               </button>
-              <button
-                className="  font-normal items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button"
-              >
-                <SocialIcon url="www.dribbble.com" />
-              </button>
+
               <button
                 className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
                 type="button"
@@ -58,6 +47,30 @@ const Footer = () => {
             <div className="flex flex-wrap items-top mb-6">
               <div className="w-full lg:w-4/12 px-4 ml-auto">
                 <ul className="list-unstyled">
+                  <li>
+                    <Link
+                      className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
+                      href="/"
+                    >
+                      Accueil
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
+                      href="/products"
+                    >
+                      Produits
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
+                      href="/contact"
+                    >
+                      Nous Contacter
+                    </Link>
+                  </li>
                   <li>
                     <Link
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
