@@ -10,6 +10,7 @@ import CartButton from "./cart-button";
 import NoSSR from "./no-ssr";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -61,13 +62,18 @@ export default function Header() {
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-6">
                 {links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={buttonVariants({ variant: "link", size: "lg" })}
-                  >
-                    {link.label}
-                  </Link>
+                  <SheetClose asChild key={link.href}>
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={buttonVariants({
+                        variant: "link",
+                        size: "lg",
+                      })}
+                    >
+                      {link.label}
+                    </Link>
+                  </SheetClose>
                 ))}
               </div>
             </SheetContent>
