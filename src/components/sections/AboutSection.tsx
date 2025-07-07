@@ -50,7 +50,7 @@ export default function AboutSection() {
   return (
     <section
       ref={sectionRef}
-      className="py-24 px-4 bg-secondary/30 relative overflow-hidden"
+      className="py-24 px-4 bg-background relative overflow-hidden"
     >
       {/* Décorations */}
       <motion.div
