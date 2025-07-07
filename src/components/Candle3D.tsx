@@ -137,7 +137,7 @@ export function Candle3D() {
     // Chargement du modèle 3D
     const loader = new FBXLoader();
     loader.load(
-      "/models/candel.fbx",
+      "https://oa5vracaap84kwhj.public.blob.vercel-storage.com/models3d/CANDEL-NI1PUaNuMTobHngVJTjNhmIleKyRqN.fbx",
       (object: THREE.Object3D) => {
         const candle = object;
         scene.add(candle);
