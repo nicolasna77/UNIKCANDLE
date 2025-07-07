@@ -18,7 +18,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative isolate min-h-screen  flex items-center justify-center overflow-hidden ">
+    <section className="relative isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -33,8 +33,8 @@ const HeroSection = () => {
       </div>
 
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
-      <div className="container mx-auto px-4 py-24 lg:py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-24 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -79,7 +79,7 @@ const HeroSection = () => {
             </motion.div>
           </motion.div>
 
-          <div className="relative aspect-square rounded-xl  ">
+          <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square rounded-xl mx-auto">
             <Candle3D />
           </div>
         </div>
