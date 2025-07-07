@@ -24,20 +24,119 @@ import {
   CreditCard,
   Truck,
   Shield,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { loadStripe } from "@stripe/stripe-js";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
+  const router = useRouter();
 
+  const [isLoading, setIsLoading] = useState(false);
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
     0
   );
+  const handleCheckout = async () => {
+    try {
+      setIsLoading(true);
 
-  // Gestion panier vide
+      // Vérifier si l'utilisateur est connecté
+      const { data: session } = await authClient.getSession();
+      console.log("Session utilisateur:", session);
+
+      if (!session) {
+        console.log(
+          "Utilisateur non connecté, redirection vers la page de connexion"
+        );
+        router.push(`/auth/signin?callbackUrl=${encodeURIComponent("/cart")}`);
+        return;
+      }
+
+      // Vérifier que le panier n'est pas vide
+      if (cart.length === 0) {
+        toast.error("Votre panier est vide");
+        return;
+      }
+
+      // Vérifier que tous les articles ont une quantité valide
+      const invalidItems = cart.filter(
+        (item) => !item.quantity || item.quantity < 1
+      );
+      if (invalidItems.length > 0) {
+        toast.error("Certains articles ont une quantité invalide");
+        return;
+      }
+
+      console.log("Contenu du panier avant envoi:", cart);
+
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cartItems: cart,
+          returnUrl: `${window.location.origin}/cart`,
+        }),
+      });
+
+      console.log("Réponse du serveur:", response.status);
+      const responseText = await response.text();
+      console.log("Contenu de la réponse:", responseText);
+
+      if (!response.ok) {
+        console.error("Erreur détaillée:", responseText);
+        throw new Error("Erreur lors de la création de la session de paiement");
+      }
+
+      const data = JSON.parse(responseText);
+      if (!data.sessionId) {
+        throw new Error("Session ID manquant");
+      }
+
+      // Rediriger directement vers Stripe
+      const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      console.log("Clé Stripe:", stripeKey ? "Présente" : "Manquante");
+
+      const stripe = await loadStripe(stripeKey || "");
+      if (!stripe) {
+        console.error("Stripe n'a pas pu être initialisé");
+        throw new Error("Stripe n'a pas pu être initialisé");
+      }
+
+      console.log("Stripe initialisé, redirection vers:", data.sessionId);
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId,
+      });
+
+      if (error) {
+        console.error("Erreur détaillée Stripe:", {
+          message: error.message,
+          type: error.type,
+          code: error.code,
+        });
+        toast.error(
+          `Erreur lors de la redirection vers le paiement: ${error.message}`
+        );
+      } else {
+        console.log("Redirection Stripe réussie");
+      }
+    } catch (error) {
+      console.error("Erreur lors du paiement:", error);
+      toast.error("Une erreur est survenue lors du paiement");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (cart.length === 0) {
     return (
       <section className="py-8 antialiased md:py-16">
@@ -220,8 +319,16 @@ export default function CartPage() {
               </div>
 
               {/* Bouton paiement */}
-              <Button className="w-full">
-                <CreditCard className="mr-2 h-4 w-4" />
+              <Button
+                className="w-full"
+                onClick={handleCheckout}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <CreditCard className="mr-2 h-4 w-4" />
+                )}
                 Procéder au paiement
               </Button>
 
