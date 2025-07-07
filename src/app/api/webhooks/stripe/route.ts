@@ -15,6 +15,17 @@ interface CartItem {
   audioUrl?: string;
 }
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, stripe-signature",
+    },
+  });
+}
+
 export async function POST(req: Request) {
   console.log("=== Webhook Stripe appelé ===");
   console.log("Webhook secret configuré:", webhookSecret ? "Oui" : "Non");

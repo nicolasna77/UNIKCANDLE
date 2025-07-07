@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     const lineItems = cartItemsWithCodes.map(
       (item: CheckoutItem & { qrCodeId: string }) => {
         // Convertir l'URL de l'image en URL absolue si ce n'est pas déjà le cas
-        const imageUrl = item.imageUrl.startsWith("http")
+        const imageUrl = item.imageUrl.startsWith("https")
           ? item.imageUrl
           : `${process.env.NEXT_PUBLIC_APP_URL}${item.imageUrl}`;
 
