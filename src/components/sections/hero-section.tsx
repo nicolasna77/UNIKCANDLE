@@ -34,7 +34,7 @@ const HeroSection = () => {
 
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
       <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-24 lg:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 max-w-7xl mx-auto gap-8 lg:gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -45,21 +45,19 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6 }}
-              className={`${lora.className} text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground tracking-tight`}
+              className={`${lora.className}  scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-4`}
             >
-              <span className="text-primary">UNIKCANDLE</span>
+              <span className="">UNIKCANDLE</span>
             </motion.h1>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="space-y-4"
             >
-              <p className="text-lg sm:text-xl text-muted-foreground">
+              <p className="text-xl text-muted-foreground mb-8">
                 Bougies personnalisées et écologiques
-              </p>
-              <p className="text-lg text-muted-foreground/80">
+                <br />
                 Une bougie, un message, une émotion.
               </p>
             </motion.div>
@@ -75,6 +73,12 @@ const HeroSection = () => {
                 href="/products"
               >
                 Découvrez nos produits
+              </Link>
+              <Link
+                className={buttonVariants({ variant: "secondary", size: "lg" })}
+                href="/about"
+              >
+                Qui sommes-nous ?
               </Link>
             </motion.div>
           </motion.div>
