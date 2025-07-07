@@ -33,6 +33,7 @@ export default function Header() {
             src="/logo/logo-primary-color.png"
             alt="logo"
             width={40}
+            className="object-contain "
             height={40}
             quality={100}
             priority

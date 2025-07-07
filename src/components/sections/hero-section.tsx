@@ -56,8 +56,8 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="space-y-4"
             >
-              <p className="text-xl sm:text-2xl text-muted-foreground">
-                Découvrez la première bougie qui parle avec votre voix.
+              <p className="text-xl sm:text-xl text-muted-foreground">
+                Bougies personnalisées et écologiques
               </p>
               <p className="text-lg text-muted-foreground/80">
                 Une bougie, un message, une émotion.
