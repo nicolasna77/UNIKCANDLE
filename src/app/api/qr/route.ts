@@ -20,8 +20,12 @@ export async function POST(request: Request) {
     const orderItem = await prisma.orderItem.findUnique({
       where: { id: orderItemId },
       include: {
-        product: true,
         scent: true,
+        product: {
+          include: {
+            category: true,
+          },
+        },
       },
     });
 
@@ -72,7 +76,7 @@ export async function GET(request: Request) {
       include: {
         orderItem: {
           include: {
-            product: true,
+            product: { include: { category: true } },
             scent: true,
           },
         },

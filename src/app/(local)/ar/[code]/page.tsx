@@ -10,12 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Mic, Volume2, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
 
 interface QRData {
   product: {
     name: string;
     description: string;
     model3dUrl: string;
+    category: {
+      icon: string;
+    };
   };
   scent: {
     name: string;
@@ -95,8 +99,9 @@ export default function ARPage() {
       <div className=" flex z-10 container mx-auto px-4 py-8 ">
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Côté gauche : Bougie 3D */}
-          <div>
+          <div className="relative">
             <Candle3D />
+            <ConfettiEmojiAuto icon={data?.product.category.icon || ""} />
           </div>
 
           {/* Côté droit : Animation et audio */}
