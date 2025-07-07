@@ -7,6 +7,9 @@ export async function GET() {
       orderBy: {
         name: "asc",
       },
+      include: {
+        products: true,
+      },
     });
 
     return NextResponse.json(categories);
