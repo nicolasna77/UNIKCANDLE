@@ -185,9 +185,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             {/* En-tête produit */}
             <div className="space-y-4">
               <div className="flex md:flex-row flex-col justify-between md:items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {product.name}
-                </h1>
+                <h1 className="text-3xl font-bold ">{product.name}</h1>
                 <PriceDisplay price={product.price} />
               </div>
 
@@ -224,10 +222,8 @@ const DetailProduct = ({ productId }: { productId: string }) => {
 
         {/* Description et avis */}
         <div className="mt-16 space-y-8">
-          <div className="bg-card rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Description
-            </h2>
+          <div className="bg-card rounded-lg py-6">
+            <h2 className="text-2xl font-bold mb-4">Description</h2>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
               {product.description}
             </p>

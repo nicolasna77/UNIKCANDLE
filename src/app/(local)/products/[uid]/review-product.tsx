@@ -149,17 +149,17 @@ const ReviewProduct = ({ product }: { product: Product }) => {
 
   return (
     <div id="reviews" className="mt-16">
-      <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+      <h2 className="text-2xl font-bold tracking-tight text-foreground">
         Avis clients
       </h2>
       <div className="mt-8">
         {session?.user ? (
-          <div className="mb-8 p-6 border border-gray-200 rounded-lg dark:border-gray-700">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">
+          <div className="mb-8 p-6 border border-border rounded-lg bg-card">
+            <h3 className="text-lg font-semibold mb-4 text-card-foreground">
               Donnez votre avis
             </h3>
             <div className="flex items-center mb-4">
-              <p className="mr-2 dark:text-white">Note :</p>
+              <p className="mr-2 text-card-foreground">Note :</p>
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -169,15 +169,15 @@ const ReviewProduct = ({ product }: { product: Product }) => {
                     className="p-1"
                   >
                     {star <= rating ? (
-                      <Star className="h-6 w-6 text-yellow-400 fill-current" />
+                      <Star className="h-6 w-6 text-primary fill-current" />
                     ) : (
-                      <Star className="h-6 w-6 text-yellow-400" />
+                      <Star className="h-6 w-6 text-muted-foreground" />
                     )}
                   </button>
                 ))}
               </div>
               {rating > 0 && (
-                <span className="ml-2 text-sm text-green-600">
+                <span className="ml-2 text-sm text-primary">
                   {rating} étoile{rating > 1 ? "s" : ""}
                 </span>
               )}
@@ -198,8 +198,8 @@ const ReviewProduct = ({ product }: { product: Product }) => {
             </Button>
           </div>
         ) : (
-          <div className="mb-8 p-6 border border-gray-200 rounded-lg text-center dark:border-gray-700">
-            <p className="mb-4 dark:text-white">
+          <div className="mb-8 p-6 border border-border rounded-lg text-center bg-card">
+            <p className="mb-4 text-card-foreground">
               Connectez-vous pour laisser un avis
             </p>
             <Link
@@ -224,8 +224,8 @@ const ReviewProduct = ({ product }: { product: Product }) => {
             {renderPagination()}
           </>
         ) : (
-          <div className="p-6 border border-gray-200 rounded-lg text-center dark:border-gray-700">
-            <p className="dark:text-white">
+          <div className="p-6 border border-border rounded-lg text-center bg-card">
+            <p className="text-card-foreground">
               Aucun avis pour le moment. Soyez le premier à donner votre avis !
             </p>
           </div>

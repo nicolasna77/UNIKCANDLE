@@ -3,7 +3,6 @@
 import type React from "react";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface Step {
@@ -129,15 +128,15 @@ export default function AboutSection() {
           </div>
 
           {/* Image centrale */}
-          <div className="w-full max-w-lg mx-auto">
-            <div className="relative aspect-video overflow-hidden rounded-2xl shadow-xl">
-              <Image
-                src="/asset/about.webp"
-                alt="Atelier UNIKCANDLE"
-                fill
-                className="object-cover object-center"
-                quality={100}
-                priority
+          <div className="w-full max-w-lg">
+            <div className="relative  overflow-hidden rounded-2xl ">
+              <video
+                src="/asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
+                autoPlay
+                loop
+                muted
+                width={600}
+                height={800}
               />
             </div>
           </div>
