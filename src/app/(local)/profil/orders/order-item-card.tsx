@@ -7,7 +7,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   FileText,
   RefreshCw,
@@ -15,7 +15,6 @@ import {
   Calendar,
   MapPin,
   Package,
-  QrCode,
 } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
@@ -121,7 +120,7 @@ const OrderItemCard = ({
                     <div className="mt-2 flex items-center gap-2">
                       <Link
                         href={`/ar/${item.qrCode.code}`}
-                        className="text-sm text-blue-600 hover:underline"
+                        className={buttonVariants({ variant: "link" })}
                         prefetch
                       >
                         Voir en réalité augmentée
@@ -192,16 +191,6 @@ const OrderItemCard = ({
               <XCircle className="mr-2 h-4 w-4" />
               Annuler la commande
             </Button>
-          )}
-          {order.items.some((item) => item.qrCode) && (
-            <Link
-              href={`/ar/${order.items.find((item) => item.qrCode)?.qrCode?.code}`}
-            >
-              <Button variant="outline" size="sm">
-                <QrCode className="mr-2 h-4 w-4" />
-                Voir en réalité augmentée
-              </Button>
-            </Link>
           )}
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
