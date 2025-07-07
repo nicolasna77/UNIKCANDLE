@@ -62,7 +62,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen py-12">
-      <Card className="max-w-md w-full">
+      <Card className="max-w-md border-border w-full">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">
             Mot de passe oublié
@@ -105,7 +105,10 @@ export default function ForgotPassword() {
               </Button>
 
               <div className="text-center text-sm">
-                <Link href="/signin" className="text-primary hover:underline">
+                <Link
+                  href="/auth/signin"
+                  className="text-primary hover:underline"
+                >
                   Retour à la connexion
                 </Link>
               </div>

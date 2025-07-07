@@ -49,7 +49,7 @@ const AuthButton = () => {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuContent className="w-56 border-border" align="end">
         <DropdownMenuLabel className="flex flex-col space-y-1">
           <div className="flex items-center gap-2">
             <User className="size-4" />

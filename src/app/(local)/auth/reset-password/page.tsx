@@ -84,7 +84,7 @@ export default function ResetPassword() {
   if (!token) {
     return (
       <div className="container mx-auto flex items-center justify-center min-h-screen py-12">
-        <Card className="max-w-md w-full">
+        <Card className="max-w-md w-full border-border">
           <CardHeader>
             <CardTitle className="text-lg md:text-xl">Token invalide</CardTitle>
             <CardDescription className="text-xs md:text-sm">

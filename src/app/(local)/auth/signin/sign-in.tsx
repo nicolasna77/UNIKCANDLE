@@ -86,7 +86,7 @@ export default function SignIn() {
   }
 
   return (
-    <Card className="">
+    <Card className=" border-border">
       <CardHeader>
         <CardTitle className="text-lg text-center md:text-xl">
           Connexion

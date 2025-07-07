@@ -106,7 +106,7 @@ export default function SignUp() {
   }
 
   return (
-    <Card className="z-50 ">
+    <Card className="z-50 border-border">
       <CardHeader>
         <CardTitle className="text-lg text-center md:text-xl">
           Créer un compte
