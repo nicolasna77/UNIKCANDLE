@@ -4,6 +4,7 @@ import type React from "react";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import { Lora } from "next/font/google";
 
 interface Step {
   number: number;
@@ -36,6 +37,11 @@ const steps: Step[] = [
   },
 ];
 
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+});
+
 export default function AboutSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +70,9 @@ export default function AboutSection() {
 
       <div className="container mx-auto flex flex-col gap-y-16 relative z-10">
         <div className="text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground tracking-tight">
+          <h2
+            className={`${lora.className} text-4xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground tracking-tight`}
+          >
             Comment ça marche ?
           </h2>
           <p className="text-xl sm:text-2xl lg:text-3xl font-medium text-primary/80 max-w-2xl mx-auto">

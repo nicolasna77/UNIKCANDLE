@@ -1,17 +1,14 @@
 "use client";
 import { buttonVariants } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Flame, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
+import { Flame, MessageCircle, Sparkles } from "lucide-react";
 import { Lora } from "next/font/google";
 import HeroSection from "@/components/sections/hero-section";
 import TestimonialSection from "@/components/sections/testimonial-section";
 import NewsletterSection from "@/components/sections/newsletter";
 import Link from "next/link";
 import AboutSection from "@/components/sections/AboutSection";
-import Image from "next/image";
-import { useCategories } from "@/hooks/useCategories";
-import { Category, Product } from "@/generated/client";
+import CategoriesSection from "@/components/sections/CategoriesSection";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -19,104 +16,11 @@ const lora = Lora({
 });
 
 export default function Home() {
-  const { data: categories, isLoading, error } = useCategories();
   return (
     <main className="bg-primary-background  ">
       <HeroSection />
       {/* Section : Catégories de produits */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-12">
-            <h2
-              className={`${lora.className} text-3xl lg:text-4xl font-bold text-foreground mb-4`}
-            >
-              Découvrez nos collections
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Explorez nos différentes gammes de bougies personnalisées
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 items-center lg:grid-cols-3 gap-6">
-            {isLoading ? (
-              // Skeleton loading pour 3 cartes
-              Array.from({ length: 3 }).map((_, index) => (
-                <Card
-                  key={index}
-                  className="relative overflow-hidden border-0 shadow-lg"
-                >
-                  <div className="relative aspect-[4/3] bg-muted animate-pulse"></div>
-                  <div className="absolute inset-0 flex flex-col justify-end p-6">
-                    <div className="h-6 bg-muted rounded mb-2 animate-pulse"></div>
-                    <div className="h-4 bg-muted rounded mb-4 animate-pulse"></div>
-                    <div className="flex items-center justify-between">
-                      <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
-                      <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            ) : error ? (
-              <div className="col-span-full text-center py-8">
-                <p className="text-muted-foreground">
-                  Erreur lors du chargement des catégories
-                </p>
-              </div>
-            ) : (
-              categories?.map(
-                (category: Category & { products: Product[] }) => (
-                  <Card
-                    key={category.id}
-                    className="group relative p-0 overflow-hidden border border-border  shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    <Link
-                      href={`/products?category=${category.id}`}
-                      className="w-full h-full"
-                    >
-                      <div className="relative aspect-[4/3] bg-muted">
-                        <Image
-                          src={"/asset/about.webp"}
-                          alt={category.name}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-background/0"></div>
-                      </div>
-                      <div className="absolute inset-0 flex flex-col justify-end p-6 z-10">
-                        <h3 className="text-xl font-semibold tracking-tight mb-2 text-foreground">
-                          {category.name} {category.icon}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {category.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            {category.products.length} produits
-                          </span>
-                          <div className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center text-sm text-foreground">
-                            Découvrir
-                            <ArrowRight className="h-4 w-4 ml-2" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </Link>
-                  </Card>
-                )
-              )
-            )}
-          </div>
-
-          <div className="text-center mt-12">
-            <Button size="lg" asChild>
-              <Link href="/products">
-                Voir toutes nos bougies
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <CategoriesSection />
       {/* Section 1 : Le Concept */}
       <section className="py-24 lg:py-32  relative">
         <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
