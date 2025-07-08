@@ -66,7 +66,7 @@ const CategoriesSection = () => {
                     className="relative aspect-[4/3] bg-muted"
                     style={{
                       backgroundColor: category.color,
-                      opacity: 0.5,
+                      opacity: 0.3,
                     }}
                   ></div>
                   <div

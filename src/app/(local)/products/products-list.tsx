@@ -205,48 +205,63 @@ const ProductsList = () => {
             )}
 
             {/* Pages autour de la page courante */}
-            {Array.from(
-              { length: Math.min(5, data.pagination.pages) },
-              (_, i) => {
-                const pageNum = Math.max(
-                  1,
-                  Math.min(data.pagination.pages, currentPage - 2 + i)
-                );
+            {(() => {
+              const totalPages = data.pagination.pages;
+              const pages = [];
+              let startPage = Math.max(1, currentPage - 2);
+              let endPage = Math.min(totalPages, currentPage + 2);
 
-                // Éviter les doublons
-                if (i > 0 && pageNum <= Math.max(1, currentPage - 2 + i - 1)) {
-                  return null;
+              // Ajuster pour toujours avoir 5 pages si possible
+              if (endPage - startPage < 4) {
+                if (startPage === 1) {
+                  endPage = Math.min(totalPages, startPage + 4);
+                } else if (endPage === totalPages) {
+                  startPage = Math.max(1, endPage - 4);
+                }
+              }
+
+              for (let i = startPage; i <= endPage; i++) {
+                // Éviter les doublons avec la première et dernière page
+                if (
+                  (currentPage > 3 && i === 1) ||
+                  (currentPage < totalPages - 2 && i === totalPages)
+                ) {
+                  continue;
                 }
 
-                return (
-                  <PaginationItem key={pageNum}>
+                pages.push(
+                  <PaginationItem key={i}>
                     <PaginationLink
-                      onClick={() => handlePageChange(pageNum)}
-                      isActive={pageNum === currentPage}
+                      onClick={() => handlePageChange(i)}
+                      isActive={i === currentPage}
                       className="cursor-pointer"
                     >
-                      {pageNum}
+                      {i}
                     </PaginationLink>
                   </PaginationItem>
                 );
               }
-            )}
+
+              return pages;
+            })()}
 
             {/* Dernière page */}
-            {currentPage < data.pagination.pages - 2 && (
-              <>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink
-                    onClick={() => handlePageChange(data.pagination.pages)}
-                  >
-                    {data.pagination.pages}
-                  </PaginationLink>
-                </PaginationItem>
-              </>
-            )}
+            {currentPage < data.pagination.pages - 2 &&
+              data.pagination.pages > 5 && (
+                <>
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink
+                      onClick={() => handlePageChange(data.pagination.pages)}
+                      className="cursor-pointer"
+                    >
+                      {data.pagination.pages}
+                    </PaginationLink>
+                  </PaginationItem>
+                </>
+              )}
 
             <PaginationItem>
               {currentPage < data.pagination.pages && (
