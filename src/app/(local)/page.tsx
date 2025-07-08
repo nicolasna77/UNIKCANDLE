@@ -69,7 +69,10 @@ export default function Home() {
                     key={category.id}
                     className="group relative p-0 overflow-hidden border border-border  shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    <Link href={`/products?category=${category.id}`}>
+                    <Link
+                      href={`/products?category=${category.id}`}
+                      className="w-full h-full"
+                    >
                       <div className="relative aspect-[4/3] bg-muted">
                         <Image
                           src={"/asset/about.webp"}
@@ -90,17 +93,10 @@ export default function Home() {
                           <span className="text-sm text-muted-foreground">
                             {category.products.length} produits
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 relative z-10"
-                            asChild
-                          >
-                            <Link href={`/products?category=${category.id}`}>
-                              Découvrir
-                              <ArrowRight className="h-4 w-4 ml-2" />
-                            </Link>
-                          </Button>
+                          <div className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center text-sm text-foreground">
+                            Découvrir
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </div>
                         </div>
                       </div>
                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
