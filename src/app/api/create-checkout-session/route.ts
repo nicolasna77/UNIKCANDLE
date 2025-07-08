@@ -18,6 +18,13 @@ interface CheckoutItem {
 
 export async function POST(req: Request) {
   console.log("=== Création de session Stripe ===");
+  console.log("Variables d'environnement Stripe:");
+  console.log(
+    "- STRIPE_SECRET_KEY:",
+    process.env.STRIPE_SECRET_KEY ? "Présente" : "Manquante"
+  );
+  console.log("- NEXT_PUBLIC_APP_URL:", process.env.NEXT_PUBLIC_APP_URL);
+
   try {
     const session = await getUser();
     console.log("Session utilisateur:", session);

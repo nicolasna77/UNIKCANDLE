@@ -98,17 +98,35 @@ export default function CartPage() {
       }
 
       const data = JSON.parse(responseText);
+      console.log("Données reçues du serveur:", data);
+
       if (!data.sessionId) {
+        console.error("Session ID manquant dans la réponse:", data);
         throw new Error("Session ID manquant");
       }
+
+      console.log("Session ID reçu:", data.sessionId);
+      console.log("Type de sessionId:", typeof data.sessionId);
+      console.log("Longueur sessionId:", data.sessionId.length);
 
       // Rediriger directement vers Stripe
       const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
       console.log("Clé Stripe:", stripeKey ? "Présente" : "Manquante");
+      console.log(
+        "Clé Stripe (première partie):",
+        stripeKey ? stripeKey.substring(0, 10) + "..." : "Aucune"
+      );
 
-      const stripe = await loadStripe(stripeKey || "");
+      if (!stripeKey) {
+        throw new Error("Clé publique Stripe manquante");
+      }
+
+      const stripe = await loadStripe(stripeKey);
       if (!stripe) {
-        console.error("Stripe n'a pas pu être initialisé");
+        console.error(
+          "Stripe n'a pas pu être initialisé avec la clé:",
+          stripeKey.substring(0, 10) + "..."
+        );
         throw new Error("Stripe n'a pas pu être initialisé");
       }
 
@@ -118,14 +136,13 @@ export default function CartPage() {
       });
 
       if (error) {
-        console.error("Erreur détaillée Stripe:", {
-          message: error.message,
-          type: error.type,
-          code: error.code,
-        });
+        console.error("Erreur détaillée Stripe:", error);
+        const errorMessage =
+          error.message || "Erreur inconnue lors de la redirection";
         toast.error(
-          `Erreur lors de la redirection vers le paiement: ${error.message}`
+          `Erreur lors de la redirection vers le paiement: ${errorMessage}`
         );
+        throw new Error(errorMessage);
       } else {
         console.log("Redirection Stripe réussie");
       }
