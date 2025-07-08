@@ -18,24 +18,12 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative bg-background isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
+    <section className="relative bg-background py-16 isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
       {/* Arrière-plan sophistiqué */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background/50 -z-20" />
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
 
       {/* Éléments décoratifs flottants */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={isLoaded ? { opacity: 0.1, scale: 1 } : {}}
-        transition={{ duration: 2, delay: 0.5 }}
-        className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl -z-10"
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={isLoaded ? { opacity: 0.05, scale: 1 } : {}}
-        transition={{ duration: 2.5, delay: 1 }}
-        className="absolute bottom-32 right-20 w-48 h-48 rounded-full bg-primary/5 blur-3xl -z-10"
-      />
 
       <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-24 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 max-w-7xl mx-auto gap-8 lg:gap-12 items-center">
@@ -60,7 +48,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className={`${lora.className} scroll-m-20 text-5xl lg:text-7xl font-bold tracking-tight mb-6 relative`}
+              className={`${lora.className} scroll-m-20 text-5xl  font-bold tracking-tight mb-6 relative`}
             >
               <span className=" ">UNIKCANDLE</span>
               <motion.div
@@ -163,31 +151,6 @@ const HeroSection = () => {
             </div>
 
             {/* Particules flottantes */}
-            <motion.div
-              animate={{
-                y: [-10, 10, -10],
-                opacity: [0.3, 0.7, 0.3],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute -top-4 -right-4 w-2 h-2 bg-primary rounded-full"
-            />
-            <motion.div
-              animate={{
-                y: [10, -10, 10],
-                opacity: [0.5, 0.9, 0.5],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-              className="absolute -bottom-4 -left-4 w-3 h-3 bg-primary/70 rounded-full"
-            />
           </motion.div>
         </div>
       </div>
