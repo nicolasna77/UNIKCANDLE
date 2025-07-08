@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${returnUrl}`,
+      cancel_url: `${req.headers.get("origin")}/cart?cancelled=true`,
       client_reference_id: session?.id || "guest",
       shipping_address_collection: {
         allowed_countries: ["FR"],

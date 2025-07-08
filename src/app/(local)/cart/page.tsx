@@ -30,16 +30,44 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Vérifier si l'utilisateur revient après annulation
+  useEffect(() => {
+    if (searchParams.get("cancelled") === "true") {
+      toast.info("Paiement annulé. Vous pouvez continuer vos achats.");
+      // Nettoyer l'URL
+      router.replace("/cart");
+    }
+  }, [searchParams, router]);
+
+  // Gérer le retour de l'utilisateur depuis Stripe
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && isLoading) {
+        // L'utilisateur est revenu sur la page, arrêter le loading
+        setIsLoading(false);
+        console.log("Utilisateur revenu sur la page, arrêt du loading");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isLoading]);
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
     0
@@ -47,6 +75,15 @@ export default function CartPage() {
   const handleCheckout = async () => {
     try {
       setIsLoading(true);
+
+      // Timeout de sécurité pour réinitialiser le loading après 5 minutes
+      timeoutRef.current = setTimeout(
+        () => {
+          setIsLoading(false);
+          console.log("Timeout atteint, réinitialisation du loading");
+        },
+        5 * 60 * 1000
+      ); // 5 minutes
 
       // Vérifier si l'utilisateur est connecté
       const { data: session } = await authClient.getSession();
@@ -131,25 +168,55 @@ export default function CartPage() {
       }
 
       console.log("Stripe initialisé, redirection vers:", data.sessionId);
-      const { error } = await stripe.redirectToCheckout({
+
+      // Validation du sessionId
+      if (
+        !data.sessionId.startsWith("cs_test_") &&
+        !data.sessionId.startsWith("cs_live_")
+      ) {
+        throw new Error("Session ID invalide - format incorrect");
+      }
+
+      console.log("Début de la redirection Stripe...");
+      const result = await stripe.redirectToCheckout({
         sessionId: data.sessionId,
       });
 
-      if (error) {
-        console.error("Erreur détaillée Stripe:", error);
+      console.log("Résultat de redirectToCheckout:", result);
+
+      if (result.error) {
+        console.error("Erreur détaillée Stripe:", {
+          error: result.error,
+          message: result.error.message,
+          type: result.error.type,
+          code: result.error.code,
+          isEmptyObject: Object.keys(result.error).length === 0,
+        });
+
         const errorMessage =
-          error.message || "Erreur inconnue lors de la redirection";
+          result.error.message ||
+          `Erreur Stripe (${result.error.type || "unknown"})` ||
+          "Erreur inconnue lors de la redirection";
+
         toast.error(
           `Erreur lors de la redirection vers le paiement: ${errorMessage}`
         );
         throw new Error(errorMessage);
       } else {
-        console.log("Redirection Stripe réussie");
+        console.log(
+          "Redirection Stripe réussie - cette ligne ne devrait pas s'afficher"
+        );
+        // Note: Cette ligne ne devrait jamais s'exécuter car redirectToCheckout()
+        // redirige la page vers Stripe
       }
     } catch (error) {
       console.error("Erreur lors du paiement:", error);
       toast.error("Une erreur est survenue lors du paiement");
     } finally {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setIsLoading(false);
     }
   };
@@ -346,8 +413,17 @@ export default function CartPage() {
                 ) : (
                   <CreditCard className="mr-2 h-4 w-4" />
                 )}
-                Procéder au paiement
+                {isLoading
+                  ? "Redirection vers Stripe..."
+                  : "Procéder au paiement"}
               </Button>
+
+              {isLoading && (
+                <p className="text-center text-sm text-muted-foreground mt-2">
+                  Si la page Stripe ne s&apos;ouvre pas, vérifiez que les
+                  pop-ups ne sont pas bloqués.
+                </p>
+              )}
 
               {/* Logos de paiement */}
               <div className="flex items-center justify-center gap-4 mt-4">

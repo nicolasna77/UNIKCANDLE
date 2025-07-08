@@ -64,7 +64,27 @@ export async function POST(req: Request) {
         "=== Traitement de l'événement checkout.session.completed ==="
       );
       const session = event.data.object as Stripe.Checkout.Session & {
-        shipping_details: {
+        shipping_details?: {
+          address: {
+            line1: string;
+            city: string;
+            state: string;
+            postal_code: string;
+            country: string;
+          };
+        };
+        collected_information?: {
+          shipping_details?: {
+            address: {
+              line1: string;
+              city: string;
+              state: string;
+              postal_code: string;
+              country: string;
+            };
+          };
+        };
+        customer_details?: {
           address: {
             line1: string;
             city: string;
@@ -146,11 +166,36 @@ export async function POST(req: Request) {
             },
             shippingAddress: {
               create: {
-                street: session.shipping_details?.address?.line1 || "",
-                city: session.shipping_details?.address?.city || "",
-                state: session.shipping_details?.address?.state || "",
-                zipCode: session.shipping_details?.address?.postal_code || "",
-                country: session.shipping_details?.address?.country || "",
+                street:
+                  session.shipping_details?.address?.line1 ||
+                  session.collected_information?.shipping_details?.address
+                    ?.line1 ||
+                  session.customer_details?.address?.line1 ||
+                  "",
+                city:
+                  session.shipping_details?.address?.city ||
+                  session.collected_information?.shipping_details?.address
+                    ?.city ||
+                  session.customer_details?.address?.city ||
+                  "",
+                state:
+                  session.shipping_details?.address?.state ||
+                  session.collected_information?.shipping_details?.address
+                    ?.state ||
+                  session.customer_details?.address?.state ||
+                  "",
+                zipCode:
+                  session.shipping_details?.address?.postal_code ||
+                  session.collected_information?.shipping_details?.address
+                    ?.postal_code ||
+                  session.customer_details?.address?.postal_code ||
+                  "",
+                country:
+                  session.shipping_details?.address?.country ||
+                  session.collected_information?.shipping_details?.address
+                    ?.country ||
+                  session.customer_details?.address?.country ||
+                  "",
               },
             },
           },

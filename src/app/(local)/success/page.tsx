@@ -90,13 +90,13 @@ const SuccessPage = () => {
   }, [clearCart]);
 
   return (
-    <section className="bg-white min-h-screen flex items-center justify-center py-8 antialiased dark:bg-gray-900 md:py-16">
+    <section className="bg-white min-h-screen flex items-center justify-center py-8 antialiased md:py-16">
       <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
         <div className="mx-auto max-w-3xl">
-          <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-            <div className="mb-4 rounded-full bg-green-100 p-4 dark:bg-green-900">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-8 text-center ">
+            <div className="mb-4 rounded-full bg-green-100 p-4 ">
               <svg
-                className="h-8 w-8 text-green-500 dark:text-green-400"
+                className="h-8 w-8 text-green-500 "
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -109,17 +109,17 @@ const SuccessPage = () => {
                 />
               </svg>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 ">
               Commande confirmée !
             </h3>
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
+            <p className="mb-4 text-gray-500 ">
               Merci pour votre achat. Nous vous enverrons un email de
               confirmation avec les détails de votre commande.
             </p>
 
             {/* Debug: Affichage des détails de la commande */}
             {process.env.NODE_ENV === "development" && (
-              <div className="w-full mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-left">
+              <div className="w-full mt-4 p-4 bg-gray-100  rounded-lg text-left">
                 <h4 className="font-semibold mb-2">
                   Debug - Détails de la commande:
                 </h4>
