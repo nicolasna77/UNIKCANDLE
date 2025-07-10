@@ -76,6 +76,17 @@ export default function CartPage() {
     try {
       setIsLoading(true);
 
+      // Vérifier les variables d'environnement Stripe
+      const stripePublishableKey =
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      if (!stripePublishableKey) {
+        toast.error(
+          "Configuration Stripe manquante. Veuillez contacter le support."
+        );
+        console.error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY manquante");
+        return;
+      }
+
       // Timeout de sécurité pour réinitialiser le loading après 5 minutes
       timeoutRef.current = setTimeout(
         () => {
@@ -131,7 +142,40 @@ export default function CartPage() {
 
       if (!response.ok) {
         console.error("Erreur détaillée:", responseText);
-        throw new Error("Erreur lors de la création de la session de paiement");
+        let errorMessage =
+          "Erreur lors de la création de la session de paiement";
+
+        // Gestion d'erreurs spécifiques selon le statut
+        switch (response.status) {
+          case 400:
+            errorMessage =
+              "Données du panier invalides. Veuillez vérifier vos articles.";
+            break;
+          case 401:
+            errorMessage =
+              "Vous devez être connecté pour procéder au paiement.";
+            break;
+          case 500:
+            errorMessage =
+              "Erreur du serveur. Veuillez réessayer dans quelques instants.";
+            break;
+          default:
+            // Essayer de parser le message d'erreur du serveur
+            try {
+              const errorData = JSON.parse(responseText);
+              if (errorData.message) {
+                errorMessage = errorData.message;
+              }
+            } catch {
+              // Si on ne peut pas parser, utiliser le texte brut s'il est court
+              if (responseText && responseText.length < 100) {
+                errorMessage = responseText;
+              }
+            }
+        }
+
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = JSON.parse(responseText);
@@ -147,23 +191,24 @@ export default function CartPage() {
       console.log("Longueur sessionId:", data.sessionId.length);
 
       // Rediriger directement vers Stripe
-      const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-      console.log("Clé Stripe:", stripeKey ? "Présente" : "Manquante");
+      console.log(
+        "Clé Stripe:",
+        stripePublishableKey ? "Présente" : "Manquante"
+      );
       console.log(
         "Clé Stripe (première partie):",
-        stripeKey ? stripeKey.substring(0, 10) + "..." : "Aucune"
+        stripePublishableKey
+          ? stripePublishableKey.substring(0, 10) + "..."
+          : "Aucune"
       );
 
-      if (!stripeKey) {
-        throw new Error("Clé publique Stripe manquante");
-      }
-
-      const stripe = await loadStripe(stripeKey);
+      const stripe = await loadStripe(stripePublishableKey);
       if (!stripe) {
         console.error(
           "Stripe n'a pas pu être initialisé avec la clé:",
-          stripeKey.substring(0, 10) + "..."
+          stripePublishableKey.substring(0, 10) + "..."
         );
+        toast.error("Impossible d'initialiser le système de paiement");
         throw new Error("Stripe n'a pas pu être initialisé");
       }
 
@@ -211,7 +256,21 @@ export default function CartPage() {
       }
     } catch (error) {
       console.error("Erreur lors du paiement:", error);
-      toast.error("Une erreur est survenue lors du paiement");
+
+      // Afficher un message d'erreur plus spécifique si possible
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors du paiement";
+
+      // Si l'erreur n'a pas déjà été affichée via toast.error() plus haut
+      if (
+        !errorMessage.includes("Données du panier") &&
+        !errorMessage.includes("Vous devez être connecté") &&
+        !errorMessage.includes("Erreur du serveur")
+      ) {
+        toast.error(errorMessage);
+      }
     } finally {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
