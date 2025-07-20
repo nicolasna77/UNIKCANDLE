@@ -6,8 +6,8 @@ import { useProduct } from "@/hooks/useProducts";
 import LoadingPage from "../loading";
 import { useCart } from "@/context/CartContext";
 import AudioRecord from "./audio-record";
-import Image from "next/image";
 import { toast } from "sonner";
+import ProductImageCarousel from "@/components/ProductImageCarousel";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -166,18 +166,12 @@ const DetailProduct = ({ productId }: { productId: string }) => {
     <section className="py-12">
       <div className="max-w-7xl mx-auto">
         <div className="lg:grid lg:grid-cols-2 lg:gap-12">
-          {/* Colonne de gauche - Image du produit */}
-          <div className="relative aspect-square">
-            {product.images && product.images[0] && (
-              <Image
-                src={product.images[0].url}
-                alt={product.name}
-                className="object-cover rounded-lg"
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-              />
-            )}
+          {/* Colonne de gauche - Carrousel d'images du produit */}
+          <div className="relative">
+            <ProductImageCarousel
+              images={product.images || []}
+              productName={product.name}
+            />
           </div>
 
           {/* Colonne de droite - Informations produit */}
@@ -222,11 +216,9 @@ const DetailProduct = ({ productId }: { productId: string }) => {
 
         {/* Description et avis */}
         <div className="mt-16 space-y-8">
-          <div className="bg-card rounded-lg py-6">
+          <div className=" py-6">
             <h2 className="text-2xl font-bold mb-4">Description</h2>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              {product.description}
-            </p>
+            <p className=" leading-relaxed">{product.description}</p>
           </div>
 
           <ReviewProduct product={product} />

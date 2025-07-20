@@ -2,34 +2,26 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { Pencil, Trash2 } from "lucide-react";
-import { useProducts } from "@/hooks/useProducts";
-import { useScents } from "@/hooks/useScents";
+import { Pencil, Trash2, Eye } from "lucide-react";
+import { useProducts, useDeleteProduct } from "@/hooks/useProducts";
 import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-
 import Image from "next/image";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Loading from "@/components/loading";
-import { TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import { TooltipTrigger } from "@/components/ui/tooltip";
-import { Tooltip } from "@/components/ui/tooltip";
-import { Image as ProductImage, Scent } from "@/generated/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { formatCurrency } from "@/lib/utils";
+import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
+import {
+  AdminHeader,
+  AdminHeaderActions,
+} from "@/components/admin/admin-header";
+import { Badge } from "@/components/ui/badge";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Image as ProductImage, Scent, Category } from "@/generated/client";
 import CreateProductForm from "./create-product-form";
 import EditProductForm from "./EditProductForm";
 
@@ -40,178 +32,231 @@ interface Product {
   price: number;
   subTitle: string;
   slogan: string;
-  category: {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-    color: string;
-  };
+  category: Category;
   arAnimation: string;
   scent: Scent;
   images: ProductImage[];
 }
 
 export default function ProductsPage() {
+  const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const { data: products = { products: [] }, isLoading: isProductsLoading } =
-    useProducts();
-  const { data: scents = [], isLoading: isScentsLoading } = useScents();
-  const queryClient = useQueryClient();
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/admin/products/${id}`, {
-        method: "DELETE",
+  const { data: products, isLoading, refetch } = useProducts();
+
+  const deleteProductMutation = useDeleteProduct();
+
+  const handleRefresh = () => {
+    refetch();
+  };
+
+  const handleExport = (data: Product[]) => {
+    const csvContent = [
+      ["ID", "Nom", "Prix", "Catégorie", "Parfum", "Description"],
+      ...data.map((product) => [
+        product.id,
+        product.name,
+        product.price.toString(),
+        product.category.name,
+        product.scent.name,
+        product.description.replace(/,/g, ";"),
+      ]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `produits-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+      deleteProductMutation.mutate(id, {
+        onSuccess: () => {
+          toast.success("Produit supprimé avec succès");
+          queryClient.invalidateQueries({ queryKey: ["products"] });
+        },
+        onError: (error) => {
+          toast.error("Erreur lors de la suppression");
+          console.error(error);
+        },
       });
-      if (!response.ok) throw new Error("Erreur lors de la suppression");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Produit supprimé avec succès");
-    },
-  });
+    }
+  };
 
-  if (isProductsLoading || isScentsLoading) {
-    return <Loading />;
-  }
+  const columns: ColumnDef<Product>[] = [
+    {
+      id: "image",
+      header: "Image",
+      cell: ({ row }) => {
+        const product = row.original;
+        const image = product.images?.[0];
+        return (
+          <div className="w-16 h-16 relative rounded-lg overflow-hidden">
+            {image ? (
+              <Image
+                src={image.url}
+                alt={product.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-xs">No image</span>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "name",
+      header: "Nom",
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <div className="space-y-1">
+            <div className="font-medium">{product.name}</div>
+            <div className="text-sm text-gray-500">{product.subTitle}</div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "category.name",
+      header: "Catégorie",
+      cell: ({ row }) => {
+        const category = row.original.category;
+        return (
+          <Badge
+            variant="outline"
+            style={{ backgroundColor: category.color + "20" }}
+          >
+            {category.name}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "scent.name",
+      header: "Parfum",
+      cell: ({ row }) => {
+        const scent = row.original.scent;
+        return <Badge variant="secondary">{scent.name}</Badge>;
+      },
+    },
+    {
+      accessorKey: "price",
+      header: "Prix",
+      cell: ({ row }) => {
+        return (
+          <div className="font-medium">
+            {formatCurrency(row.original.price)}
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(`/products/${product.id}`, "_blank")}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingProduct(product)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => handleDelete(product.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Gestion des produits</h1>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Créer un produit</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Créer un produit</DialogTitle>
-            </DialogHeader>
-            <CreateProductForm
-              onSuccess={() => setIsCreateDialogOpen(false)}
-              scents={scents}
+    <div className="space-y-6">
+      <AdminHeader
+        title="Gestion des produits"
+        description="Gérez votre catalogue de produits"
+        breadcrumbs={[
+          { label: "Administration", href: "/admin" },
+          { label: "Produits" },
+        ]}
+        badge={{
+          text: `${products?.products?.length || 0} produit${(products?.products?.length || 0) > 1 ? "s" : ""}`,
+          variant: "secondary",
+        }}
+        actions={
+          <AdminHeaderActions
+            onRefresh={handleRefresh}
+            onAdd={() => setIsCreateDialogOpen(true)}
+            addLabel="Créer un produit"
+            isLoading={isLoading}
+          />
+        }
+      />
+
+      <DataTableAdvanced
+        columns={columns}
+        data={products?.products || []}
+        searchPlaceholder="Rechercher par nom..."
+        onRefresh={handleRefresh}
+        onExport={handleExport}
+        isLoading={isLoading}
+        emptyMessage="Aucun produit trouvé"
+      />
+
+      {/* Dialog de création */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>Créer un produit</DialogTitle>
+          </DialogHeader>
+          <CreateProductForm onSuccess={() => setIsCreateDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog d'édition */}
+      <Dialog
+        open={!!editingProduct}
+        onOpenChange={(open) => !open && setEditingProduct(null)}
+      >
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>Modifier le produit</DialogTitle>
+          </DialogHeader>
+          {editingProduct && (
+            <EditProductForm
+              productId={editingProduct.id}
+              onSuccess={() => setEditingProduct(null)}
+              initialData={editingProduct}
             />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Image</TableHead>
-              <TableHead>Nom</TableHead>
-              <TableHead>Catégorie</TableHead>
-              <TableHead>Parfum</TableHead>
-              <TableHead>Prix</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.products?.map((product: Product) => (
-              <TableRow key={product.id}>
-                <TableCell>
-                  {product.images[0] && (
-                    <Image
-                      src={product.images[0].url}
-                      alt={product.name}
-                      className="h-20 w-20 object-cover rounded"
-                      width={80}
-                      height={80}
-                    />
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {product.subTitle}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: product.category.color }}
-                          />
-                          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
-                            {product.category.name}
-                          </span>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{product.category.description}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-                <TableCell>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: product.scent.color }}
-                          />
-                          <span>{product.scent.name}</span>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{product.scent.description}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-                <TableCell>{product.price.toFixed(2)}€</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Dialog
-                      open={editingProduct?.id === product.id}
-                      onOpenChange={(open) => !open && setEditingProduct(null)}
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingProduct(product)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent style={{ maxWidth: "1000px" }}>
-                        <DialogHeader>
-                          <DialogTitle>Modifier le produit</DialogTitle>
-                        </DialogHeader>
-
-                        <EditProductForm
-                          productId={product.id}
-                          initialData={product}
-                          onSuccess={() => setEditingProduct(null)}
-                          scents={scents}
-                        />
-                      </DialogContent>
-                    </Dialog>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteMutation.mutate(product.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

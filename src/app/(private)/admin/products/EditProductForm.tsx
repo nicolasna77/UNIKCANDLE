@@ -1,15 +1,21 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useUpdateProduct } from "@/hooks/useProducts";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Image as PrismaImage, Scent, Category } from "@/generated/client";
-import UploadFiles from "@/components/upload-files";
-import { FileMetadata } from "@/hooks/use-file-upload";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -18,72 +24,38 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { motion } from "framer-motion";
-import { Info, Loader2, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useCategories } from "@/hooks/useCategories";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Plus, Loader2 } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import { useScents } from "@/hooks/useScents";
+import UploadFiles from "@/components/upload-files";
+import { FileMetadata } from "@/hooks/use-file-upload";
 import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
 import CreateCategoryForm from "@/app/(private)/admin/categories/create-category-form";
-import { useQueryClient } from "@tanstack/react-query";
+import {
+  productUpdateSchema,
+  type ProductUpdateData,
+  type ProductWithRelations,
+} from "@/lib/admin-schemas";
+import { Category } from "@/generated/client";
 
 interface EditProductFormProps {
   productId: string;
   onSuccess: () => void;
-  initialData: {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    subTitle: string;
-    slogan: string;
-    category: {
-      id: string;
-      name: string;
-      description: string;
-      icon: string;
-      color: string;
-    };
-    arAnimation: string;
-    scent: Scent;
-    images: PrismaImage[];
-  };
-  scents: Scent[];
+  initialData: ProductWithRelations;
 }
-
-type ProductField = {
-  name: string;
-  description: string;
-  price: number;
-  subTitle: string;
-  slogan: string;
-  categoryId: string;
-  arAnimation: string;
-};
-
-type FieldValue = string | number;
 
 export default function EditProductForm({
   productId,
   onSuccess,
   initialData,
-  scents,
 }: EditProductFormProps) {
-  const [editingProduct, setEditingProduct] = useState({
-    ...initialData,
-    categoryId: initialData.category.id,
-  });
+  const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>(() =>
     initialData.images.map((image) => ({
       id: image.id,
@@ -93,490 +65,349 @@ export default function EditProductForm({
       url: image.url,
     }))
   );
-  const [selectedScentId, setSelectedScentId] = useState(initialData.scent.id);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const updateProduct = useUpdateProduct();
+  const [isScentDialogOpen, setIsScentDialogOpen] = useState(false);
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+
   const { data: categories = [] } = useCategories();
-  const queryClient = useQueryClient();
+  const { data: scents = [] } = useScents();
 
-  const validateField = useCallback(
-    (name: keyof ProductField, value: FieldValue) => {
-      if (typeof value !== "string" && typeof value !== "number") {
-        return "Type de valeur invalide";
-      }
-
-      switch (name) {
-        case "name":
-        case "subTitle":
-        case "slogan":
-        case "arAnimation":
-          return typeof value === "string" && value.length < 3
-            ? "Le champ doit contenir au moins 3 caractères"
-            : "";
-        case "price":
-          return typeof value === "number" && value <= 0
-            ? "Le prix doit être supérieur à 0"
-            : "";
-        case "description":
-          return typeof value === "string" && value.length < 10
-            ? "La description doit contenir au moins 10 caractères"
-            : "";
-        default:
-          return "";
-      }
+  const form = useForm<ProductUpdateData>({
+    resolver: zodResolver(productUpdateSchema),
+    defaultValues: {
+      id: productId,
+      name: initialData.name,
+      description: initialData.description,
+      price: initialData.price,
+      subTitle: initialData.subTitle,
+      slogan: initialData.slogan,
+      categoryId: initialData.category.id,
+      scentId: initialData.scent.id,
     },
-    []
-  );
+  });
 
-  const handleFieldChange = useCallback(
-    (name: keyof ProductField, value: FieldValue) => {
-      setEditingProduct((prev) => ({ ...prev, [name]: value }));
-      const error = validateField(name, value);
-      setErrors((prev) => ({ ...prev, [name]: error }));
-    },
-    [validateField]
-  );
-
-  const handleFilesChange = useCallback((files: FileMetadata[]) => {
-    setSelectedFiles(files);
-  }, []);
-
-  const uploadNewImages = useCallback(async (files: FileMetadata[]) => {
-    const uploadPromises = files.map(async (file) => {
-      if (!file.file) throw new Error("Fichier non trouvé");
-      const formData = new FormData();
-      formData.append("file", file.file);
-      const response = await fetch("/api/upload/image", {
-        method: "POST",
-        body: formData,
+  const uploadImages = async (files: FileMetadata[]) => {
+    const uploadPromises = files
+      .filter((file) => file.file && !file.url.startsWith("http"))
+      .map(async (file) => {
+        if (!file.file) throw new Error("Fichier non trouvé");
+        const formData = new FormData();
+        formData.append("file", file.file);
+        const response = await fetch("/api/upload/image", {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Échec de l'upload de l'image");
+        const data = await response.json();
+        return data.url;
       });
-      if (!response.ok) throw new Error("Échec de l'upload de l'image");
-      const data = await response.json();
-      return data.url;
-    });
 
     return Promise.all(uploadPromises);
-  }, []);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (isSubmitting) return;
-
-      const newErrors: Record<string, string> = {};
-      Object.entries(editingProduct).forEach(([key, value]) => {
-        if (key === "category" || key === "scent" || key === "images") return;
-        const error = validateField(
-          key as keyof ProductField,
-          value as FieldValue
-        );
-        if (error) newErrors[key] = error;
-      });
-
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        toast.error("Veuillez corriger les erreurs avant de soumettre");
-        return;
-      }
-
-      setIsSubmitting(true);
-      try {
-        const newFiles = selectedFiles.filter(
-          (file) => !file.url.startsWith("http")
-        );
-
-        const uploadedUrls =
-          newFiles.length > 0 ? await uploadNewImages(newFiles) : [];
-
-        const finalImageUrls = selectedFiles.map((file) => {
-          if (file.url.startsWith("http")) return file.url;
-          const newUrl = uploadedUrls.shift();
-          if (!newUrl) throw new Error("Échec de l'upload de l'image");
-          return newUrl;
-        });
-
-        const data = {
-          id: productId,
-          name: editingProduct.name,
-          description: editingProduct.description,
-          price: editingProduct.price,
-          subTitle: editingProduct.subTitle,
-          slogan: editingProduct.slogan,
-          categoryId: editingProduct.categoryId,
-          arAnimation: editingProduct.arAnimation,
-          scentId: selectedScentId,
-          images: finalImageUrls.map((url) => ({ url })),
-        };
-
-        await updateProduct.mutateAsync(data);
-        toast.success("Produit mis à jour avec succès");
-        onSuccess();
-      } catch (error) {
-        console.error("Erreur lors de la mise à jour du produit:", error);
-        toast.error("Erreur lors de la mise à jour du produit");
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [
-      editingProduct,
-      isSubmitting,
-      productId,
-      selectedFiles,
-      selectedScentId,
-      updateProduct,
-      uploadNewImages,
-      validateField,
-      onSuccess,
-    ]
-  );
-
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 },
+  const updateProduct = useMutation({
+    mutationFn: async (
+      values: ProductUpdateData & { images?: Array<{ url: string }> }
+    ) => {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Une erreur est survenue");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Produit mis à jour avec succès");
+      onSuccess();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onSubmit = async (values: ProductUpdateData) => {
+    try {
+      // Gérer l'upload des nouvelles images
+      const newFiles = selectedFiles.filter(
+        (file) => file.file && !file.url.startsWith("http")
+      );
+      const uploadedUrls =
+        newFiles.length > 0 ? await uploadImages(newFiles) : [];
+
+      // Construire la liste finale des URLs d'images
+      const finalImageUrls = selectedFiles.map((file) => {
+        if (file.url.startsWith("http")) return file.url;
+        const newUrl = uploadedUrls.shift();
+        if (!newUrl) throw new Error("Échec de l'upload de l'image");
+        return newUrl;
+      });
+
+      await updateProduct.mutateAsync({
+        ...values,
+        images: finalImageUrls.map((url) => ({ url })),
+      });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour:", error);
+      toast.error("Erreur lors de la mise à jour du produit");
+    }
+  };
+
+  const handleFilesChange = (files: FileMetadata[]) => {
+    setSelectedFiles(files);
   };
 
   return (
-    <motion.form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      transition={{ duration: 0.3 }}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="name">Nom</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Le nom principal du produit</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Informations générales */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium">Informations générales</h3>
+            <p className="text-sm text-muted-foreground">
+              Nom, description et prix du produit
+            </p>
           </div>
-          <Input
-            id="name"
-            value={editingProduct.name}
-            onChange={(e) => handleFieldChange("name", e.target.value)}
-            required
-            disabled={isSubmitting}
-            className={cn(errors.name && "border-red-500")}
-          />
-          {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-        </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom du produit</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nom du produit" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="price">Prix</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Le prix en euros</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            value={editingProduct.price}
-            onChange={(e) => handleFieldChange("price", Number(e.target.value))}
-            required
-            disabled={isSubmitting}
-            className={cn(errors.price && "border-red-500")}
-          />
-          {errors.price && (
-            <p className="text-sm text-red-500">{errors.price}</p>
-          )}
-        </motion.div>
-
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="subTitle">Sous-titre</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Un sous-titre court et accrocheur</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Input
-            id="subTitle"
-            value={editingProduct.subTitle}
-            onChange={(e) => handleFieldChange("subTitle", e.target.value)}
-            required
-            disabled={isSubmitting}
-            className={cn(errors.subTitle && "border-red-500")}
-          />
-          {errors.subTitle && (
-            <p className="text-sm text-red-500">{errors.subTitle}</p>
-          )}
-        </motion.div>
-
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="slogan">Slogan</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Une phrase accrocheuse pour le produit</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Input
-            id="slogan"
-            value={editingProduct.slogan}
-            onChange={(e) => handleFieldChange("slogan", e.target.value)}
-            required
-            disabled={isSubmitting}
-            className={cn(errors.slogan && "border-red-500")}
-          />
-          {errors.slogan && (
-            <p className="text-sm text-red-500">{errors.slogan}</p>
-          )}
-        </motion.div>
-
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="category">Catégorie</Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>La catégorie principale du produit</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouvelle catégorie
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Créer une nouvelle catégorie</DialogTitle>
-                </DialogHeader>
-                <CreateCategoryForm
-                  onSuccess={() => {
-                    queryClient.invalidateQueries({ queryKey: ["categories"] });
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
-          <Select
-            value={editingProduct.categoryId}
-            onValueChange={(value) => handleFieldChange("categoryId", value)}
-            disabled={isSubmitting}
-          >
-            <SelectTrigger
-              className={cn(errors.categoryId && "border-red-500")}
-            >
-              <SelectValue placeholder="Sélectionner une catégorie" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category: Category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: category.color }}
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prix (€)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Prix du produit"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
                     />
-                    <span>{category.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.categoryId && (
-            <p className="text-sm text-red-500">{errors.categoryId}</p>
-          )}
-        </motion.div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="scent">Parfum</Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Le parfum principal du produit</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouveau parfum
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Créer un nouveau parfum</DialogTitle>
-                </DialogHeader>
-                <CreateScentForm
-                  onSuccess={() => {
-                    queryClient.invalidateQueries({ queryKey: ["scents"] });
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
-          <Select
-            value={selectedScentId}
-            onValueChange={setSelectedScentId}
-            disabled={isSubmitting}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un parfum" />
-            </SelectTrigger>
-            <SelectContent>
-              {scents.map((scent) => (
-                <SelectItem key={scent.id} value={scent.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: scent.color }}
-                    />
-                    <span>{scent.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </motion.div>
+            <FormField
+              control={form.control}
+              name="subTitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sous-titre</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Sous-titre du produit" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <motion.div className="space-y-2" variants={itemVariants}>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="arAnimation">Animation AR</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    L&apos;identifiant de l&apos;animation en réalité augmentée
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <FormField
+              control={form.control}
+              name="slogan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slogan</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Slogan du produit" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <Input
-            id="arAnimation"
-            value={editingProduct.arAnimation}
-            onChange={(e) => handleFieldChange("arAnimation", e.target.value)}
-            required
-            disabled={isSubmitting}
-            className={cn(errors.arAnimation && "border-red-500")}
+        </div>
+
+        {/* Description */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium">Description</h3>
+            <p className="text-sm text-muted-foreground">
+              Description détaillée du produit
+            </p>
+          </div>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Description détaillée du produit"
+                    rows={4}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.arAnimation && (
-            <p className="text-sm text-red-500">{errors.arAnimation}</p>
-          )}
-        </motion.div>
-      </div>
-
-      <motion.div className="space-y-2" variants={itemVariants}>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="description">Description</Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Une description détaillée du produit</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
-        <Textarea
-          id="description"
-          value={editingProduct.description}
-          onChange={(e) => handleFieldChange("description", e.target.value)}
-          required
-          disabled={isSubmitting}
-          className={cn(
-            "min-h-[150px]",
-            errors.description && "border-red-500"
-          )}
-        />
-        {errors.description && (
-          <p className="text-sm text-red-500">{errors.description}</p>
-        )}
-      </motion.div>
 
-      <motion.div className="space-y-2" variants={itemVariants}>
-        <div className="flex items-center gap-2">
-          <Label>Images</Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>
-                  Les images du produit (glissez-déposez ou cliquez pour
-                  sélectionner)
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        {/* Catégories et parfums */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium">Catégories et parfums</h3>
+            <p className="text-sm text-muted-foreground">
+              Assignez une catégorie et un parfum au produit
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Catégorie
+                    <Dialog
+                      open={isCategoryDialogOpen}
+                      onOpenChange={setIsCategoryDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="sm">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>
+                            Créer une nouvelle catégorie
+                          </DialogTitle>
+                        </DialogHeader>
+                        <CreateCategoryForm
+                          onSuccess={() => setIsCategoryDialogOpen(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner une catégorie" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category: Category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="scentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    Parfum
+                    <Dialog
+                      open={isScentDialogOpen}
+                      onOpenChange={setIsScentDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="sm">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Créer un nouveau parfum</DialogTitle>
+                        </DialogHeader>
+                        <CreateScentForm
+                          onSuccess={() => setIsScentDialogOpen(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un parfum" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {scents.map((scent) => (
+                        <SelectItem key={scent.id} value={scent.id}>
+                          {scent.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
-        <UploadFiles
-          initialFiles={selectedFiles}
-          onFilesChange={handleFilesChange}
-          disabled={isSubmitting}
-        />
-      </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Mise à jour en cours...
-            </>
-          ) : (
-            "Mettre à jour le produit"
-          )}
-        </Button>
-      </motion.div>
-    </motion.form>
+        {/* Images du produit */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium">Images du produit</h3>
+            <p className="text-sm text-muted-foreground">
+              Téléchargez les images du produit
+            </p>
+          </div>
+          <UploadFiles
+            initialFiles={selectedFiles}
+            onFilesChange={handleFilesChange}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-6 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            disabled={updateProduct.isPending}
+          >
+            Annuler
+          </Button>
+          <Button type="submit" disabled={updateProduct.isPending}>
+            {updateProduct.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Mise à jour...
+              </>
+            ) : (
+              "Mettre à jour"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

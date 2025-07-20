@@ -7,7 +7,6 @@ import HeaderMenu from "./header-menu";
 import { buttonVariants } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import CartButton from "./cart-button";
-import NoSSR from "./no-ssr";
 import {
   Sheet,
   SheetClose,
@@ -43,9 +42,7 @@ export default function Header() {
           <HeaderMenu links={links} />
         </div>
         <div className="flex items-center gap-5">
-          <NoSSR>
-            <CartButton />
-          </NoSSR>
+          <CartButton />
           <AuthButton />
 
           <Sheet>

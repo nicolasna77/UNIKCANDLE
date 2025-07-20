@@ -67,7 +67,7 @@ const NewsletterSection = () => {
           >
             Rejoignez l&apos;aventure{" "}
             <span
-              className={`${lora.className} text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent`}
+              className={`${lora.className} text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text `}
             >
               UNIKCANDLE
             </span>

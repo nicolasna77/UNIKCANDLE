@@ -166,6 +166,7 @@ export async function POST(req: Request) {
             },
             shippingAddress: {
               create: {
+                name: session.customer_details?.name || "",
                 street:
                   session.shipping_details?.address?.line1 ||
                   session.collected_information?.shipping_details?.address
@@ -224,6 +225,9 @@ export async function POST(req: Request) {
             })
           )
         );
+
+        // Envoyer l'email de confirmation de commande
+     await
 
         console.log("QR codes créés avec succès");
         console.log("Commande complète:", JSON.stringify(order, null, 2));

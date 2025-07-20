@@ -35,11 +35,11 @@ export default function Home() {
             >
               Une bougie pas comme les autres
             </h2>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              Chez UNIKCANDLE, nous croyons que chaque bougie raconte une
-              histoire. Imaginez une bougie qui ne se contente pas
-              d&apos;éclairer, mais qui porte vos mots, vos émotions, vos
-              souvenirs.
+            <p className="text-xl text-muted-foreground leading-relaxed balance-text">
+              Chez UNIKCANDLE, nous croyons qu&apos;une bougie peut incarner
+              l&apos;élégance ultime. Imaginez une bougie qui illumine avec
+              raffinement tout en portant vos mots, vos émotions et vos
+              souvenirs les plus précieux.
             </p>
             <div className="bg-card/50 backdrop-blur-sm rounded-xl p-8 space-y-8 text-left  border border-border">
               <div className="flex items-start gap-4">
@@ -48,11 +48,11 @@ export default function Home() {
                 </div>
                 <p className="text-lg text-card-foreground">
                   <span className="font-semibold text-primary">
-                    Personnalisez votre bougie
+                    Personnalisez votre création :
                   </span>{" "}
                   <br />
-                  choisissez son odeur, son design, et enregistrez un message
-                  audio.
+                  sélectionnez des fragrances rares, des designs exclusifs, et
+                  enregistrez un message audio personnel.
                 </p>
               </div>
               <div className="flex items-start gap-4">
@@ -61,10 +61,11 @@ export default function Home() {
                 </div>
                 <p className="text-lg text-card-foreground">
                   <span className="font-semibold text-primary">
-                    Découvrez votre message
+                    Un rituel unique :
                   </span>{" "}
-                  <br />à la fin de la combustion, scannez la bougie pour
-                  écouter votre message grâce à la réalité augmentée.
+                  <br />
+                  lorsque la flamme s’éteint, révélez votre message privé grâce
+                  à notre technologie immersive de réalité augmentée.
                 </p>
               </div>
             </div>
@@ -72,7 +73,7 @@ export default function Home() {
               className={buttonVariants({ variant: "default", size: "lg" })}
               href="#newsletter"
             >
-              Je m&apos;inscris pour être informé du lancement
+              Rejoignez notre cercle privé
             </Link>
           </div>
         </div>
@@ -90,7 +91,7 @@ export default function Home() {
             Pourquoi choisir <span className="text-primary">UNIKCANDLE</span> ?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="text-center p-8  border-primary/10">
+            <Card className="text-center   border-primary/10">
               <CardHeader>
                 <CardTitle
                   className={`${lora.className} text-primary text-2xl font-bold`}
@@ -100,11 +101,12 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Chaque bougie est personnalisée pour vous ou pour offrir.
+                  Chaque bougie est conçue sur-mesure, exclusivement pour vous
+                  ou pour une personne d’exception.
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center p-8  border-primary/10">
+            <Card className="text-center  border-primary/10">
               <CardHeader>
                 <CardTitle
                   className={`${lora.className} text-primary text-2xl font-bold`}
@@ -113,14 +115,17 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  La réalité augmentée transforme votre bougie en une expérience
-                  immersive.
+                <p className="text-muted-foreground balance-text">
+                   Notre technologie de réalité augmentée sublime l’expérience
+                  et rend chaque création inoubliable.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center p-8  border-primary/10">
+            <Card
+              className="text-center 
+             border-primary/10"
+            >
               <CardHeader>
                 <CardTitle
                   className={`${lora.className} text-primary text-2xl font-bold`}
@@ -129,9 +134,9 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Un cadeau qui parle au cœur et crée des souvenirs
-                  inoubliables.
+                <p className="text-muted-foreground balance-text">
+                  Un cadeau raffiné, porteur d&apos;émotions intimes, pour des
+                  souvenirs gravés avec élégance.
                 </p>
               </CardContent>
             </Card>

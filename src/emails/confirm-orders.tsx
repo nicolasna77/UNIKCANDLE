@@ -120,7 +120,7 @@ export const OrderConfirmationEmail = ({
                 </Link>
               </Column>
               <Column style={{ width: "33%" }} colSpan={1}>
-                <Link href={`${baseUrl}/retours`} style={menu.text}>
+                <Link href={`${baseUrl}/return-policy`} style={menu.text}>
                   Retours & Échanges
                 </Link>
               </Column>

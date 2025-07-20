@@ -1,13 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { Resolver, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { categorySchema, type CategoryFormData } from "@/lib/admin-schemas";
 
 interface CreateCategoryFormProps {
   onSuccess: () => void;
@@ -16,20 +25,20 @@ interface CreateCategoryFormProps {
 export default function CreateCategoryForm({
   onSuccess,
 }: CreateCategoryFormProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#000000");
-  const [icon, setIcon] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
 
+  const form = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema) as Resolver<CategoryFormData>,
+    defaultValues: {
+      name: "",
+      description: "",
+      icon: "",
+      color: "#000000",
+    },
+  });
+
   const createCategory = useMutation({
-    mutationFn: async (data: {
-      name: string;
-      description: string;
-      color: string;
-      icon: string;
-    }) => {
+    mutationFn: async (data: CategoryFormData) => {
       const response = await fetch("/api/admin/categories", {
         method: "POST",
         headers: {
@@ -38,108 +47,127 @@ export default function CreateCategoryForm({
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        throw new Error("Erreur lors de la création de la catégorie");
+        const error = await response.json();
+        throw new Error(
+          error.error || "Erreur lors de la création de la catégorie"
+        );
       }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Catégorie créée avec succès");
+      form.reset();
       onSuccess();
     },
     onError: (error: Error) => {
-      toast.error(
-        error.message || "Erreur lors de la création de la catégorie"
-      );
+      toast.error(error.message);
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-    try {
-      await createCategory.mutateAsync({
-        name,
-        description,
-        color,
-        icon,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = (data: CategoryFormData) => {
+    createCategory.mutate(data);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Nom</Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          disabled={isSubmitting}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          disabled={isSubmitting}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="color">Couleur</Label>
-        <div className="flex gap-2">
-          <Input
-            id="color"
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            required
-            disabled={isSubmitting}
-            className="w-20"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom de la catégorie</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ex: Bougies parfumées, Accessoires..."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <Input
-            type="text"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            required
-            disabled={isSubmitting}
-            className="flex-1"
+
+          <FormField
+            control={form.control}
+            name="icon"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Icône</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: Flame, Star, Heart" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="icon">Icône</Label>
-        <Input
-          id="icon"
-          value={icon}
-          onChange={(e) => setIcon(e.target.value)}
-          required
-          disabled={isSubmitting}
-          placeholder="Nom de l'icône (ex: Flower)"
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Description détaillée de la catégorie..."
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Création en cours...
-          </>
-        ) : (
-          "Créer la catégorie"
-        )}
-      </Button>
-    </form>
+        <FormField
+          control={form.control}
+          name="color"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Couleur de la catégorie</FormLabel>
+              <div className="flex gap-2">
+                <FormControl>
+                  <Input type="color" className="w-20 h-10" {...field} />
+                </FormControl>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="#000000"
+                    className="flex-1"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            disabled={createCategory.isPending}
+          >
+            Annuler
+          </Button>
+          <Button type="submit" disabled={createCategory.isPending}>
+            {createCategory.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Création...
+              </>
+            ) : (
+              "Créer la catégorie"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

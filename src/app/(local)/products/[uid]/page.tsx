@@ -7,7 +7,7 @@ type Props = {
 };
 
 export default async function ProductPage({ params }: Props) {
-  const { uid } = params;
+  const { uid } = await params;
 
   return (
     <Suspense fallback={<LoadingPage />}>

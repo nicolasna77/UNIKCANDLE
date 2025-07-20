@@ -1,99 +1,198 @@
 "use client";
 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { CalendarIcon, Ban, AlertTriangle, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { BanForm } from "@/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface BanUserFormProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  banData: {
-    userId: string;
-    reason: string;
-    expirationDate?: Date;
-  };
-  onBanDataChange: (data: BanForm) => void;
+const banUserSchema = z.object({
+  reason: z.string().min(10, "La raison doit contenir au moins 10 caractères"),
+  expirationDate: z.date().optional(),
+});
+
+type BanUserFormData = z.infer<typeof banUserSchema>;
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  image?: string;
 }
 
-export function BanUserForm({
-  isOpen,
-  onOpenChange,
-  onSubmit,
-  banData,
-  onBanDataChange,
-}: BanUserFormProps) {
+interface BanUserFormProps {
+  user: User;
+  onSuccess: () => void;
+  onBan: (data: BanUserFormData) => void;
+}
+
+export function BanUserForm({ user, onSuccess, onBan }: BanUserFormProps) {
+  const form = useForm<BanUserFormData>({
+    resolver: zodResolver(banUserSchema),
+    defaultValues: {
+      reason: "",
+      expirationDate: undefined,
+    },
+  });
+
+  const onSubmit = (data: BanUserFormData) => {
+    onBan(data);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Bannir un utilisateur</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <input type="hidden" name="userId" value={banData.userId} />
-          <div>
-            <Label htmlFor="reason">Raison</Label>
-            <Input
-              id="reason"
+    <div className="space-y-6">
+      {/* Informations utilisateur */}
+      <div className="p-4 border rounded-lg bg-muted/50">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={user.image} alt={user.name} />
+            <AvatarFallback className="bg-primary/10">
+              {user.name?.charAt(0).toUpperCase() ||
+                user.email.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <h3 className="font-medium">{user.name || "Nom non défini"}</h3>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Avertissement */}
+      <div className="p-4 border border-amber-200 rounded-lg bg-amber-50 dark:bg-amber-950/10">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              Attention
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-300">
+              Cette action bannira l&apos;utilisateur et l&apos;empêchera de se
+              connecter. Vous pouvez définir une durée limitée ou un
+              bannissement permanent.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Raison du bannissement */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium">Raison du bannissement</h3>
+              <p className="text-sm text-muted-foreground">
+                Expliquez pourquoi cet utilisateur est banni
+              </p>
+            </div>
+
+            <FormField
+              control={form.control}
               name="reason"
-              value={banData.reason}
-              onChange={(e) =>
-                onBanDataChange({ ...banData, reason: e.target.value })
-              }
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Ban className="h-4 w-4" />
+                    Motif du bannissement
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Ex: Violation des conditions d'utilisation, comportement inapproprié, spam..."
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="expirationDate">Date d&apos;expiration</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="expirationDate"
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !banData.expirationDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {banData.expirationDate ? (
-                    format(banData.expirationDate, "PPP")
-                  ) : (
-                    <span>Choisir une date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={banData.expirationDate}
-                  onSelect={(date) => {
-                    onBanDataChange({ ...banData, expirationDate: date });
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+
+          {/* Durée du bannissement */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium">Durée du bannissement</h3>
+              <p className="text-sm text-muted-foreground">
+                Définissez une date d&apos;expiration ou laissez vide pour un
+                bannissement permanent
+              </p>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="expirationDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Date d&apos;expiration (optionnel)
+                  </FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "dd MMMM yyyy", { locale: fr })
+                          ) : (
+                            <span>Sélectionner une date (optionnel)</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <Button type="submit">Bannir l&apos;utilisateur</Button>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 pt-6 border-t">
+            <Button type="button" variant="outline" onClick={onSuccess}>
+              Annuler
+            </Button>
+            <Button type="submit" variant="destructive">
+              <Ban className="mr-2 h-4 w-4" />
+              Bannir l&apos;utilisateur
+            </Button>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Form>
+    </div>
   );
 }

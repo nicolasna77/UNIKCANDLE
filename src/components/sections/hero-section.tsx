@@ -66,12 +66,12 @@ const HeroSection = () => {
               className="space-y-4"
             >
               <p className="text-2xl lg:text-3xl font-light text-foreground leading-relaxed">
-                Bougies personnalisées et écologiques
+                Bougies d’exception sur-mesure
               </p>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto lg:mx-0 leading-relaxed">
-                Une bougie, un message, une émotion. Créez des moments uniques
-                avec nos bougies artisanales et leur technologie de réalité
-                augmentée.
+              <p className="text-lg text-muted-foreground max-w-md mx-auto balance-text lg:mx-0 leading-relaxed">
+                Chaque bougie UNIKCANDLE est une pièce unique, créée pour
+                sublimer vos instants précieux avec une touche de sophistication
+                et une technologie innovante de réalité augmentée.
               </p>
             </motion.div>
 
@@ -89,7 +89,10 @@ const HeroSection = () => {
                   className={`${buttonVariants({ variant: "default", size: "lg" })} relative overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300`}
                   href="/products"
                 >
-                  <span className="relative z-10">Découvrez nos produits</span>
+                  <span className="relative z-10">
+                    {" "}
+                    Explorez notre collection
+                  </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </motion.div>
@@ -102,7 +105,7 @@ const HeroSection = () => {
                   className={`${buttonVariants({ variant: "outline", size: "lg" })} `}
                   href="/about"
                 >
-                  Notre histoire
+                  L’univers UNIKCANDLE
                 </Link>
               </motion.div>
             </motion.div>
@@ -117,18 +120,18 @@ const HeroSection = () => {
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">1000+</div>
                 <div className="text-sm text-muted-foreground">
-                  Bougies créées
+                  Créations sur-mesure
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">500+</div>
                 <div className="text-sm text-muted-foreground">
-                  Clients satisfaits
+                  Clients privilégiés
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">100%</div>
-                <div className="text-sm text-muted-foreground">Écologique</div>
+                <div className="text-sm text-muted-foreground">exclusif</div>
               </div>
             </motion.div>
           </motion.div>

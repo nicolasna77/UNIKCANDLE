@@ -1,6 +1,5 @@
-import Dashboard from "./dashboard";
+import { redirect } from "next/navigation";
 
-const Admin = () => {
-  return <Dashboard />;
-};
-export default Admin;
+export default function AdminPage() {
+  redirect("/admin/dashboard");
+}

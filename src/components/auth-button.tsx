@@ -65,7 +65,7 @@ const AuthButton = () => {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem asChild>
-              <Link href="/admin" className="flex items-center gap-2">
+              <Link href="/admin/dashboard" className="flex items-center gap-2">
                 <Shield className="size-4" />
                 <span>Admin</span>
               </Link>

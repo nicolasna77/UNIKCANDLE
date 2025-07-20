@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 // Shader de flamme
 const flameVertexShader = `
@@ -31,19 +31,16 @@ const flameVertexShader = `
     hValue = position.y;
     float posXZlen = length(position.xz);
     
-    // Animation plus dynamique
     float timeScale = time * 2.0;
     float noiseScale = 0.5;
     float movementScale = 0.1;
     
-    // Variation de hauteur avec bruit
     pos.y *= 1. + (
       cos((posXZlen + timeScale) * 3.1415926) * 0.25 + 
       noise(vec2(0, timeScale)) * 0.125 + 
       noise(vec2(position.x + timeScale, position.z + timeScale)) * noiseScale
     ) * position.y;
     
-    // Mouvement ondulant
     pos.x += noise(vec2(timeScale * 2., (position.y - timeScale) * 4.0)) * hValue * movementScale;
     pos.z += noise(vec2((position.y - timeScale) * 4.0, timeScale * 2.)) * hValue * movementScale;
     
@@ -65,14 +62,12 @@ const flameFragmentShader = `
     float alpha = (1. - v) * 0.99;
     alpha -= 1. - smoothstep(1.0, 0.97, hValue);
     
-    // Animation des couleurs
     float colorTime = time * 0.5;
     vec3 baseColor = heatmapGradient(smoothstep(0.0, 0.3, hValue)) * vec3(0.95,0.95,0.4);
     baseColor = mix(vec3(0,0,1), baseColor, smoothstep(0.0, 0.3, hValue));
     baseColor += vec3(1, 0.9, 0.5) * (1.25 - vUv.y);
     baseColor = mix(baseColor, vec3(0.66, 0.32, 0.03), smoothstep(0.95, 1., hValue));
     
-    // Variation de luminosité
     float flicker = 1.0 + sin(time * 10.0) * 0.1;
     gl_FragColor = vec4(baseColor * flicker, alpha);
   }
@@ -84,36 +79,28 @@ export function Candle3D() {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const candleRef = useRef<THREE.Object3D | null>(null);
-  const flameRef = useRef<THREE.PointLight | null>(null);
   const clockRef = useRef<THREE.Clock | null>(null);
-  const timeRef = useRef<number>(0);
-
-  // Variables globales pour l'animation
-  const GVARS = {
-    CheraghPosition: { x: 0, y: -0.5, z: 0 },
-    FlamePositionOffset: { x: 0, y: 0.2, z: 0 },
-    CheraghLightBaseIntensity: 1,
-  };
+  const flameShaderRef = useRef<THREE.ShaderMaterial | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Création de la scène
+    // Scène
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    // Initialisation de l'horloge
+    // Horloge
     const clock = new THREE.Clock();
     clockRef.current = clock;
 
-    // Création de la caméra
-    const camera = new THREE.PerspectiveCamera(15, 1, 0.3, 1000);
-    camera.position.set(3, 0, 0);
+    // Caméra
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.4, 1000);
+    camera.position.set(3, 3, 3);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // Création du renderer
+    // Renderer
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
       antialias: true,
@@ -122,134 +109,97 @@ export function Candle3D() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Ajout de l'éclairage
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    // Éclairage
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
-    // Lumière directionnelle pour un éclairage général
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(2, 2, 2);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(1, 2, 1);
     scene.add(directionalLight);
 
-    // Chargement du modèle 3D
-    const loader = new FBXLoader();
+    // Chargement de la bougie
+    const loader = new GLTFLoader();
     loader.load(
-      "https://oa5vracaap84kwhj.public.blob.vercel-storage.com/models3d/CANDEL-NI1PUaNuMTobHngVJTjNhmIleKyRqN.fbx",
-      (object: THREE.Object3D) => {
-        const candle = object;
-        scene.add(candle);
-        candleRef.current = candle;
+      "/models/candleGlass.glb",
+      (gltf) => {
+        const candle = gltf.scene;
 
-        // Ajustement de la position et de la rotation
-        candle.position.set(0, -0.1, 0);
-        candle.rotation.set(-Math.PI / 2, 0, 0);
-        candle.scale.set(0.2, 0.2, 0.2);
+        // Positionner la bougie plus bas
+        candle.position.set(0, -0.5, 0);
 
-        // Activation des ombres pour la bougie
-        candle.traverse((child: THREE.Object3D) => {
+        // Debug des textures et matériaux
+        console.log("=== BOUGIE CHARGÉE ===");
+        console.log("Matériaux trouvés:");
+        candle.traverse((child) => {
           if (child instanceof THREE.Mesh) {
+            console.log("- Mesh:", child.name);
+            console.log("  Matériau:", child.material);
+            if (child.material.map) {
+              console.log("  Texture:", child.material.map);
+            }
+            // Activer les ombres
             child.castShadow = true;
             child.receiveShadow = true;
           }
         });
+
+        scene.add(candle);
+        candleRef.current = candle;
       },
-      (progress: ProgressEvent) => {
-        console.log(
-          "Chargement du modèle:",
-          (progress.loaded / progress.total) * 100,
-          "%"
-        );
-      },
-      (error: unknown) => {
-        console.error("Erreur lors du chargement du modèle:", error);
+      undefined,
+      (error) => {
+        console.error("Erreur chargement bougie:", error);
       }
     );
 
-    // Création de la flamme avec shader
-    const flameGeometry = new THREE.SphereGeometry(0.5, 10, 10);
-    flameGeometry.translate(0, 0.2, 0);
-    const flameMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0.0 },
-      },
+    // Flamme animée
+    const flameGeometry = new THREE.ConeGeometry(0.03, 0.14, 8);
+    const flameShaderMaterial = new THREE.ShaderMaterial({
       vertexShader: flameVertexShader,
       fragmentShader: flameFragmentShader,
+      uniforms: {
+        time: { value: 0 },
+      },
       transparent: true,
       side: THREE.DoubleSide,
     });
-    const flame = new THREE.Mesh(flameGeometry, flameMaterial);
-    flame.position.set(0, 0.1, 0);
-    flame.scale.set(0.1, 0.1, 0.1);
-    scene.add(flame);
+    flameShaderRef.current = flameShaderMaterial;
 
-    // Lumière de la flamme avec animation
-    const flameLight = new THREE.PointLight(0xff6600, 1, 1);
-    flameLight.position.set(0, 0.15, 0);
-    scene.add(flameLight);
-    flameRef.current = flameLight;
+    const flame = new THREE.Mesh(flameGeometry, flameShaderMaterial);
+    flame.position.set(0, 0.22, 0); // Ajustée pour suivre la bougie descendue
+    scene.add(flame);
 
     // Animation
     const animate = () => {
-      requestAnimationFrame(animate);
+      if (!clockRef.current || !flameShaderRef.current) return;
 
-      //------ timing --------
-      const delta = clock.getDelta();
-      timeRef.current += delta;
+      const time = clockRef.current.getElapsedTime();
+      flameShaderRef.current.uniforms.time.value = time;
 
-      // Animation de la flamme
-      if (flameRef.current) {
-        // Animation de la position de la flamme
-        flameRef.current.position.x =
-          Math.sin(timeRef.current * Math.PI * 0.3) * 0.002 +
-          GVARS.CheraghPosition.x +
-          GVARS.FlamePositionOffset.x;
-        flameRef.current.position.y =
-          Math.cos(timeRef.current * Math.PI * 0.3 + Math.random() * 0.1) *
-            0.002 +
-          GVARS.CheraghPosition.y +
-          GVARS.FlamePositionOffset.y;
-        flameRef.current.position.z =
-          Math.cos(timeRef.current * Math.PI * 0.3) * 0.002 +
-          GVARS.CheraghPosition.z +
-          GVARS.FlamePositionOffset.z;
-
-        // Animation de l'intensité
-        flameRef.current.intensity =
-          (1.2 +
-            Math.sin(timeRef.current * Math.PI * 2) *
-              Math.cos(timeRef.current * Math.PI * 1.5)) *
-            0.005 +
-          GVARS.CheraghLightBaseIntensity;
-
-        // Animation de la couleur
-        flameRef.current.color.setHSL(
-          0.1 + Math.sin(timeRef.current) * 0.005,
-          0.8,
-          0.4
-        );
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
 
-      // Mise à jour du shader de la flamme
-      flameMaterial.uniforms.time.value = timeRef.current;
-
-      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
     };
+
     animate();
 
+    // Nettoyage
     return () => {
-      if (container && rendererRef.current) {
+      if (
+        rendererRef.current &&
+        container.contains(rendererRef.current.domElement)
+      ) {
         container.removeChild(rendererRef.current.domElement);
       }
+      rendererRef.current?.dispose();
     };
   }, []);
 
-  return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex items-center justify-center"
-    />
-  );
+  return <div ref={containerRef} className="w-full h-full" />;
 }

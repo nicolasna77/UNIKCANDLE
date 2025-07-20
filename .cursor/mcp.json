@@ -1,1 +1,11 @@
- 
+{
+  "mcpServers": {
+    "nextjs-rules": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-everything"],
+      "env": {
+        "RULES_PATH": "./nextjs-rules.mdc"
+      }
+    }
+  }
+}
