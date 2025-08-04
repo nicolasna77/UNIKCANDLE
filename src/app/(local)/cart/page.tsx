@@ -343,16 +343,19 @@ export default function CartPage() {
           <div className="space-y-4">
             {/* Grouper les produits par type (avec/sans audio) */}
             {(() => {
-              const productsWithAudio = cart.filter(item => item.audioUrl);
-              const productsWithoutAudio = cart.filter(item => !item.audioUrl);
-              
+              const productsWithAudio = cart.filter((item) => item.audioUrl);
+              const productsWithoutAudio = cart.filter(
+                (item) => !item.audioUrl
+              );
+
               return (
                 <>
                   {/* Produits avec audio */}
                   {productsWithAudio.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">
-                        🎵 Produits avec audio personnalisé ({productsWithAudio.length})
+                        🎵 Produits avec audio personnalisé (
+                        {productsWithAudio.length})
                       </h3>
                       {productsWithAudio.map((item) => (
                         <Card
@@ -396,7 +399,9 @@ export default function CartPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => removeFromCart(getItemKey(item))}
+                                    onClick={() =>
+                                      removeFromCart(getItemKey(item))
+                                    }
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -436,7 +441,10 @@ export default function CartPage() {
 
                                   <div className="text-right">
                                     <div className="font-medium text-foreground">
-                                      {(item.price * (item.quantity || 1)).toFixed(2)} €
+                                      {(
+                                        item.price * (item.quantity || 1)
+                                      ).toFixed(2)}{" "}
+                                      €
                                     </div>
                                   </div>
                                 </div>
@@ -491,7 +499,9 @@ export default function CartPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => removeFromCart(getItemKey(item))}
+                                    onClick={() =>
+                                      removeFromCart(getItemKey(item))
+                                    }
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -531,7 +541,10 @@ export default function CartPage() {
 
                                   <div className="text-right">
                                     <div className="font-medium text-foreground">
-                                      {(item.price * (item.quantity || 1)).toFixed(2)} €
+                                      {(
+                                        item.price * (item.quantity || 1)
+                                      ).toFixed(2)}{" "}
+                                      €
                                     </div>
                                   </div>
                                 </div>

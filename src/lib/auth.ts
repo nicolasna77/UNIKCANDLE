@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
-import { admin } from "better-auth/plugins";
+import { admin, oneTap } from "better-auth/plugins";
 
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
@@ -54,6 +54,8 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    oneTap(),
+
     admin({
       adminRoles: ["ADMIN"],
     }),

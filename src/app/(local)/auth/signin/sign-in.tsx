@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Alert } from "@/components/ui/alert";
+import { oneTapCall } from "./one-tap";
 
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -47,7 +48,9 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    oneTapCall();
+  }, []);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
