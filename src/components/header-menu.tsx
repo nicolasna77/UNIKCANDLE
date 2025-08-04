@@ -10,6 +10,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import Link from "next/link";
 
 export default function HeaderMenu({
   links,
@@ -22,11 +23,10 @@ export default function HeaderMenu({
         <NavigationMenuList>
           {links.map((link) => (
             <NavigationMenuItem key={link.href}>
-              <NavigationMenuLink
-                href={link.href}
-                className={navigationMenuTriggerStyle()}
-              >
-                {link.label}
+              <NavigationMenuLink asChild>
+                <Link href={link.href} className={navigationMenuTriggerStyle()}>
+                  {link.label}
+                </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           ))}

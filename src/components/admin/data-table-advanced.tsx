@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, Download, RefreshCw } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -33,15 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { PaginationComponent } from "@/app/(private)/Pagination";
 
 interface DataTableAdvancedProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,7 +51,6 @@ export function DataTableAdvanced<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = "Rechercher...",
-  onRefresh,
   onExport,
   isLoading = false,
   emptyMessage = "Aucun résultat trouvé.",
@@ -163,47 +154,6 @@ export function DataTableAdvanced<TData, TValue>({
     }
   }, [currentPage, table]);
 
-  // Fonction pour générer les numéros de page
-  const generatePageNumbers = () => {
-    const totalPages = table.getPageCount();
-    const pages: (number | "ellipsis")[] = [];
-
-    if (totalPages <= 7) {
-      // Afficher toutes les pages si <= 7
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Logique de pagination complexe
-      pages.push(1);
-
-      if (currentPage > 4) {
-        pages.push("ellipsis");
-      }
-
-      const startPage = Math.max(2, currentPage - 1);
-      const endPage = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = startPage; i <= endPage; i++) {
-        if (!pages.includes(i)) {
-          pages.push(i);
-        }
-      }
-
-      if (currentPage < totalPages - 3) {
-        if (pages[pages.length - 1] !== totalPages - 1) {
-          pages.push("ellipsis");
-        }
-      }
-
-      if (!pages.includes(totalPages) && totalPages > 1) {
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
   return (
     <div className="w-full space-y-4">
       {/* Barre d'outils */}
@@ -223,19 +173,6 @@ export function DataTableAdvanced<TData, TValue>({
           )}
         </div>
         <div className="flex items-center space-x-2">
-          {onRefresh && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={isLoading}
-            >
-              <RefreshCw
-                className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-              />
-              Actualiser
-            </Button>
-          )}
           {onExport && (
             <Button variant="outline" size="sm" onClick={() => onExport(data)}>
               <Download className="mr-2 h-4 w-4" />
@@ -333,68 +270,11 @@ export function DataTableAdvanced<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center space-x-2 py-4">
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          {/* Navigation pagination */}
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => {
-                    const newPage = Math.max(1, currentPage - 1);
-                    updatePageInURL(newPage);
-                  }}
-                  className={
-                    !table.getCanPreviousPage()
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-
-              {generatePageNumbers().map((page, index) => {
-                if (page === "ellipsis") {
-                  return (
-                    <PaginationItem key={`ellipsis-${index}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  );
-                }
-
-                const isActive = page === currentPage;
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => updatePageInURL(page)}
-                      isActive={isActive}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => {
-                    const newPage = Math.min(
-                      table.getPageCount(),
-                      currentPage + 1
-                    );
-                    updatePageInURL(newPage);
-                  }}
-                  className={
-                    !table.getCanNextPage()
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </div>
+      <PaginationComponent
+        table={table}
+        currentPage={currentPage}
+        updatePageInURL={updatePageInURL}
+      />
     </div>
   );
 }

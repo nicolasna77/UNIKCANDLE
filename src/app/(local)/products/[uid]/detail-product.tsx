@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import ProductImageCarousel from "@/components/ProductImageCarousel";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Category,
   Product,
@@ -71,27 +72,42 @@ const ScentDisplay = ({ scent }: { scent: Scent | null | undefined }) => {
   if (!scent) return null;
 
   return (
-    <div className="mt-4 p-4 rounded-lg border bg-card">
-      <h3 className="text-lg font-semibold mb-2">Parfum</h3>
-      <div className="flex items-center gap-3">
-        {scent.icon && <span className="text-3xl">{scent.icon}</span>}
-        <div>
-          <p className="font-medium">{scent.name || "Sans nom"}</p>
-          {scent.description && (
-            <p className="text-sm text-muted-foreground">{scent.description}</p>
-          )}
-          {scent.notes && scent.notes.length > 0 && (
-            <div className="flex gap-2 mt-2">
-              {scent.notes.map((note: string, index: number) => (
-                <Badge key={index} variant="secondary">
-                  {note}
-                </Badge>
-              ))}
+    <Card className="border-border/50 bg-card/50">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <span className="text-2xl">🌸</span>
+          Parfum
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-start gap-4">
+          {scent.icon && (
+            <div className="flex-shrink-0">
+              <span className="text-4xl">{scent.icon}</span>
             </div>
           )}
+          <div className="flex-1 space-y-2">
+            <h4 className="font-semibold text-card-foreground text-lg">
+              {scent.name || "Sans nom"}
+            </h4>
+            {scent.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {scent.description}
+              </p>
+            )}
+            {scent.notes && scent.notes.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {scent.notes.map((note: string, index: number) => (
+                  <Badge key={index} variant="outline">
+                    {note}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -120,7 +136,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
     console.error("Erreur ou produit non trouvé:", { error, product });
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <div className="text-red-500 text-xl font-semibold">
+        <div className="text-destructive text-xl font-semibold">
           {error?.message || "Erreur lors du chargement du produit"}
         </div>
         <p className="text-muted-foreground">
@@ -163,7 +179,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   };
 
   return (
-    <section className="py-12">
+    <section>
       <div className="max-w-7xl mx-auto">
         <div className="lg:grid lg:grid-cols-2 lg:gap-12">
           {/* Colonne de gauche - Carrousel d'images du produit */}

@@ -82,7 +82,7 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-border">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
             Informations personnelles

@@ -17,12 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { scentSchema, type ScentFormData } from "@/lib/admin-schemas";
+import { DialogClose } from "@/components/ui/dialog";
 
-interface CreateScentFormProps {
-  onSuccess: () => void;
-}
-
-export default function CreateScentForm({ onSuccess }: CreateScentFormProps) {
+export default function CreateScentForm() {
   const queryClient = useQueryClient();
 
   const form = useForm<ScentFormData>({
@@ -56,7 +53,6 @@ export default function CreateScentForm({ onSuccess }: CreateScentFormProps) {
       queryClient.invalidateQueries({ queryKey: ["scents"] });
       toast.success("Parfum créé avec succès");
       form.reset();
-      onSuccess();
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -165,14 +161,15 @@ export default function CreateScentForm({ onSuccess }: CreateScentFormProps) {
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            disabled={createScent.isPending}
-          >
-            Annuler
-          </Button>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={createScent.isPending}
+            >
+              Annuler
+            </Button>
+          </DialogClose>
           <Button type="submit" disabled={createScent.isPending}>
             {createScent.isPending ? (
               <>

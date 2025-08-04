@@ -50,21 +50,34 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
+  // Helper function to generate unique key for cart items
+  const getItemKey = (item: CartItem) => {
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}`;
+  };
+
+  // Helper function to check if two items are the same (same product + scent + audio status)
+  const isSameItem = (item1: CartItem, item2: CartItem) => {
+    return (
+      item1.id === item2.id &&
+      item1.selectedScent.id === item2.selectedScent.id &&
+      // Si les deux ont un audio ou si les deux n'en ont pas
+      ((item1.audioUrl && item2.audioUrl) ||
+        (!item1.audioUrl && !item2.audioUrl))
+    );
+  };
+
   // Function to add items to the cart
   const addToCart = (item: CartItem) => {
     console.log("Adding item:", item);
     setCart((prevCart) => {
-      const existingItem = prevCart.find(
-        (cartItem) =>
-          cartItem.id === item.id &&
-          cartItem.selectedScent.id === item.selectedScent.id
+      const existingItem = prevCart.find((cartItem) =>
+        isSameItem(cartItem, item)
       );
 
       if (existingItem) {
         console.log("Item already in cart, updating quantity");
         return prevCart.map((cartItem) =>
-          cartItem.id === item.id &&
-          cartItem.selectedScent.id === item.selectedScent.id
+          isSameItem(cartItem, item)
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         );
@@ -76,36 +89,59 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Function to update quantity of an item in the cart
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = (itemKey: string, quantity: number) => {
     if (quantity < 1) return;
     setCart((prevCart) =>
-      prevCart.map((cartItem) =>
-        cartItem.id === id ? { ...cartItem, quantity } : cartItem
-      )
+      prevCart.map((cartItem) => {
+        const cartItemKey = getItemKey(cartItem);
+        return cartItemKey === itemKey ? { ...cartItem, quantity } : cartItem;
+      })
     );
   };
 
   // Function to remove item from the cart
-  const removeFromCart = (id: string) => {
-    setCart((prevCart) => prevCart.filter((cartItem) => cartItem.id !== id));
+  const removeFromCart = (itemKey: string) => {
+    setCart((prevCart) =>
+      prevCart.filter((cartItem) => getItemKey(cartItem) !== itemKey)
+    );
   };
 
   // Function to update audio URL for a specific item
-  const updateItemAudio = (id: string, audioUrl: string) => {
-    setCart((prevCart) =>
-      prevCart.map((cartItem) =>
-        cartItem.id === id ? { ...cartItem, audioUrl } : cartItem
-      )
-    );
+  const updateItemAudio = (itemKey: string, audioUrl: string) => {
+    setCart((prevCart) => {
+      const itemIndex = prevCart.findIndex(
+        (cartItem) => getItemKey(cartItem) === itemKey
+      );
+      if (itemIndex === -1) return prevCart;
+
+      const item = prevCart[itemIndex];
+      const updatedItem = { ...item, audioUrl };
+
+      // Créer un nouvel élément avec l'audio
+      const newCart = [...prevCart];
+      newCart[itemIndex] = updatedItem;
+
+      return newCart;
+    });
   };
 
   // Function to remove audio from a specific item
-  const removeItemAudio = (id: string) => {
-    setCart((prevCart) =>
-      prevCart.map((cartItem) =>
-        cartItem.id === id ? { ...cartItem, audioUrl: undefined } : cartItem
-      )
-    );
+  const removeItemAudio = (itemKey: string) => {
+    setCart((prevCart) => {
+      const itemIndex = prevCart.findIndex(
+        (cartItem) => getItemKey(cartItem) === itemKey
+      );
+      if (itemIndex === -1) return prevCart;
+
+      const item = prevCart[itemIndex];
+      const updatedItem = { ...item, audioUrl: undefined };
+
+      // Créer un nouvel élément sans audio
+      const newCart = [...prevCart];
+      newCart[itemIndex] = updatedItem;
+
+      return newCart;
+    });
   };
 
   const clearCart = () => {

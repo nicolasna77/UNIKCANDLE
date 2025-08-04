@@ -54,9 +54,14 @@ export async function GET(request: Request) {
       include: {
         items: {
           include: {
-            product: true,
+            product: {
+              include: {
+                images: true,
+              },
+            },
             scent: true,
             qrCode: true,
+            Return: true,
           },
         },
         shippingAddress: true,

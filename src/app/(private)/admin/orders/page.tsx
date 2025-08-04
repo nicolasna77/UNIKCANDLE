@@ -42,10 +42,13 @@ import {
 
 import Loading from "@/components/loading";
 import DialogDetailOrder from "./dialog-detail-order";
+import { PaginationComponent } from "@/app/(private)/Pagination";
 
 export default function OrdersPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: orders, isLoading } = useQuery<
     (Order & {
@@ -141,6 +144,16 @@ export default function OrdersPage() {
     order.user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Pagination
+  const totalPages = Math.ceil((filteredOrders?.length || 0) / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOrders = filteredOrders?.slice(startIndex, endIndex);
+
+  const updatePageInURL = (page: number) => {
+    setCurrentPage(page);
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -175,7 +188,7 @@ export default function OrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredOrders?.map((order) => (
+            {paginatedOrders?.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">#{order.id}</TableCell>
                 <TableCell>
@@ -261,6 +274,21 @@ export default function OrdersPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <PaginationComponent
+            table={{
+              getPageCount: () => totalPages,
+              getCanPreviousPage: () => currentPage > 1,
+              getCanNextPage: () => currentPage < totalPages,
+            }}
+            currentPage={currentPage}
+            updatePageInURL={updatePageInURL}
+          />
+        </div>
+      )}
     </div>
   );
 }

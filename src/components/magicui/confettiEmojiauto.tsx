@@ -48,7 +48,7 @@ export function ConfettiEmojiAuto({ icon }: { icon: string }) {
     shoot();
 
     return () => clearInterval(interval);
-  }, []);
+  }, [icon]);
 
   return null; // Pas de bouton, effet auto
 }

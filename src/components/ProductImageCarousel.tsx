@@ -29,14 +29,12 @@ export default function ProductImageCarousel({
 }: ProductImageCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
     if (!api) {
       return;
     }
 
-    setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
 
     api.on("select", () => {
@@ -121,34 +119,19 @@ export default function ProductImageCarousel({
                 )}
                 onClick={() => handleThumbClick(index)}
               >
-                <Card className="border-2 transition-colors">
-                  <CardContent className="p-1">
-                    <div className="relative aspect-square">
-                      <Image
-                        src={image.url}
-                        alt={`${productName} - Vignette ${index + 1}`}
-                        fill
-                        className="object-cover rounded-sm"
-                        sizes="(max-width: 768px) 25vw, 20vw"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="border-border border transition-colors relative aspect-square">
+                  <Image
+                    src={image.url}
+                    alt={`${productName} - Vignette ${index + 1}`}
+                    fill
+                    className="object-cover rounded-sm"
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                  />
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
         </Carousel>
-      )}
-
-      {/* Indicateur de position */}
-      {images.length > 1 && (
-        <div className="flex justify-center mt-4">
-          <div className="text-sm text-muted-foreground">
-            {current} sur {count}
-          </div>
-        </div>
       )}
     </div>
   );

@@ -159,6 +159,7 @@ model OrderItem {
   product     Product  @relation(fields: [productId], references: [id])
   scent       Scent    @relation(fields: [scentId], references: [id])
   qrCode      QRCode?
+  Return      Return[]
 }
 
 model Address {
@@ -196,6 +197,33 @@ model QRCode {
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 }
 
+model Return {
+  id           String       @id @default(uuid())
+  orderItemId  String
+  reason       String
+  description  String?
+  status       ReturnStatus @default(REQUESTED)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  processedAt  DateTime?
+  refundAmount Float?
+  adminNote    String?
+
+  // Suivi du colis retour
+  trackingNumber String?
+  carrier        String?
+  trackingUrl    String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+
+  // Remboursement Stripe
+  stripeRefundId String?
+  refundedAt     DateTime?
+  refundStatus   RefundStatus @default(PENDING)
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+}
+
 model Category {
   id          String    @id @default(uuid())
   name        String    @unique
@@ -205,6 +233,24 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   products    Product[]
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  RETURN_SHIPPING_SENT // Étiquette de retour envoyée
+  RETURN_IN_TRANSIT // Colis retour en cours
+  RETURN_DELIVERED // Colis retour reçu
+  PROCESSING // Traitement du retour
+  COMPLETED // Retour terminé et remboursé
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 enum OrderStatus {

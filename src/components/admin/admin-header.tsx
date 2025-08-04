@@ -13,6 +13,9 @@ import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
 
 interface BreadcrumbItemType {
   label: string;
@@ -129,8 +132,7 @@ interface AdminHeaderActionsProps {
 
 export function AdminHeaderActions({
   onRefresh,
-  onAdd,
-  addLabel = "Ajouter",
+
   isLoading = false,
   customActions,
 }: AdminHeaderActionsProps) {
@@ -152,12 +154,20 @@ export function AdminHeaderActions({
         </Button>
       )}
 
-      {onAdd && (
-        <Button size="sm" onClick={onAdd}>
-          <Plus className="h-4 w-4 mr-2" />
-          {addLabel}
-        </Button>
-      )}
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle senteur
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Créer une nouvelle senteur</DialogTitle>
+          </DialogHeader>
+          <CreateScentForm />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

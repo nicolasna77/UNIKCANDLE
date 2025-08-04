@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
@@ -24,7 +23,6 @@ import { type ScentWithProducts } from "@/lib/admin-schemas";
 
 export default function ScentsPage() {
   const queryClient = useQueryClient();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingScent, setEditingScent] = useState<ScentWithProducts | null>(
     null
   );
@@ -196,27 +194,8 @@ export default function ScentsPage() {
           { label: "Administration", href: "/admin" },
           { label: "Senteurs" },
         ]}
-        actions={
-          <AdminHeaderActions
-            onRefresh={handleRefresh}
-            onAdd={() => setIsCreateDialogOpen(true)}
-          />
-        }
+        actions={<AdminHeaderActions onRefresh={handleRefresh} />}
       />
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogTrigger asChild>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle senteur
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Créer une nouvelle senteur</DialogTitle>
-          </DialogHeader>
-          <CreateScentForm onSuccess={() => setIsCreateDialogOpen(false)} />
-        </DialogContent>
-      </Dialog>
 
       <DataTableAdvanced
         data={scents}
@@ -236,7 +215,7 @@ export default function ScentsPage() {
             <DialogHeader>
               <DialogTitle>Modifier la senteur</DialogTitle>
             </DialogHeader>
-            <CreateScentForm onSuccess={() => setEditingScent(null)} />
+            <CreateScentForm />
           </DialogContent>
         </Dialog>
       )}

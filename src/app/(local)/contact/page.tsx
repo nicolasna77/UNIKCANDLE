@@ -74,7 +74,7 @@ const ContactPage = () => {
 
   async function onSubmit(data: ContactFormValues) {
     try {
-      const response = await fetch("/api/send-email", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +96,7 @@ const ContactPage = () => {
       }
     } catch {
       toast.error("Erreur de connexion", {
-        description: "Impossible de se connecter au serveur",
+        description: "Erreur lors de l'envoi du message",
       });
     }
   }

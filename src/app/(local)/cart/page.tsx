@@ -36,12 +36,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper function to generate unique key for cart items
+  const getItemKey = (item: (typeof cart)[0]) => {
+    return `${item.id}-${item.selectedScent?.id || ""}-${item.audioUrl || "no-audio"}`;
+  };
 
   // Vérifier si l'utilisateur revient après annulation
   useEffect(() => {
@@ -68,10 +73,12 @@ export default function CartPage() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isLoading]);
+
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
     0
   );
+
   const handleCheckout = async () => {
     try {
       setIsLoading(true);
@@ -307,92 +314,237 @@ export default function CartPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Section principale du panier */}
         <div className="space-y-6 lg:col-span-2">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              Mon panier
-            </h1>
-            <p className="text-muted-foreground">
-              {cart.length} {cart.length === 1 ? "article" : "articles"} dans
-              votre panier
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">
+                Mon panier
+              </h1>
+              <p className="text-muted-foreground">
+                {cart.length} {cart.length === 1 ? "article" : "articles"} dans
+                votre panier
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (confirm("Êtes-vous sûr de vouloir vider votre panier ?")) {
+                  clearCart();
+                  toast.success("Panier vidé avec succès");
+                }
+              }}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Vider le panier
+            </Button>
           </div>
 
           <div className="space-y-4">
-            {cart.map((item) => (
-              <Card
-                key={item.id + (item.selectedScent?.id || "")}
-                className="overflow-hidden border-border p-0"
-              >
-                <CardContent className="p-0">
-                  <div className="flex h-full flex-col md:flex-row">
-                    {/* Image produit */}
-                    <div className="relative h-auto w-full md:w-32">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        width={500}
-                        height={500}
-                        className="h-full w-full object-cover md:w-32"
-                      />
-                    </div>
-
-                    {/* Détails produit */}
-                    <div className="flex-1 p-6 pb-3">
-                      <div className="flex justify-between">
-                        <div>
-                          <h3 className="font-medium text-foreground">
-                            {item.name}
-                          </h3>
-                          <p className="text-muted-foreground text-sm">
-                            {item.selectedScent?.name}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeFromCart(item.id)}
+            {/* Grouper les produits par type (avec/sans audio) */}
+            {(() => {
+              const productsWithAudio = cart.filter(item => item.audioUrl);
+              const productsWithoutAudio = cart.filter(item => !item.audioUrl);
+              
+              return (
+                <>
+                  {/* Produits avec audio */}
+                  {productsWithAudio.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">
+                        🎵 Produits avec audio personnalisé ({productsWithAudio.length})
+                      </h3>
+                      {productsWithAudio.map((item) => (
+                        <Card
+                          key={getItemKey(item)}
+                          className="overflow-hidden border-border p-0 border-l-4 border-l-primary"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                          <CardContent className="p-0">
+                            <div className="flex h-full flex-col md:flex-row">
+                              {/* Image produit */}
+                              <div className="relative h-auto w-full md:w-32">
+                                <Image
+                                  src={item.imageUrl}
+                                  alt={item.name}
+                                  width={500}
+                                  height={500}
+                                  className="h-full w-full object-cover md:w-32"
+                                />
+                              </div>
 
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              updateQuantity(item.id, (item.quantity || 1) - 1)
-                            }
-                            disabled={(item.quantity || 1) <= 1}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-8 text-center text-foreground">
-                            {item.quantity || 1}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              updateQuantity(item.id, (item.quantity || 1) + 1)
-                            }
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
+                              {/* Détails produit */}
+                              <div className="flex-1 p-6 pb-3">
+                                <div className="flex justify-between">
+                                  <div>
+                                    <h3 className="font-medium text-foreground">
+                                      {item.name}
+                                    </h3>
+                                    <p className="text-muted-foreground text-sm">
+                                      {item.selectedScent?.name}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <div className="flex items-center gap-1">
+                                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                                          🎵 Audio personnalisé
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          +2.00€
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeFromCart(getItemKey(item))}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
 
-                        <div className="text-right">
-                          <div className="font-medium text-foreground">
-                            {(item.price * (item.quantity || 1)).toFixed(2)} €
-                          </div>
-                        </div>
-                      </div>
+                                <div className="mt-4 flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() =>
+                                        updateQuantity(
+                                          getItemKey(item),
+                                          (item.quantity || 1) - 1
+                                        )
+                                      }
+                                      disabled={(item.quantity || 1) <= 1}
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </Button>
+                                    <span className="w-8 text-center text-foreground">
+                                      {item.quantity || 1}
+                                    </span>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() =>
+                                        updateQuantity(
+                                          getItemKey(item),
+                                          (item.quantity || 1) + 1
+                                        )
+                                      }
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+
+                                  <div className="text-right">
+                                    <div className="font-medium text-foreground">
+                                      {(item.price * (item.quantity || 1)).toFixed(2)} €
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  )}
+
+                  {/* Produits sans audio */}
+                  {productsWithoutAudio.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">
+                        📦 Produits standard ({productsWithoutAudio.length})
+                      </h3>
+                      {productsWithoutAudio.map((item) => (
+                        <Card
+                          key={getItemKey(item)}
+                          className="overflow-hidden border-border p-0"
+                        >
+                          <CardContent className="p-0">
+                            <div className="flex h-full flex-col md:flex-row">
+                              {/* Image produit */}
+                              <div className="relative h-auto w-full md:w-32">
+                                <Image
+                                  src={item.imageUrl}
+                                  alt={item.name}
+                                  width={500}
+                                  height={500}
+                                  className="h-full w-full object-cover md:w-32"
+                                />
+                              </div>
+
+                              {/* Détails produit */}
+                              <div className="flex-1 p-6 pb-3">
+                                <div className="flex justify-between">
+                                  <div>
+                                    <h3 className="font-medium text-foreground">
+                                      {item.name}
+                                    </h3>
+                                    <p className="text-muted-foreground text-sm">
+                                      {item.selectedScent?.name}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                        Sans audio
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeFromCart(getItemKey(item))}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+
+                                <div className="mt-4 flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() =>
+                                        updateQuantity(
+                                          getItemKey(item),
+                                          (item.quantity || 1) - 1
+                                        )
+                                      }
+                                      disabled={(item.quantity || 1) <= 1}
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </Button>
+                                    <span className="w-8 text-center text-foreground">
+                                      {item.quantity || 1}
+                                    </span>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() =>
+                                        updateQuantity(
+                                          getItemKey(item),
+                                          (item.quantity || 1) + 1
+                                        )
+                                      }
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+
+                                  <div className="text-right">
+                                    <div className="font-medium text-foreground">
+                                      {(item.price * (item.quantity || 1)).toFixed(2)} €
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
 

@@ -6,6 +6,7 @@ import {
   IconListDetails,
   IconPackage,
   IconUsers,
+  IconRefresh,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -38,6 +39,11 @@ const data = {
       title: "Orders",
       url: "/admin/orders",
       icon: IconListDetails,
+    },
+    {
+      title: "Returns",
+      url: "/admin/returns",
+      icon: IconRefresh,
     },
     {
       title: "Products",

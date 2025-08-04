@@ -5,12 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useProducts, useDeleteProduct } from "@/hooks/useProducts";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency } from "@/lib/utils";
@@ -22,8 +16,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Image as ProductImage, Scent, Category } from "@/generated/client";
-import CreateProductForm from "./create-product-form";
+import CreateProductForm from "./CreateProductForm";
 import EditProductForm from "./EditProductForm";
+// Import du composant de pagination réutilisable
+// import { PaginationComponent } from "@/app/(private)/Pagination";
 
 interface Product {
   id: string;
@@ -219,44 +215,53 @@ export default function ProductsPage() {
         }
       />
 
+      {/* 
+        Le DataTableAdvanced utilise maintenant automatiquement le composant PaginationComponent
+        grâce à l'intégration dans le composant DataTableAdvanced.
+        
+        Si vous voulez utiliser le composant de pagination directement dans une page simple :
+        
+        const [currentPage, setCurrentPage] = useState(1);
+        const itemsPerPage = 10;
+        const totalPages = Math.ceil(data.length / itemsPerPage);
+        
+        <PaginationComponent
+          table={{
+            getPageCount: () => totalPages,
+            getCanPreviousPage: () => currentPage > 1,
+            getCanNextPage: () => currentPage < totalPages,
+          }}
+          currentPage={currentPage}
+          updatePageInURL={setCurrentPage}
+        />
+      */}
+
       <DataTableAdvanced
         columns={columns}
         data={products?.products || []}
         searchPlaceholder="Rechercher par nom..."
-        onRefresh={handleRefresh}
         onExport={handleExport}
         isLoading={isLoading}
         emptyMessage="Aucun produit trouvé"
       />
 
-      {/* Dialog de création */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>Créer un produit</DialogTitle>
-          </DialogHeader>
-          <CreateProductForm onSuccess={() => setIsCreateDialogOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      {/* Formulaire de création avec dialog intégré */}
+      <CreateProductForm
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSuccess={() => setIsCreateDialogOpen(false)}
+      />
 
-      {/* Dialog d'édition */}
-      <Dialog
-        open={!!editingProduct}
-        onOpenChange={(open) => !open && setEditingProduct(null)}
-      >
-        <DialogContent className="max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>Modifier le produit</DialogTitle>
-          </DialogHeader>
-          {editingProduct && (
-            <EditProductForm
-              productId={editingProduct.id}
-              onSuccess={() => setEditingProduct(null)}
-              initialData={editingProduct}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Formulaire d'édition avec dialog intégré */}
+      {editingProduct && (
+        <EditProductForm
+          productId={editingProduct.id}
+          initialData={editingProduct}
+          open={!!editingProduct}
+          onOpenChange={(open) => !open && setEditingProduct(null)}
+          onSuccess={() => setEditingProduct(null)}
+        />
+      )}
     </div>
   );
 }

@@ -146,7 +146,7 @@ const HeroSection = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-full blur-3xl scale-150 animate-pulse" />
 
             {/* Container de la bougie 3D */}
-            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative w-full h-full overflow-hidden ">
               <Candle3D />
 
               {/* Reflet élégant */}

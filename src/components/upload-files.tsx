@@ -2,11 +2,7 @@
 
 import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  formatBytes,
-  useFileUpload,
-  type FileMetadata,
-} from "@/hooks/use-file-upload";
+import { formatBytes, type FileMetadata } from "@/hooks/use-file-upload";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -26,6 +22,9 @@ export default function UploadFiles({
   const [localFiles, setLocalFiles] = useState<FileMetadata[]>(
     initialFiles || []
   );
+  const [isDragging, setIsDragging] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const onFilesChangeRef = useRef(onFilesChange);
 
   useEffect(() => {
@@ -49,40 +48,79 @@ export default function UploadFiles({
     }
   }, []);
 
-  const [
-    { isDragging, errors },
-    {
-      handleDragEnter,
-      handleDragLeave,
-      handleDragOver,
-      handleDrop,
-      openFileDialog,
-      removeFile,
-      clearFiles,
-      getInputProps,
-    },
-  ] = useFileUpload({
-    accept: "image/svg+xml,image/png,image/jpeg,image/jpg,image/gif",
-    maxSize,
-    multiple: true,
-    maxFiles,
-    initialFiles,
-    onFilesChange: (uploadedFiles) => {
-      const fileMetadata = uploadedFiles.map((f) => {
-        const file = f.file instanceof File ? f.file : undefined;
-        const url = file ? URL.createObjectURL(file) : f.preview || "";
-        return {
-          id: f.id,
-          name: f.file.name,
-          size: f.file.size,
-          type: f.file.type,
-          url,
-          file,
-        } satisfies FileMetadata;
+  const generateUniqueId = (file: File): string => {
+    return `${file.name}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  };
+
+  const handleFileSelect = useCallback(
+    (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+
+      const validateFile = (file: File): string | null => {
+        if (file.size > maxSize) {
+          return `Le fichier "${file.name}" dépasse la taille maximale de ${formatBytes(maxSize)}.`;
+        }
+
+        const acceptedTypes =
+          "image/svg+xml,image/png,image/jpeg,image/jpg,image/gif"
+            .split(",")
+            .map((type) => type.trim());
+        const isAccepted = acceptedTypes.some((type) => {
+          if (type.endsWith("/*")) {
+            const baseType = type.split("/")[0];
+            return file.type.startsWith(`${baseType}/`);
+          }
+          return file.type === type;
+        });
+
+        if (!isAccepted) {
+          return `Le fichier "${file.name}" n'est pas un type de fichier accepté.`;
+        }
+
+        return null;
+      };
+
+      const newErrors: string[] = [];
+      const newFiles: FileMetadata[] = [];
+
+      Array.from(files).forEach((file) => {
+        const error = validateFile(file);
+        if (error) {
+          newErrors.push(error);
+        } else {
+          // Vérifier si on ne dépasse pas le nombre maximum de fichiers
+          if (localFiles.length + newFiles.length >= maxFiles) {
+            newErrors.push(
+              `Vous ne pouvez uploader qu'un maximum de ${maxFiles} fichiers.`
+            );
+            return;
+          }
+
+          const url = URL.createObjectURL(file);
+          newFiles.push({
+            id: generateUniqueId(file),
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            url,
+            file,
+          });
+        }
       });
-      handleFilesChange(fileMetadata);
+
+      if (newErrors.length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
+      if (newFiles.length > 0) {
+        const updatedFiles = [...localFiles, ...newFiles];
+        handleFilesChange(updatedFiles);
+        setErrors([]);
+      }
     },
-  });
+    [localFiles, maxFiles, handleFilesChange, maxSize]
+  );
 
   const handleRemoveFile = useCallback(
     (fileId: string) => {
@@ -94,11 +132,10 @@ export default function UploadFiles({
       ) {
         URL.revokeObjectURL(fileToRemove.url);
       }
-      removeFile(fileId);
       const remainingFiles = localFiles.filter((f) => f.id !== fileId);
       handleFilesChange(remainingFiles);
     },
-    [disabled, localFiles, handleFilesChange, removeFile]
+    [disabled, localFiles, handleFilesChange]
   );
 
   const handleClearFiles = useCallback(() => {
@@ -108,9 +145,44 @@ export default function UploadFiles({
         URL.revokeObjectURL(file.url);
       }
     });
-    clearFiles();
     handleFilesChange([]);
-  }, [disabled, clearFiles, handleFilesChange, localFiles]);
+  }, [disabled, handleFilesChange, localFiles]);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      if (disabled) return;
+
+      const files = e.dataTransfer.files;
+      handleFileSelect(files);
+    },
+    [disabled, handleFileSelect]
+  );
+
+  const openFileDialog = useCallback(() => {
+    if (disabled) return;
+    fileInputRef.current?.click();
+  }, [disabled]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -125,10 +197,18 @@ export default function UploadFiles({
         className={`border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors not-data-[files]:justify-center has-[input:focus]:ring-[3px] ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <input
-          {...getInputProps()}
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/svg+xml,image/png,image/jpeg,image/jpg,image/gif"
           className="sr-only"
           aria-label="Upload image file"
           disabled={disabled}
+          onChange={(e) => handleFileSelect(e.target.files)}
+          onClick={(e) => {
+            // Empêcher la propagation vers le formulaire parent
+            e.stopPropagation();
+          }}
         />
         <div className="flex flex-col items-center justify-center px-4 py-3 text-center">
           <div
@@ -139,15 +219,17 @@ export default function UploadFiles({
           </div>
           <p className="mb-1.5 text-sm font-medium">Glissez vos images ici</p>
           <p className="text-muted-foreground text-xs">
-            SVG, PNG, JPG ou GIF (max. {maxSizeMB}MB)
+            ou cliquez pour sélectionner
           </p>
           <Button
+            type="button"
             variant="outline"
+            size="sm"
             className="mt-4"
             onClick={openFileDialog}
             disabled={disabled}
           >
-            <UploadIcon className="-ms-1 opacity-60" aria-hidden="true" />
+            <UploadIcon className="mr-2 h-4 w-4" />
             Selectionner des images
           </Button>
         </div>
@@ -198,6 +280,7 @@ export default function UploadFiles({
                 onClick={() => handleRemoveFile(file.id)}
                 aria-label="Supprimer le fichier"
                 disabled={disabled}
+                type="button"
               >
                 <XIcon aria-hidden="true" />
               </Button>
@@ -208,12 +291,13 @@ export default function UploadFiles({
           {localFiles.length > 1 && (
             <div className="flex justify-center">
               <Button
-                size="sm"
+                type="button"
                 variant="outline"
+                size="sm"
                 onClick={handleClearFiles}
                 disabled={disabled}
               >
-                Supprimer toutes les images
+                Supprimer tous les fichiers
               </Button>
             </div>
           )}

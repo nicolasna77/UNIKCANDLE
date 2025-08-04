@@ -52,7 +52,7 @@ const ChangePasswordForm = () => {
     }
   };
   return (
-    <Card>
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Mot de passe</CardTitle>
         <CardDescription>

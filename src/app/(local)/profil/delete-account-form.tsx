@@ -37,7 +37,7 @@ const DeleteAccountForm = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="text-xl font-bold">Supprimer le compte</CardTitle>
         <CardDescription>

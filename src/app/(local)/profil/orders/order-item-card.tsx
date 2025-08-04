@@ -28,6 +28,7 @@ import {
   Address,
   QRCode,
 } from "@/generated/client";
+import ReturnRequestDialog from "./return-request-dialog";
 
 const OrderItemCard = ({
   order,
@@ -57,6 +58,8 @@ const OrderItemCard = ({
     month: "long",
     day: "numeric",
   });
+
+  console.log(order);
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -96,7 +99,7 @@ const OrderItemCard = ({
               <div key={item.id} className="flex items-center gap-4">
                 <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-gray-50">
                   <Image
-                    src={item.product?.images?.[0]?.url || "/placeholder.svg"}
+                    src={item.product?.images?.[0]?.url || ""}
                     alt={item.product?.name || "Produit"}
                     fill
                     className="object-cover"
@@ -135,6 +138,22 @@ const OrderItemCard = ({
                       </span>
                     </div>
                   )}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <ReturnRequestDialog
+                      orderItem={{
+                        id: item.id,
+                        product: { name: item.product.name },
+                        scent: { name: item.scent.name },
+                      }}
+                      order={{
+                        id: order.id,
+                      }}
+                    />
+                    {/* TODO: Système de retour simplifié */}
+                    {/* <Button variant="outline" size="sm">
+                       Suivre le retour
+                     </Button> */}
+                  </div>
                 </div>
               </div>
             ))}

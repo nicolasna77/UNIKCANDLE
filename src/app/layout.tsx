@@ -78,11 +78,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning className="smooth-scroll">
+    <html lang="fr" className="smooth-scroll">
       <Analytics />
-      <body
-        className={`${lora.variable} ${geistMono.variable} antialiased bg-white`}
-      >
+      <body className={`${lora.variable} ${geistMono.variable} antialiased `}>
         <CartProvider>
           <QueryProvider>
             {children}

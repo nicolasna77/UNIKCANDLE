@@ -199,7 +199,7 @@ export default function SignIn() {
                   try {
                     await signIn.social({
                       provider: "google",
-                      callbackURL: "/dashboard",
+                      callbackURL: "/",
                     });
                   } finally {
                     setLoading(false);

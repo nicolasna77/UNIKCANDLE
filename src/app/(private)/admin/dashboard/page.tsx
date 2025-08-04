@@ -31,6 +31,7 @@ import {
   Bar,
   Legend,
 } from "recharts";
+import { Button } from "@/components/ui/button";
 
 interface OrderStatus {
   status: string;
@@ -156,12 +157,9 @@ export default function DashboardPage() {
           { label: "Tableau de bord" },
         ]}
         actions={
-          <button
-            onClick={() => refetch()}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
+          <Button variant="outline" onClick={() => refetch()}>
             Actualiser
-          </button>
+          </Button>
         }
       />
 
