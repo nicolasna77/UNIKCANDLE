@@ -54,8 +54,9 @@ export const auth = betterAuth({
   },
 
   plugins: [
-    oneTap(),
-
+    oneTap({
+      disableSignup: false,
+    }),
     admin({
       adminRoles: ["ADMIN"],
     }),

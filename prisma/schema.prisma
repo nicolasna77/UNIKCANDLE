@@ -218,6 +218,8 @@ model Return {
 
   // Remboursement Stripe
   stripeRefundId String?
+
+  
   refundedAt     DateTime?
   refundStatus   RefundStatus @default(PENDING)
 

@@ -5,9 +5,7 @@
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
     "studio": "prisma studio",
-    "shema": "prisma/schema.prisma",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma db push && prisma db seed && next build"
+    "schema": "prisma/schema.prisma"
   },
   "pkg": {
     "assets": [
@@ -17,7 +15,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "prisma:generate": "prisma generate --schema=./prisma/schema/schema.prisma",
+    "prisma:generate": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
