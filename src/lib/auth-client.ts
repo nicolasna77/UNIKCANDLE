@@ -12,6 +12,13 @@ export const authClient = createAuthClient({
     adminClient(),
     oneTapClient({
       clientId: googleClientId || "",
+      autoSelect: false,
+      cancelOnTapOutside: true,
+      context: "signin",
+      promptOptions: {
+        baseDelay: 1000,
+        maxAttempts: 3
+      }
     }),
   ],
 });

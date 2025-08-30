@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
+import { signIn, useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,11 +46,16 @@ export default function SignIn() {
   const callbackUrl = useSearchParams().get("callbackUrl");
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const { data: session, isPending } = useSession();
 
   const [loading, setLoading] = useState(false);
+  
   useEffect(() => {
-    oneTapCall();
-  }, []);
+    // Ne pas afficher One Tap si l'utilisateur est déjà connecté
+    if (!isPending && !session) {
+      oneTapCall();
+    }
+  }, [session, isPending]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
