@@ -55,14 +55,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}`;
   };
 
-  // Helper function to check if two items are the same (same product + scent + audio status)
+  // Helper function to check if two items are the same (same product + scent + exact audio)
   const isSameItem = (item1: CartItem, item2: CartItem) => {
     return (
       item1.id === item2.id &&
       item1.selectedScent.id === item2.selectedScent.id &&
-      // Si les deux ont un audio ou si les deux n'en ont pas
-      ((item1.audioUrl && item2.audioUrl) ||
-        (!item1.audioUrl && !item2.audioUrl))
+      // Même audio exact (même URL ou les deux sans audio)
+      item1.audioUrl === item2.audioUrl
     );
   };
 

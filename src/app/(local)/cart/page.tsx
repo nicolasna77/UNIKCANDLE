@@ -379,9 +379,11 @@ export default function CartPage() {
                               <div className="flex-1 p-6 pb-3">
                                 <div className="flex justify-between">
                                   <div>
-                                    <h3 className="font-medium text-foreground">
-                                      {item.name}
-                                    </h3>
+                                    <Link href={`/products/${item.id}`} className="hover:underline">
+                                      <h3 className="font-medium text-foreground">
+                                        {item.name}
+                                      </h3>
+                                    </Link>
                                     <p className="text-muted-foreground text-sm">
                                       {item.selectedScent?.name}
                                     </p>
@@ -389,9 +391,6 @@ export default function CartPage() {
                                       <div className="flex items-center gap-1">
                                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
                                           🎵 Audio personnalisé
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                          +2.00€
                                         </span>
                                       </div>
                                     </div>
@@ -484,9 +483,11 @@ export default function CartPage() {
                               <div className="flex-1 p-6 pb-3">
                                 <div className="flex justify-between">
                                   <div>
-                                    <h3 className="font-medium text-foreground">
-                                      {item.name}
-                                    </h3>
+                                    <Link href={`/products/${item.id}`} className="hover:underline">
+                                      <h3 className="font-medium text-foreground">
+                                        {item.name}
+                                      </h3>
+                                    </Link>
                                     <p className="text-muted-foreground text-sm">
                                       {item.selectedScent?.name}
                                     </p>
