@@ -37,6 +37,7 @@ type OrderItemMetadata = {
   quantity: number;
   price: number;
   audioUrl?: string;
+  qrCodeId: string;
 };
 
 export const sendConfirmationEmail = async (order: Order) => {
@@ -125,10 +126,18 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
       return existingOrder;
     }
 
-    // Vérifier si les produits existent
-    const metadataItems = session.metadata?.items
-      ? (JSON.parse(session.metadata.items) as OrderItemMetadata[])
-      : [];
+    // Récupérer les données de commande depuis la table temporaire
+    const temporaryOrder = await prisma.temporaryOrder.findUnique({
+      where: { orderId: session.metadata?.orderId },
+    });
+
+    if (!temporaryOrder) {
+      console.error("Données de commande temporaires non trouvées pour orderId:", session.metadata?.orderId);
+      throw new Error("Données de commande temporaires non trouvées");
+    }
+
+    const orderData = JSON.parse(temporaryOrder.orderData);
+    const metadataItems = orderData.items as OrderItemMetadata[];
 
     const productIds = metadataItems.map((item) => item.id);
     const scentIds = metadataItems.map((item) => item.scentId).filter(Boolean);
@@ -199,13 +208,6 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
         items: {
           create: await Promise.all(
             metadataItems.map(async (item) => {
-              const qrCodeData = {
-                productId: item.id,
-                scentId: item.scentId,
-                orderId: session.metadata?.orderId || session.id,
-                timestamp: Date.now(),
-              };
-
               return {
                 productId: item.id,
                 scentId: item.scentId,
@@ -214,7 +216,7 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
                 audioUrl: item.audioUrl,
                 qrCode: {
                   create: {
-                    code: JSON.stringify(qrCodeData),
+                    code: item.qrCodeId,
                   },
                 },
               };
@@ -269,6 +271,17 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
     });
 
     console.log("Nouvelle commande créée:", order);
+    
+    // Nettoyer la table temporaire après succès
+    try {
+      await prisma.temporaryOrder.delete({
+        where: { orderId: session.metadata?.orderId },
+      });
+      console.log("Données temporaires nettoyées pour orderId:", session.metadata?.orderId);
+    } catch (cleanupError) {
+      console.warn("Erreur lors du nettoyage des données temporaires:", cleanupError);
+    }
+    
     return order;
   } catch (error) {
     console.error("Erreur lors de la création de la commande:", error);

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { sendConfirmationEmail } from "@/app/(local)/success/confirm.action";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -106,12 +107,23 @@ export async function POST(req: Request) {
           throw new Error("userId manquant dans les métadonnées");
         }
 
-        if (!session.metadata?.items) {
-          console.error("items manquant dans les métadonnées");
-          throw new Error("items manquant dans les métadonnées");
+        if (!session.metadata?.orderId) {
+          console.error("orderId manquant dans les métadonnées");
+          throw new Error("orderId manquant dans les métadonnées");
         }
 
-        const cartItems: CartItem[] = JSON.parse(session.metadata.items);
+        // Récupérer les données de commande depuis la table temporaire
+        const temporaryOrder = await prisma.temporaryOrder.findUnique({
+          where: { orderId: session.metadata.orderId },
+        });
+
+        if (!temporaryOrder) {
+          console.error("Données de commande temporaires non trouvées pour orderId:", session.metadata.orderId);
+          throw new Error("Données de commande temporaires non trouvées");
+        }
+
+        const orderData = JSON.parse(temporaryOrder.orderData);
+        const cartItems: CartItem[] = orderData.items;
         console.log("Items du panier parsés:", cartItems);
         console.log(
           "Détail des items avec audio:",
@@ -203,7 +215,11 @@ export async function POST(req: Request) {
           include: {
             items: {
               include: {
-                product: true,
+                product: {
+                  include: {
+                    images: true,
+                  },
+                },
                 scent: true,
               },
             },
@@ -226,11 +242,46 @@ export async function POST(req: Request) {
           )
         );
 
-        // Envoyer l'email de confirmation de commande
-     await
 
         console.log("QR codes créés avec succès");
         console.log("Commande complète:", JSON.stringify(order, null, 2));
+
+        // Préparer les données pour l'email de confirmation
+        const emailOrderData = {
+          id: order.id,
+          createdAt: order.createdAt,
+          total: order.total,
+          status: order.status as "pending" | "processing" | "completed" | "cancelled",
+          userId: order.userId,
+          user: order.user,
+          items: order.items.map((item) => ({
+            id: item.id,
+            name: item.product.name,
+            imageUrl: item.product.images?.[0]?.url || "/placeholder-product.jpg",
+            scentName: item.scent.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        };
+
+        // Envoyer l'email de confirmation
+        try {
+          await sendConfirmationEmail(emailOrderData);
+          console.log("Email de confirmation envoyé avec succès");
+        } catch (emailError) {
+          console.error("Erreur lors de l'envoi de l'email de confirmation:", emailError);
+          // Ne pas faire échouer la commande si l'email échoue
+        }
+
+        // Nettoyer la table temporaire après succès
+        try {
+          await prisma.temporaryOrder.delete({
+            where: { orderId: session.metadata.orderId },
+          });
+          console.log("Données temporaires nettoyées pour orderId:", session.metadata.orderId);
+        } catch (cleanupError) {
+          console.warn("Erreur lors du nettoyage des données temporaires:", cleanupError);
+        }
 
         return new NextResponse(null, { status: 200 });
       } catch (error) {

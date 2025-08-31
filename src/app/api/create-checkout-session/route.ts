@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getUser } from "@/lib/auth-session";
 import { nanoid } from "nanoid";
+import { prisma } from "@/lib/prisma";
 
 interface CheckoutItem {
   id: string;
@@ -91,9 +92,10 @@ export async function POST(req: Request) {
     // Créer un identifiant unique pour cette commande
     const orderId = `order_${Date.now()}`;
 
-    console.log("Métadonnées finales:", {
+    // Stocker les données complètes en base de données temporairement
+    const orderData = {
       orderId,
-      userId: session?.id,
+      userId: session?.id || "guest",
       items: cartItemsWithCodes.map(
         (item: CheckoutItem & { qrCodeId: string }) => ({
           id: item.id,
@@ -104,6 +106,18 @@ export async function POST(req: Request) {
           audioUrl: item.audioUrl,
         })
       ),
+    };
+
+    console.log("Données de commande à stocker:", orderData);
+
+    // Créer un enregistrement temporaire pour cette session
+    await prisma.temporaryOrder.create({
+      data: {
+        orderId: orderId,
+        userId: session?.id || "guest",
+        orderData: JSON.stringify(orderData),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+      },
     });
 
     const stripeSession = await stripe.checkout.sessions.create({
@@ -139,20 +153,8 @@ export async function POST(req: Request) {
         },
       ],
       metadata: {
-        userId: session?.id || "guest",
         orderId: orderId,
-        items: JSON.stringify(
-          cartItemsWithCodes.map(
-            (item: CheckoutItem & { qrCodeId: string }) => ({
-              id: item.id,
-              quantity: item.quantity || 1,
-              price: item.price,
-              scentId: item.selectedScent.id,
-              qrCodeId: item.qrCodeId,
-              audioUrl: item.audioUrl,
-            })
-          )
-        ),
+        userId: session?.id || "guest",
       },
     });
 

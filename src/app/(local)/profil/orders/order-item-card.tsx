@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import {
+import type {
   Order,
   OrderItem,
   Product,
@@ -59,7 +59,15 @@ const OrderItemCard = ({
     day: "numeric",
   });
 
-  console.log(order);
+  console.log("Order data:", {
+    id: order.id,
+    items: order.items.map(item => ({
+      id: item.id,
+      product: item.product,
+      productImages: item.product?.images,
+      scent: item.scent
+    }))
+  });
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -99,7 +107,7 @@ const OrderItemCard = ({
               <div key={item.id} className="flex items-center gap-4">
                 <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-gray-50">
                   <Image
-                    src={item.product?.images?.[0]?.url || ""}
+                    src={item.product?.images?.[0]?.url || "/placeholder-product.jpg"}
                     alt={item.product?.name || "Produit"}
                     fill
                     className="object-cover"

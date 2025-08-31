@@ -197,6 +197,16 @@ model QRCode {
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 }
 
+model TemporaryOrder {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  userId    String
+  orderData String   // JSON stocké en texte
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Return {
   id           String       @id @default(uuid())
   orderItemId  String
