@@ -4,13 +4,12 @@ import { headers } from "next/headers";
 
 const authRoutes = ["/sign-in", "/sign-up"];
 const passwordRoutes = ["/reset-password", "/forgot-password"];
-const adminRoutes = ["/admin", "/admin/:path*"];
 
 export default async function authMiddleware(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
   const isAuthRoute = authRoutes.includes(pathName);
   const isPasswordRoute = passwordRoutes.includes(pathName);
-  const isAdminRoute = adminRoutes.includes(pathName);
+  const isAdminRoute = pathName.startsWith("/admin");
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -27,7 +26,7 @@ export default async function authMiddleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (isAdminRoute && session.user.role !== "admin") {
+  if (isAdminRoute && session.user.role !== "ADMIN") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
