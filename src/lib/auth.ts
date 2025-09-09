@@ -19,8 +19,7 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24 * 7, // 7 days (every 7 days the session expiration is updated)
     cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // Cache duration in seconds
+      enabled: false, // Disabled to prevent session data being too large for cookies
     },
   },
   trustedOrigins: ["http://localhost:3000", "https://unikcandle.vercel.app"],
