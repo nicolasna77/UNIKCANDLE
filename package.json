@@ -112,7 +112,7 @@
     "@types/three": "^0.174.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
-    "prisma": "^6.9.0",
+    "prisma": "^6.15.0",
     "react-email": "^4.2.8",
     "tailwindcss": "^4",
     "tailwindcss-bg-patterns": "^0.3.0",
