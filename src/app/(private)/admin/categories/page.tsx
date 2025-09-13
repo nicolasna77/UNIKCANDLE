@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
@@ -179,14 +179,16 @@ export default function CategoriesPage() {
         </Dialog>
       </div>
 
-      <DataTableAdvanced
-        data={categories}
-        columns={columns}
-        isLoading={isLoading}
-        onRefresh={handleRefresh}
-        onExport={handleExport}
-        emptyMessage="Aucune catégorie trouvée"
-      />
+      <Suspense fallback={<div>Chargement...</div>}>
+        <DataTableAdvanced
+          data={categories}
+          columns={columns}
+          isLoading={isLoading}
+          onRefresh={handleRefresh}
+          onExport={handleExport}
+          emptyMessage="Aucune catégorie trouvée"
+        />
+      </Suspense>
 
       {editingCategory && (
         <Dialog

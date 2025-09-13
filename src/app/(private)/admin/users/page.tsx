@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -376,15 +376,17 @@ export default function UsersPage() {
         }
       />
 
-      <DataTableAdvanced
-        data={users as unknown as User[]}
-        columns={columns}
-        isLoading={isLoading}
-        onRefresh={handleRefresh}
-        onExport={handleExport}
-        emptyMessage="Aucun utilisateur trouvé"
-        searchPlaceholder="Rechercher par nom ou email..."
-      />
+      <Suspense fallback={<div>Chargement...</div>}>
+        <DataTableAdvanced
+          data={users as unknown as User[]}
+          columns={columns}
+          isLoading={isLoading}
+          onRefresh={handleRefresh}
+          onExport={handleExport}
+          emptyMessage="Aucun utilisateur trouvé"
+          searchPlaceholder="Rechercher par nom ou email..."
+        />
+      </Suspense>
 
       {/* Dialogue de création d&apos;utilisateur */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

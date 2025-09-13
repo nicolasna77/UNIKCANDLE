@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -197,14 +197,16 @@ export default function ScentsPage() {
         actions={<AdminHeaderActions onRefresh={handleRefresh} />}
       />
 
-      <DataTableAdvanced
-        data={scents}
-        columns={columns}
-        isLoading={isLoading}
-        onRefresh={handleRefresh}
-        onExport={handleExport}
-        emptyMessage="Aucune senteur trouvée"
-      />
+      <Suspense fallback={<div>Chargement...</div>}>
+        <DataTableAdvanced
+          data={scents}
+          columns={columns}
+          isLoading={isLoading}
+          onRefresh={handleRefresh}
+          onExport={handleExport}
+          emptyMessage="Aucune senteur trouvée"
+        />
+      </Suspense>
 
       {editingScent && (
         <Dialog

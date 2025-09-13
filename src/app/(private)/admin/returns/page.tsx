@@ -37,7 +37,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -367,14 +367,16 @@ export default function ReturnsPage() {
         }
       />
 
-      <DataTableAdvanced
-        columns={columns}
-        data={returns || []}
-        searchPlaceholder="Rechercher par produit ou client..."
-        onExport={handleExport}
-        isLoading={isLoading}
-        emptyMessage="Aucune demande de retour trouvée"
-      />
+      <Suspense fallback={<div>Chargement...</div>}>
+        <DataTableAdvanced
+          columns={columns}
+          data={returns || []}
+          searchPlaceholder="Rechercher par produit ou client..."
+          onExport={handleExport}
+          isLoading={isLoading}
+          emptyMessage="Aucune demande de retour trouvée"
+        />
+      </Suspense>
 
       {/* Dialog Instructions de renvoi */}
       <Dialog open={instructionsOpen} onOpenChange={setInstructionsOpen}>

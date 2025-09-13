@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useProducts, useDeleteProduct } from "@/hooks/useProducts";
@@ -236,14 +236,16 @@ export default function ProductsPage() {
         />
       */}
 
-      <DataTableAdvanced
-        columns={columns}
-        data={products?.products || []}
-        searchPlaceholder="Rechercher par nom..."
-        onExport={handleExport}
-        isLoading={isLoading}
-        emptyMessage="Aucun produit trouvé"
-      />
+      <Suspense fallback={<div>Chargement...</div>}>
+        <DataTableAdvanced
+          columns={columns}
+          data={products?.products || []}
+          searchPlaceholder="Rechercher par nom..."
+          onExport={handleExport}
+          isLoading={isLoading}
+          emptyMessage="Aucun produit trouvé"
+        />
+      </Suspense>
 
       {/* Formulaire de création avec dialog intégré */}
       <CreateProductForm
