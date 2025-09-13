@@ -318,7 +318,7 @@ export default function UsersPage() {
                 onClick={() =>
                   handleUpdateRole(
                     user.id,
-                    user.role === "ADMIN" ? "USER" : "ADMIN"
+                    user.role === "ADMIN" ? "user" : "admin"
                   )
                 }
               >
