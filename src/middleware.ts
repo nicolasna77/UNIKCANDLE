@@ -2,13 +2,16 @@ import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-const authRoutes = ["/sign-in", "/sign-up"];
+const authRoutes = ["/auth/signin", "/auth/signup"];
 const passwordRoutes = ["/reset-password", "/forgot-password"];
+const publicRoutes = ["/", "/products", "/about", "/contact", "/unauthorized"];
 
 export default async function authMiddleware(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
   const isAuthRoute = authRoutes.includes(pathName);
   const isPasswordRoute = passwordRoutes.includes(pathName);
+  const isPublicRoute =
+    publicRoutes.includes(pathName) || pathName.startsWith("/products/");
   const isAdminRoute = pathName.startsWith("/admin");
 
   const session = await auth.api.getSession({
@@ -16,17 +19,18 @@ export default async function authMiddleware(request: NextRequest) {
   });
 
   if (!session) {
-    if (isAuthRoute || isPasswordRoute) {
+    if (isAuthRoute || isPasswordRoute || isPublicRoute) {
       return NextResponse.next();
     }
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+
+    return NextResponse.redirect(new URL("/auth/signin", request.url));
   }
 
   if (isAuthRoute || isPasswordRoute) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (isAdminRoute && session.user.role !== "admin") {
+  if (isAdminRoute && session.user.role !== "ADMIN") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
@@ -39,4 +43,5 @@ export const config = {
     "/admin/:path*",
     "/admin",
   ],
+  runtime: "nodejs",
 };

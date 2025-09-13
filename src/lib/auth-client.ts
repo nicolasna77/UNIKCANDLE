@@ -10,16 +10,19 @@ if (!googleClientId) {
 export const authClient = createAuthClient({
   plugins: [
     adminClient(),
-    oneTapClient({
-      clientId: googleClientId || "",
-      autoSelect: false,
-      cancelOnTapOutside: true,
-      context: "signin",
-      promptOptions: {
-        baseDelay: 1000,
-        maxAttempts: 3
-      }
-    }),
+    // One Tap désactivé temporairement à cause de l'erreur FedCM en développement
+    ...(process.env.NODE_ENV === 'production' && googleClientId ? [
+      oneTapClient({
+        clientId: googleClientId,
+        autoSelect: false,
+        cancelOnTapOutside: true,
+        context: "signin",
+        promptOptions: {
+          baseDelay: 1000,
+          maxAttempts: 3
+        }
+      })
+    ] : []),
   ],
 });
 

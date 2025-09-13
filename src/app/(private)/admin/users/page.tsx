@@ -45,7 +45,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "user";
+  role: "ADMIN" | "USER";
   banned: boolean;
   banReason?: string;
   banExpires?: Date;
@@ -240,9 +240,9 @@ export default function UsersPage() {
       cell: ({ row }) => {
         const user = row.original;
         return (
-          <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-            {user.role === "admin" && <Crown className="mr-1 h-3 w-3" />}
-            {user.role === "admin" ? "Administrateur" : "Utilisateur"}
+          <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
+            {user.role === "ADMIN" && <Crown className="mr-1 h-3 w-3" />}
+            {user.role === "ADMIN" ? "Administrateur" : "Utilisateur"}
           </Badge>
         );
       },
@@ -318,12 +318,12 @@ export default function UsersPage() {
                 onClick={() =>
                   handleUpdateRole(
                     user.id,
-                    user.role === "admin" ? "user" : "admin"
+                    user.role === "ADMIN" ? "USER" : "ADMIN"
                   )
                 }
               >
                 <Shield className="mr-2 h-4 w-4" />
-                {user.role === "admin" ? "Rétrograder" : "Promouvoir"}
+                {user.role === "ADMIN" ? "Rétrograder" : "Promouvoir"}
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
