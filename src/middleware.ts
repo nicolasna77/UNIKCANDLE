@@ -1,6 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 const authRoutes = ["/auth/signin", "/auth/signup"];
 const passwordRoutes = ["/reset-password", "/forgot-password"];
@@ -12,17 +10,13 @@ export default async function authMiddleware(request: NextRequest) {
   const isPasswordRoute = passwordRoutes.includes(pathName);
   const isPublicRoute =
     publicRoutes.includes(pathName) || pathName.startsWith("/products/");
-  const isAdminRoute = pathName.startsWith("/admin");
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const sessionCookie = request.cookies.get("better-auth.session_token");
 
-  if (!session) {
+  if (!sessionCookie) {
     if (isAuthRoute || isPasswordRoute || isPublicRoute) {
       return NextResponse.next();
     }
-
     return NextResponse.redirect(new URL("/auth/signin", request.url));
   }
 
@@ -30,18 +24,9 @@ export default async function authMiddleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (isAdminRoute && session.user.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
-  }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|.*\\.png$).*)",
-    "/admin/:path*",
-    "/admin",
-  ],
-  runtime: "nodejs",
+  matcher: ["/((?!api|_next|favicon.ico|sitemap.xml|robots.txt).*)"],
 };
