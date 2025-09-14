@@ -5,8 +5,8 @@ import { Order } from "@/types/order";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { stripe } from "@/lib/stripe";
-import prisma from "@/lib/prisma";
 import type { Stripe } from "stripe";
+import prisma from "@/lib/prisma";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -99,21 +99,6 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
       throw new Error("Session non trouvée");
     }
 
-    console.log("Session Stripe récupérée:", {
-      id: session.id,
-      metadata: session.metadata,
-      customer: session.customer,
-      shipping: session.shipping,
-      shipping_details: session.shipping_details,
-      line_items: session.line_items?.data.map((item) => ({
-        product: item.price?.product,
-        quantity: item.quantity,
-        amount: item.amount_total,
-      })),
-    });
-
-    console.log("Session Stripe complète:", JSON.stringify(session, null, 2));
-
     // Vérifier si la commande existe déjà
     const existingOrder = await prisma.order.findFirst({
       where: {
@@ -157,11 +142,6 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
         },
       });
 
-      console.log(
-        "Produits trouvés dans la base de données:",
-        existingProducts.map((p) => p.id)
-      );
-
       if (existingProducts.length !== productIds.length) {
         console.error(
           "Certains produits n'existent pas dans la base de données"
@@ -183,11 +163,6 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
           },
         },
       });
-
-      console.log(
-        "Senteurs trouvées dans la base de données:",
-        existingScents.map((s) => s.id)
-      );
 
       if (existingScents.length !== scentIds.length) {
         console.error(
@@ -272,8 +247,6 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
         shippingAddress: true,
       },
     });
-
-    console.log("Nouvelle commande créée:", order);
 
     // Nettoyer la table temporaire après succès
     try {
