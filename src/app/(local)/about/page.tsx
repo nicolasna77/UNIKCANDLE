@@ -49,7 +49,7 @@ export default function AboutPage() {
                 src="/asset/about.webp"
                 alt="Notre mission"
                 fill
-                quality={100}
+                quality={75}
                 priority
                 className="object-cover object-center"
               />
@@ -80,7 +80,7 @@ export default function AboutPage() {
                 src="/asset/IMG_20250328_111936.webp"
                 alt="Notre processus"
                 fill
-                quality={100}
+                quality={75}
                 priority
                 className="object-cover object-center"
               />
@@ -106,7 +106,7 @@ export default function AboutPage() {
                 src="/asset/IMG_20250328_111933.webp"
                 alt="Notre engagement"
                 fill
-                quality={100}
+                quality={75}
                 priority
                 className="object-cover object-center"
               />
