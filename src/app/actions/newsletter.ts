@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { Resend } from "resend";
 import NewsletterWelcomeEmail from "@/emails/newsletter-welcome";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

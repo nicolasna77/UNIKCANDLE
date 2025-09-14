@@ -5,7 +5,7 @@ import { ResetPasswordEmail } from "@/emails/reset-password";
 import { admin, oneTap } from "better-auth/plugins";
 
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "@/lib/prisma";
+import prisma from "./prisma";
 
 // Déterminer l'URL de base en fonction de l'environnement
 const baseUrl = process.env.BETTER_AUTH_URL;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getUser } from "@/lib/auth-session";
 import { nanoid } from "nanoid";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 interface CheckoutItem {
   id: string;

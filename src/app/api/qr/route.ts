@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";

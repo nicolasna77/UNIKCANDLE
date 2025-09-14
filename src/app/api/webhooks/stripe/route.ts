@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 import { sendConfirmationEmail } from "@/app/(local)/success/confirm.action";
 
@@ -118,7 +118,10 @@ export async function POST(req: Request) {
         });
 
         if (!temporaryOrder) {
-          console.error("Données de commande temporaires non trouvées pour orderId:", session.metadata.orderId);
+          console.error(
+            "Données de commande temporaires non trouvées pour orderId:",
+            session.metadata.orderId
+          );
           throw new Error("Données de commande temporaires non trouvées");
         }
 
@@ -242,7 +245,6 @@ export async function POST(req: Request) {
           )
         );
 
-
         console.log("QR codes créés avec succès");
         console.log("Commande complète:", JSON.stringify(order, null, 2));
 
@@ -251,13 +253,18 @@ export async function POST(req: Request) {
           id: order.id,
           createdAt: order.createdAt,
           total: order.total,
-          status: order.status as "pending" | "processing" | "completed" | "cancelled",
+          status: order.status as
+            | "pending"
+            | "processing"
+            | "completed"
+            | "cancelled",
           userId: order.userId,
           user: order.user,
           items: order.items.map((item) => ({
             id: item.id,
             name: item.product.name,
-            imageUrl: item.product.images?.[0]?.url || "/placeholder-product.jpg",
+            imageUrl:
+              item.product.images?.[0]?.url || "/placeholder-product.jpg",
             scentName: item.scent.name,
             quantity: item.quantity,
             price: item.price,
@@ -269,7 +276,10 @@ export async function POST(req: Request) {
           await sendConfirmationEmail(emailOrderData);
           console.log("Email de confirmation envoyé avec succès");
         } catch (emailError) {
-          console.error("Erreur lors de l'envoi de l'email de confirmation:", emailError);
+          console.error(
+            "Erreur lors de l'envoi de l'email de confirmation:",
+            emailError
+          );
           // Ne pas faire échouer la commande si l'email échoue
         }
 
@@ -278,9 +288,15 @@ export async function POST(req: Request) {
           await prisma.temporaryOrder.delete({
             where: { orderId: session.metadata.orderId },
           });
-          console.log("Données temporaires nettoyées pour orderId:", session.metadata.orderId);
+          console.log(
+            "Données temporaires nettoyées pour orderId:",
+            session.metadata.orderId
+          );
         } catch (cleanupError) {
-          console.warn("Erreur lors du nettoyage des données temporaires:", cleanupError);
+          console.warn(
+            "Erreur lors du nettoyage des données temporaires:",
+            cleanupError
+          );
         }
 
         return new NextResponse(null, { status: 200 });

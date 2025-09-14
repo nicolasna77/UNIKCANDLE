@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
-
+import prisma from "@/lib/prisma";
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ sessionId: string }> }
