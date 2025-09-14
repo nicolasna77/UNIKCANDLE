@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { resend } from "./resend";
 import { ResetPasswordEmail } from "@/emails/reset-password";
+import { NewsletterWelcomeEmail } from "@/emails/newsletter-welcome";
+import { EmailVerificationEmail } from "@/emails/email-verification";
 import { admin, oneTap } from "better-auth/plugins";
 
 import { prismaAdapter } from "better-auth/adapters/prisma";
@@ -19,15 +21,19 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24 * 7, // 7 days (every 7 days the session expiration is updated)
     cookieCache: {
-      enabled: false, // Disabled to prevent session data being too large for cookies
+      enabled: false,
     },
   },
-  trustedOrigins: ["http://localhost:3000", "https://unikcandle.vercel.app"],
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://unikcandle.vercel.app",
+    "https://unikcandle.com",
+  ],
 
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
-    requireEmailVerification: false,
+    autoSignIn: false,
+    requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await resend.emails.send({
         from: "noreply@unikcandle.com",
@@ -42,6 +48,28 @@ export const auth = betterAuth({
           userFirstname: user.name,
           resetPasswordLink: url,
         }),
+      });
+    },
+  },
+
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await resend.emails.send({
+        from: "noreply@unikcandle.com",
+        to: user.email,
+        subject: "Vérifiez votre adresse email UNIKCANDLE",
+        react: EmailVerificationEmail({
+          userFirstname: user.name,
+          verificationLink: url,
+        }),
+      });
+    },
+    afterEmailVerified: async (user: { email: string; name: string }) => {
+      await resend.emails.send({
+        from: "noreply@unikcandle.com",
+        to: user.email,
+        subject: "Bienvenue chez UNIKCANDLE !",
+        react: NewsletterWelcomeEmail(),
       });
     },
   },

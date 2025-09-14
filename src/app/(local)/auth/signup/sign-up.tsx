@@ -88,7 +88,7 @@ export default function SignUp() {
         password: data.motDePasse,
         name: `${data.prenom} ${data.nom}`,
         image: image ? await convertImageToBase64(image) : "",
-        callbackURL: "/",
+        callbackURL: "/auth/signin",
         fetchOptions: {
           onResponse: () => setChargement(false),
           onRequest: () => setChargement(true),
@@ -96,7 +96,10 @@ export default function SignUp() {
             setError(ctx.error.message);
             setChargement(false);
           },
-          onSuccess: () => router.push("/"),
+          onSuccess: () => {
+            toast.success("Un email de vérification a été envoyé à votre adresse email");
+            router.push("/auth/signin");
+          },
         },
       });
     } catch {

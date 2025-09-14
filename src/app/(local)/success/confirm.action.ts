@@ -5,7 +5,7 @@ import { Order } from "@/types/order";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import type { Stripe } from "stripe";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -132,7 +132,10 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
     });
 
     if (!temporaryOrder) {
-      console.error("Données de commande temporaires non trouvées pour orderId:", session.metadata?.orderId);
+      console.error(
+        "Données de commande temporaires non trouvées pour orderId:",
+        session.metadata?.orderId
+      );
       throw new Error("Données de commande temporaires non trouvées");
     }
 
@@ -271,17 +274,23 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
     });
 
     console.log("Nouvelle commande créée:", order);
-    
+
     // Nettoyer la table temporaire après succès
     try {
       await prisma.temporaryOrder.delete({
         where: { orderId: session.metadata?.orderId },
       });
-      console.log("Données temporaires nettoyées pour orderId:", session.metadata?.orderId);
+      console.log(
+        "Données temporaires nettoyées pour orderId:",
+        session.metadata?.orderId
+      );
     } catch (cleanupError) {
-      console.warn("Erreur lors du nettoyage des données temporaires:", cleanupError);
+      console.warn(
+        "Erreur lors du nettoyage des données temporaires:",
+        cleanupError
+      );
     }
-    
+
     return order;
   } catch (error) {
     console.error("Erreur lors de la création de la commande:", error);
