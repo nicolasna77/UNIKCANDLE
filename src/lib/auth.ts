@@ -85,7 +85,7 @@ export const auth = betterAuth({
       disableSignup: false,
     }),
     admin({
-      adminRoles: ["ADMIN"],
+      adminRoles: ["admin"],
     }),
     nextCookies(),
   ],

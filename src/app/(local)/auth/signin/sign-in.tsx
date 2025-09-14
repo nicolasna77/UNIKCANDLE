@@ -50,15 +50,18 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
-    // Ne pas afficher One Tap si l'utilisateur est déjà connecté
-    if (!isPending && !session) {
+    // Ne pas afficher One Tap si l'utilisateur est déjà connecté ou en développement
+    if (!isPending && !session && process.env.NODE_ENV === 'production') {
       authClient.oneTap({
         callbackURL: callbackUrl || "/",
         onPromptNotification: (notification) => {
           console.warn("One Tap prompt was dismissed. Consider showing alternative sign-in options.", notification);
         }
       }).catch((error) => {
-        if (error instanceof Error && !error.message.includes('AbortError')) {
+        // Ignorer les erreurs FedCM courantes
+        if (error instanceof Error &&
+            !error.message.includes('AbortError') &&
+            !error.message.includes('FedCM')) {
           console.error("One Tap error:", error);
         }
       });

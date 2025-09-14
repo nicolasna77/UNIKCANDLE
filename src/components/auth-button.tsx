@@ -60,7 +60,7 @@ const AuthButton = () => {
             <span>{session.user.email}</span>
           </div>
         </DropdownMenuLabel>
-        {session.user.role === "ADMIN" && (
+        {session.user.role === "admin" && (
           <>
             <DropdownMenuSeparator />
 

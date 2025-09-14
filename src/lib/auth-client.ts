@@ -10,7 +10,7 @@ if (!googleClientId) {
 export const authClient = createAuthClient({
   plugins: [
     adminClient(),
-    ...(googleClientId ? [
+    ...(process.env.NODE_ENV === 'production' && googleClientId ? [
       oneTapClient({
         clientId: googleClientId,
         autoSelect: false,
