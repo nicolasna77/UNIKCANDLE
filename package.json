@@ -105,6 +105,7 @@
     "@babel/preset-typescript": "^7.27.0",
     "@eslint/eslintrc": "^3",
     "@faker-js/faker": "^9.6.0",
+    "@react-email/preview-server": "^4.2.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.17.30",
     "@types/qrcode": "^1.5.5",

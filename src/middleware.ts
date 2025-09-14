@@ -46,6 +46,6 @@ export const config = {
     "/auth/:path*",
     "/reset-password",
     "/forgot-password",
-    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt).*)"
+    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };
