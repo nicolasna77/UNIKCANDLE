@@ -10,8 +10,7 @@ if (!googleClientId) {
 export const authClient = createAuthClient({
   plugins: [
     adminClient(),
-    // One Tap désactivé temporairement à cause de l'erreur FedCM en développement
-    ...(process.env.NODE_ENV === 'production' && googleClientId ? [
+    ...(googleClientId ? [
       oneTapClient({
         clientId: googleClientId,
         autoSelect: false,

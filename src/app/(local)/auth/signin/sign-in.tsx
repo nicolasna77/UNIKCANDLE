@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { signIn, useSession } from "@/lib/auth-client";
+import { signIn, useSession, authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +32,6 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Alert } from "@/components/ui/alert";
-import { oneTapCall } from "./one-tap";
 
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -53,9 +52,18 @@ export default function SignIn() {
   useEffect(() => {
     // Ne pas afficher One Tap si l'utilisateur est déjà connecté
     if (!isPending && !session) {
-      oneTapCall();
+      authClient.oneTap({
+        callbackURL: callbackUrl || "/",
+        onPromptNotification: (notification) => {
+          console.warn("One Tap prompt was dismissed. Consider showing alternative sign-in options.", notification);
+        }
+      }).catch((error) => {
+        if (error instanceof Error && !error.message.includes('AbortError')) {
+          console.error("One Tap error:", error);
+        }
+      });
     }
-  }, [session, isPending]);
+  }, [session, isPending, callbackUrl]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
