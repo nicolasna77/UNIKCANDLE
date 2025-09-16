@@ -1,11 +1,11 @@
-import UnauthorizedPage from "@/app/unauthorized";
+import { redirect } from "next/navigation";
 import ProfilMenu from "./profil-menu";
 import { getUser } from "@/lib/auth-session";
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await getUser();
   if (!session) {
-    return <UnauthorizedPage />;
+    redirect("/auth/signin");
   }
   return (
     <div className="mt-16">
