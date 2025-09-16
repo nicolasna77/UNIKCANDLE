@@ -33,6 +33,7 @@ export const config = {
     "/admin/:path*",
     "/auth/:path*",
     "/reset-password",
+    "/profile/:path*",
     "/forgot-password",
     "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
