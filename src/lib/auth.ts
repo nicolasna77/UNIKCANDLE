@@ -21,8 +21,16 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24 * 7, // 7 days (every 7 days the session expiration is updated)
     cookieCache: {
-      enabled: false,
+      enabled: true,
+      maxAge: 60 * 5, // 5 minutes
     },
+  },
+  advanced: {
+    generateId: () => crypto.randomUUID(),
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: ".unikcandle.com"
+    }
   },
   trustedOrigins: [
     "http://localhost:3000",
