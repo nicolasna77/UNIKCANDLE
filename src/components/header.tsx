@@ -29,12 +29,11 @@ export default function Header() {
       <nav className="mx-auto max-w-screen-3xl px-4 flex items-center justify-between h-16">
         <Link href="/" className="text-xl font-bold">
           <Image
-            src="/logo/logo.png"
+            src="/favicon.ico"
             alt="logo"
             width={40}
             height={40}
             quality={75}
-            className="fill-amber-300"
             priority
           />
         </Link>
