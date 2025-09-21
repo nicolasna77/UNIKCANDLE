@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 const authRoutes = ["/auth/signin", "/auth/signup"];
-const passwordRoutes = ["/reset-password", "/forgot-password"];
+const passwordRoutes = ["/reset-password", "/forgot-password", "/auth/forgot-password"];
 const publicRoutes = ["/", "/products", "/about", "/contact", "/unauthorized", "/cgu", "/cart"];
 const staticRoutes = ["/asset", "/models", "/logo", "/images"];
 
