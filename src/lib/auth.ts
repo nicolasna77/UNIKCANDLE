@@ -28,6 +28,7 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "https://unikcandle.vercel.app",
     "https://unikcandle.com",
+    "https://www.unikcandle.com",
   ],
 
   emailAndPassword: {
