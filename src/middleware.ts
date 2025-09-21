@@ -4,16 +4,19 @@ import { auth } from "@/lib/auth";
 const authRoutes = ["/auth/signin", "/auth/signup"];
 const passwordRoutes = ["/reset-password", "/forgot-password"];
 const publicRoutes = ["/", "/products", "/about", "/contact", "/unauthorized"];
+const staticRoutes = ["/asset", "/models", "/logo", "/images"];
 
 export async function middleware(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
+  console.log(`[Middleware] Processing: ${pathName} on ${request.nextUrl.origin}`);
   const isAuthRoute = authRoutes.includes(pathName);
   const isPasswordRoute = passwordRoutes.includes(pathName);
   const isPublicRoute =
     publicRoutes.includes(pathName) || pathName.startsWith("/products/");
+  const isStaticRoute = staticRoutes.some(route => pathName.startsWith(route));
 
-  // Si c'est une route publique, d'authentification ou de mot de passe, pas besoin de vérifier la session
-  if (isPublicRoute || isAuthRoute || isPasswordRoute) {
+  // Si c'est une route publique, statique, d'authentification ou de mot de passe, pas besoin de vérifier la session
+  if (isPublicRoute || isStaticRoute || isAuthRoute || isPasswordRoute) {
     return NextResponse.next();
   }
 
@@ -23,8 +26,11 @@ export async function middleware(request: NextRequest) {
       headers: request.headers,
     });
 
+    console.log(`[Middleware] Path: ${pathName}, Session:`, !!session);
+
     // Si pas de session valide, rediriger vers la connexion
     if (!session) {
+      console.log(`[Middleware] No session found for ${pathName}, redirecting to signin`);
       return NextResponse.redirect(new URL("/auth/signin", request.url));
     }
 
