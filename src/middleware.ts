@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
       headers: request.headers,
     });
 
-    console.log(`[Middleware] Path: ${pathName}, Session:`, !!session);
+    console.log(`[Middleware] Path: ${pathName}, Session:`, !!session, session?.user?.email);
 
     // Si pas de session valide, rediriger vers la connexion
     if (!session) {
@@ -66,6 +66,6 @@ export const config = {
     "/reset-password",
     "/profile/:path*",
     "/forgot-password",
-    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt|asset|models|logo|images).*)",
   ],
 };
