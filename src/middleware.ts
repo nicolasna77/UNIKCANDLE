@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 
 const authRoutes = ["/auth/signin", "/auth/signup"];
 const passwordRoutes = ["/reset-password", "/forgot-password"];
-const publicRoutes = ["/", "/products", "/about", "/contact", "/unauthorized"];
+const publicRoutes = ["/", "/products", "/about", "/contact", "/unauthorized", "/cgu", "/cart"];
 const staticRoutes = ["/asset", "/models", "/logo", "/images"];
 
 export async function middleware(request: NextRequest) {
@@ -46,8 +46,14 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    // En cas d'erreur, rediriger vers la connexion
+    // En cas d'erreur Better Auth, rediriger vers la connexion mais éviter les boucles
     console.error("Middleware auth error:", error);
+
+    // Si on est déjà sur une page d'auth, ne pas rediriger pour éviter les boucles
+    if (pathName.startsWith("/auth/")) {
+      return NextResponse.next();
+    }
+
     return NextResponse.redirect(new URL("/auth/signin", request.url));
   }
 }
