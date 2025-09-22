@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
-import { ReturnStatus } from "@/generated/client";
+import { ReturnStatus } from "@prisma/client";
 
 // POST - Ajouter des informations de suivi
 export async function POST(
