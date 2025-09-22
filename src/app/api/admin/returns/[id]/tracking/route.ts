@@ -44,7 +44,7 @@ export async function POST(
       updateData.shippedAt = new Date();
     }
 
-    const updatedReturn = await prisma["return"].update({
+    const updatedReturn = await prisma.return.update({
       where: { id },
       data: updateData,
       include: {
@@ -112,7 +112,7 @@ export async function PATCH(
       updateData.deliveredAt = new Date();
     }
 
-    const updatedReturn = await prisma["return"].update({
+    const updatedReturn = await prisma.return.update({
       where: { id },
       data: updateData,
       include: {
