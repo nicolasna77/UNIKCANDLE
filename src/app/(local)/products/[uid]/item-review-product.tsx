@@ -1,6 +1,6 @@
 "use client";
 import { StarIcon } from "lucide-react";
-import { Review, User } from "@/generated/client";
+import { Review, User } from "@prisma/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ItemReviewProduct = ({ review }: { review: Review & { user: User } }) => {

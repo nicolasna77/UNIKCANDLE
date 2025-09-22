@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Card } from "../ui/card";
-import { Category, Product } from "@/generated/client";
+import { Category, Product } from "@prisma/client";
 import { useCategories } from "@/hooks/useCategories";
 import { Lora } from "next/font/google";
 import { buttonVariants } from "../ui/button";

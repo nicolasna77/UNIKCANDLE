@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Product, Scent } from "@/generated/client";
+import { Product, Scent } from "@prisma/client";
 
 type ProductWithScents = Product & {
   scents: Scent[];

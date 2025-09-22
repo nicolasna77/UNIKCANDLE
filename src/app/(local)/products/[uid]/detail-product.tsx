@@ -17,7 +17,7 @@ import {
   Scent,
   Image as PrismaImage,
   Review,
-} from "@/generated/client";
+} from "@prisma/client";
 import { useState } from "react";
 
 interface ProductWithDetails extends Product {

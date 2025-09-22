@@ -38,7 +38,7 @@ import { FileMetadata } from "@/hooks/use-file-upload";
 import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
 import CreateCategoryForm from "@/app/(private)/admin/categories/create-category-form";
 import { productSchema, type ProductFormData } from "@/lib/admin-schemas";
-import { Category } from "@/generated/client";
+import { Category } from "@prisma/client";
 import { CardFooter } from "@/components/ui/card";
 
 interface CreateProductFormProps {

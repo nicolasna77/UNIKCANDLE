@@ -44,7 +44,7 @@ import {
   type ProductUpdateData,
   type ProductWithRelations,
 } from "@/lib/admin-schemas";
-import { Category } from "@/generated/client";
+import { Category } from "@prisma/client";
 
 interface EditProductFormProps {
   productId: string;

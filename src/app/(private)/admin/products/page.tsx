@@ -15,7 +15,7 @@ import {
 } from "@/components/admin/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Image as ProductImage, Scent, Category } from "@/generated/client";
+import { Image as ProductImage, Scent, Category } from "@prisma/client";
 import CreateProductForm from "./CreateProductForm";
 import EditProductForm from "./EditProductForm";
 // Import du composant de pagination réutilisable

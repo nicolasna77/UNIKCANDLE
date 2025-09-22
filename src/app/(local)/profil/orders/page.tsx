@@ -27,7 +27,7 @@ import {
   Image,
   Address,
   QRCode,
-} from "@/generated/client";
+} from "@prisma/client";
 
 export default function OrdersPage() {
   const router = useRouter();

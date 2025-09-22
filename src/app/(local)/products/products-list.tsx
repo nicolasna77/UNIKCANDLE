@@ -15,7 +15,7 @@ import { Filter } from "lucide-react";
 import ProductCard from "./product-card";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Category } from "@/generated/client";
+import { Category } from "@prisma/client";
 import {
   Pagination,
   PaginationContent,

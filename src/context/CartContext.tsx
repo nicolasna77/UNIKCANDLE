@@ -1,6 +1,6 @@
 "use client";
 
-import { Scent, Category } from "@/generated/client";
+import { Scent, Category } from "@prisma/client";
 import { createContext, useContext, useState, useEffect } from "react";
 
 interface CartItem {

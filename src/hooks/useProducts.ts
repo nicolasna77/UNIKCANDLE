@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Product, Category, Scent, Image, Review } from "@/generated/client";
+import { Product, Category, Scent, Image, Review } from "@prisma/client";
 
 interface ProductWithDetails extends Product {
   category: Category;

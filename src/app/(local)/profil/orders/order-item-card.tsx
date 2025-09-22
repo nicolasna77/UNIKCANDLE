@@ -27,7 +27,7 @@ import type {
   Image as PrismaImage,
   Address,
   QRCode,
-} from "@/generated/client";
+} from "@prisma/client";
 import ReturnRequestDialog from "./return-request-dialog";
 
 const OrderItemCard = ({

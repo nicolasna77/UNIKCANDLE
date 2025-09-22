@@ -22,7 +22,7 @@ import type {
   QRCode,
   Scent,
   User as UserType,
-} from "@/generated/client";
+} from "@prisma/client";
 
 interface OrderItem {
   id: string;

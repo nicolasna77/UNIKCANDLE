@@ -38,7 +38,7 @@ import {
   Scent,
   User,
   Image,
-} from "@/generated/client";
+} from "@prisma/client";
 
 import Loading from "@/components/loading";
 import DialogDetailOrder from "./dialog-detail-order";

@@ -17,7 +17,7 @@ import {
   Review,
   Scent,
   Category,
-} from "@/generated/client";
+} from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCartIcon, StarIcon } from "lucide-react";

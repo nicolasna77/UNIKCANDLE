@@ -18,7 +18,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import Loading from "@/components/loading";
-import { Product, Review, User } from "@/generated/client";
+import { Product, Review, User } from "@prisma/client";
 
 const REVIEWS_PER_PAGE = 6;
 

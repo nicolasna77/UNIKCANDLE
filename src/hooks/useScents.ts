@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Scent } from "@/generated/client";
+import { Scent } from "@prisma/client";
 
 export function useScents() {
   return useQuery<Scent[]>({
