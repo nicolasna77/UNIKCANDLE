@@ -26,7 +26,6 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    generateId: () => crypto.randomUUID(),
     crossSubDomainCookies: {
       enabled: true,
       domain: ".unikcandle.com"

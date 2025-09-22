@@ -56,7 +56,12 @@ export async function middleware(request: NextRequest) {
 
     // Contournement temporaire : si l'utilisateur a un cookie de session valide côté client,
     // permettre l'accès (l'auth sera re-vérifiée côté client)
-    const sessionCookie = request.cookies.get('better-auth.session_token');
+    console.log(`[Middleware] Available cookies:`, Array.from(request.cookies.entries()).map(([name, cookie]) => name));
+
+    const sessionCookie = request.cookies.get('better-auth.session_token') ||
+                         request.cookies.get('session_token') ||
+                         request.cookies.get('better-auth-session');
+
     if (sessionCookie && (pathName.startsWith("/profil") || pathName.startsWith("/admin"))) {
       console.log(`[Middleware] Session cookie found, allowing access to ${pathName}`);
       return NextResponse.next();
