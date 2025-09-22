@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
 
     // Contournement temporaire : si l'utilisateur a un cookie de session valide côté client,
     // permettre l'accès (l'auth sera re-vérifiée côté client)
-    console.log(`[Middleware] Available cookies:`, Array.from(request.cookies.entries()).map(([name, cookie]) => name));
+    console.log(`[Middleware] Available cookies:`, Array.from(request.cookies.entries()).map(([name]) => name));
 
     const sessionCookie = request.cookies.get('better-auth.session_token') ||
                          request.cookies.get('session_token') ||
