@@ -1,7 +1,6 @@
 generator client {
-  provider      = "prisma-client-js"
-  output        = "../src/generated/client"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -201,7 +200,7 @@ model TemporaryOrder {
   id        String   @id @default(uuid())
   orderId   String   @unique
   userId    String
-  orderData String   // JSON stocké en texte
+  orderData String // JSON stocké en texte
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -229,9 +228,8 @@ model Return {
   // Remboursement Stripe
   stripeRefundId String?
 
-  
-  refundedAt     DateTime?
-  refundStatus   RefundStatus @default(PENDING)
+  refundedAt   DateTime?
+  refundStatus RefundStatus @default(PENDING)
 
   orderItem OrderItem @relation(fields: [orderItemId], references: [id])
 }
