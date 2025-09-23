@@ -6,11 +6,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const updateProductSchema = z.object({
-  name: z.string().min(1, "Le nom est requis"),
-  description: z.string().min(1, "La description est requise"),
-  price: z.number().min(0, "Le prix doit être positif"),
-  scentId: z.string(),
-  images: z.array(z.object({ url: z.string().url() })),
+  name: z.string().min(1, "Le nom est requis").optional(),
+  description: z.string().min(1, "La description est requise").optional(),
+  price: z.number().min(0, "Le prix doit être positif").optional(),
+  subTitle: z.string().min(1, "Le sous-titre est requis").optional(),
+  categoryId: z.string().optional(),
+  scentId: z.string().optional(),
+  images: z.array(z.object({ url: z.string().url() })).optional(),
 });
 
 export async function DELETE(
@@ -70,14 +72,17 @@ export async function PATCH(
           name: validatedData.name,
           description: validatedData.description,
           price: validatedData.price,
+          subTitle: validatedData.subTitle,
+          categoryId: validatedData.categoryId,
           scentId: validatedData.scentId,
           images: {
             deleteMany: {},
-            create: validatedData.images.map((image) => ({ url: image.url })),
+            create: validatedData.images?.map((image) => ({ url: image.url })) || [],
           },
         },
         include: {
           scent: true,
+          category: true,
           images: true,
         },
       });

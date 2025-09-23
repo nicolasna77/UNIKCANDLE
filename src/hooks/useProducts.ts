@@ -81,6 +81,7 @@ export function useCreateProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Produit créé avec succès");
     },
     onError: (error: Error) => {
@@ -119,6 +120,7 @@ export function useUpdateProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Produit mis à jour avec succès");
     },
     onError: (error: Error) => {
@@ -141,10 +143,25 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Produit supprimé avec succès");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Erreur lors de la suppression du produit");
+    },
+  });
+}
+
+// Hook pour récupérer les produits pour l'admin
+export function useAdminProducts() {
+  return useQuery<ProductWithDetails[]>({
+    queryKey: ["admin-products"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/products");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des produits");
+      }
+      return response.json();
     },
   });
 }

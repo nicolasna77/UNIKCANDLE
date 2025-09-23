@@ -132,7 +132,8 @@ interface AdminHeaderActionsProps {
 
 export function AdminHeaderActions({
   onRefresh,
-
+  onAdd,
+  addLabel = "Ajouter",
   isLoading = false,
   customActions,
 }: AdminHeaderActionsProps) {
@@ -154,20 +155,12 @@ export function AdminHeaderActions({
         </Button>
       )}
 
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle senteur
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Créer une nouvelle senteur</DialogTitle>
-          </DialogHeader>
-          <CreateScentForm />
-        </DialogContent>
-      </Dialog>
+      {onAdd && (
+        <Button onClick={onAdd}>
+          <Plus className="mr-2 h-4 w-4" />
+          {addLabel}
+        </Button>
+      )}
     </div>
   );
 }

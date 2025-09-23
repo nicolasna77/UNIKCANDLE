@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Eye } from "lucide-react";
-import { useProducts, useDeleteProduct } from "@/hooks/useProducts";
+import { useAdminProducts, useDeleteProduct } from "@/hooks/useProducts";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -39,7 +39,7 @@ export default function ProductsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const { data: products, isLoading, refetch } = useProducts();
+  const { data: products, isLoading, refetch } = useAdminProducts();
 
   const deleteProductMutation = useDeleteProduct();
 
@@ -76,7 +76,7 @@ export default function ProductsPage() {
       deleteProductMutation.mutate(id, {
         onSuccess: () => {
           toast.success("Produit supprimé avec succès");
-          queryClient.invalidateQueries({ queryKey: ["products"] });
+          queryClient.invalidateQueries({ queryKey: ["admin-products"] });
         },
         onError: (error) => {
           toast.error("Erreur lors de la suppression");
@@ -129,6 +129,9 @@ export default function ProductsPage() {
       header: "Catégorie",
       cell: ({ row }) => {
         const category = row.original.category;
+        if (!category) {
+          return <Badge variant="outline">Aucune catégorie</Badge>;
+        }
         return (
           <Badge
             variant="outline"
@@ -144,6 +147,9 @@ export default function ProductsPage() {
       header: "Parfum",
       cell: ({ row }) => {
         const scent = row.original.scent;
+        if (!scent) {
+          return <Badge variant="secondary">Aucun parfum</Badge>;
+        }
         return <Badge variant="secondary">{scent.name}</Badge>;
       },
     },
@@ -202,7 +208,7 @@ export default function ProductsPage() {
           { label: "Produits" },
         ]}
         badge={{
-          text: `${products?.products?.length || 0} produit${(products?.products?.length || 0) > 1 ? "s" : ""}`,
+          text: `${products?.length || 0} produit${(products?.length || 0) > 1 ? "s" : ""}`,
           variant: "secondary",
         }}
         actions={
@@ -239,7 +245,7 @@ export default function ProductsPage() {
       <Suspense fallback={<div>Chargement...</div>}>
         <DataTableAdvanced
           columns={columns}
-          data={products?.products || []}
+          data={products || []}
           searchPlaceholder="Rechercher par nom..."
           onExport={handleExport}
           isLoading={isLoading}

@@ -117,9 +117,8 @@ export default function EditProductForm({
       description: initialData.description,
       price: initialData.price,
       subTitle: initialData.subTitle,
-      slogan: initialData.slogan,
-      categoryId: initialData.category.id,
-      scentId: initialData.scent.id,
+      categoryId: initialData.category?.id || "",
+      scentId: initialData.scent?.id || "",
     },
   });
 
@@ -175,6 +174,7 @@ export default function EditProductForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Produit mis à jour avec succès");
       onSuccess();
     },
@@ -322,23 +322,6 @@ export default function EditProductForm({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="slogan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Slogan</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Slogan du produit"
-                        {...field}
-                        rows={2}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}

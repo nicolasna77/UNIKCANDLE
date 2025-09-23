@@ -20,14 +20,8 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24 * 7, // 7 days (every 7 days the session expiration is updated)
-    // cookieCache retiré
   },
-  advanced: {
-    crossSubDomainCookies: {
-      enabled: true,
-      domain: ".unikcandle.com",
-    },
-  },
+
   trustedOrigins: [
     "http://localhost:3000",
     "https://unikcandle.vercel.app",
