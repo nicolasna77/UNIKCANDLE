@@ -30,7 +30,13 @@ export async function middleware(request: NextRequest) {
   const isApiRoute = pathName.startsWith("/api/");
 
   // Si c'est une route publique, statique, API, d'authentification ou de mot de passe, pas besoin de vérifier la session
-  if (isPublicRoute || isStaticRoute || isAuthRoute || isPasswordRoute || isApiRoute) {
+  if (
+    isPublicRoute ||
+    isStaticRoute ||
+    isAuthRoute ||
+    isPasswordRoute ||
+    isApiRoute
+  ) {
     return NextResponse.next();
   }
 
@@ -45,17 +51,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/signin", request.url));
     }
 
-    // Vérification des permissions admin pour les routes admin
     if (pathName.startsWith("/admin") && session.user.role !== "admin") {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
 
     return NextResponse.next();
   } catch (error) {
-    // En cas d'erreur Better Auth, rediriger vers la connexion mais éviter les boucles
     console.error("Middleware auth error:", error);
 
-    // Si on est déjà sur une page d'auth, ne pas rediriger pour éviter les boucles
     if (pathName.startsWith("/auth/")) {
       return NextResponse.next();
     }
