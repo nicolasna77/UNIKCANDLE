@@ -13,9 +13,6 @@ import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { DialogTrigger } from "@radix-ui/react-dialog";
-import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
 
 interface BreadcrumbItemType {
   label: string;
