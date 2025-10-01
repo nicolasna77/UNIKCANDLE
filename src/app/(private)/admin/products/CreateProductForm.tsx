@@ -150,6 +150,7 @@ export default function CreateProductForm({
       // Utiliser la première image comme imageUrl principale et toutes comme images
       const finalData = {
         ...values,
+        arAnimation: values.arAnimation || "default",
         imageUrl: uploadedUrls[0] || "",
         images: uploadedUrls.map((url) => ({ url })),
       };
