@@ -71,7 +71,6 @@ export default function CreateProductForm({
       subTitle: "",
       slogan: "",
       categoryId: "",
-      arAnimation: "default",
       scentId: "",
       imageUrl: "",
     },
