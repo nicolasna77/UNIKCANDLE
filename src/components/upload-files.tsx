@@ -54,6 +54,7 @@ export default function UploadFiles({
 
   const handleFileSelect = useCallback(
     (files: FileList | null) => {
+      console.log("🔍 handleFileSelect appelé avec:", files);
       if (!files || files.length === 0) return;
 
       const validateFile = (file: File): string | null => {
@@ -115,8 +116,11 @@ export default function UploadFiles({
 
       if (newFiles.length > 0) {
         const updatedFiles = [...localFiles, ...newFiles];
+        console.log("✅ Nouveaux fichiers ajoutés:", updatedFiles);
         handleFilesChange(updatedFiles);
         setErrors([]);
+      } else {
+        console.log("⚠️ Aucun fichier valide à ajouter");
       }
     },
     [localFiles, maxFiles, handleFilesChange, maxSize]
@@ -180,7 +184,9 @@ export default function UploadFiles({
   );
 
   const openFileDialog = useCallback(() => {
+    console.log("🖱️ openFileDialog appelé, disabled:", disabled);
     if (disabled) return;
+    console.log("📂 Click sur input file");
     fileInputRef.current?.click();
   }, [disabled]);
 
@@ -226,7 +232,11 @@ export default function UploadFiles({
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={openFileDialog}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openFileDialog();
+            }}
             disabled={disabled}
           >
             <UploadIcon className="mr-2 h-4 w-4" />
@@ -246,7 +256,10 @@ export default function UploadFiles({
       )}
 
       {/* File list */}
-      {localFiles.length > 0 && (
+      {(() => {
+        console.log("🎨 Rendu de la liste des fichiers, localFiles:", localFiles);
+        return localFiles.length > 0;
+      })() && (
         <div className="space-y-2">
           {localFiles.map((file) => (
             <div

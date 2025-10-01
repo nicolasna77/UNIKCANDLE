@@ -29,7 +29,6 @@ export async function middleware(request: NextRequest) {
   );
   const isApiRoute = pathName.startsWith("/api/");
 
-  // Si c'est une route publique, statique, API, d'authentification ou de mot de passe, pas besoin de vérifier la session
   if (
     isPublicRoute ||
     isStaticRoute ||
@@ -46,7 +45,6 @@ export async function middleware(request: NextRequest) {
       headers: request.headers,
     });
 
-    // Si pas de session valide, rediriger vers la connexion
     if (!session) {
       return NextResponse.redirect(new URL("/auth/signin", request.url));
     }

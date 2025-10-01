@@ -12,10 +12,11 @@ const createProductSchema = z.object({
   price: z.number().positive("Le prix doit être positif"),
   subTitle: z.string().min(1, "Le sous-titre est requis"),
   slogan: z.string().min(1, "Le slogan est requis"),
-  category: z.string().min(1, "La catégorie est requise"),
-  arAnimation: z.string().min(1, "L'animation AR est requise"),
+  categoryId: z.string().min(1, "La catégorie est requise"),
+  arAnimation: z.string().optional().default("default"),
   scentId: z.string().min(1, "Le parfum est requis"),
-  imageUrl: z.string().url("L'URL de l'image doit être valide"),
+  imageUrl: z.string().optional(),
+  images: z.array(z.object({ url: z.string() })).optional(),
 });
 
 export async function GET() {
@@ -85,6 +86,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // Vérification que la catégorie existe
+    const existingCategory = await prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+
+    if (!existingCategory) {
+      return NextResponse.json(
+        { error: "La catégorie sélectionnée n'existe pas" },
+        { status: 400 }
+      );
+    }
+
     // Création du produit
     const product = await prisma.product.create({
       data: {
@@ -93,19 +106,28 @@ export async function POST(request: Request) {
         price: data.price,
         subTitle: data.subTitle,
         slogan: data.slogan,
-        category: data.category,
-        arAnimation: data.arAnimation,
+        arAnimation: data.arAnimation || "default",
+        category: {
+          connect: { id: data.categoryId },
+        },
         scent: {
           connect: { id: data.scentId },
         },
-        images: {
-          create: {
-            url: data.imageUrl,
-          },
-        },
+        images: data.images?.length
+          ? {
+              create: data.images,
+            }
+          : data.imageUrl
+          ? {
+              create: {
+                url: data.imageUrl,
+              },
+            }
+          : undefined,
       },
       include: {
         scent: true,
+        category: true,
         images: true,
       },
     });

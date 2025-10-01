@@ -47,6 +47,8 @@ interface CreateProductFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const EMPTY_FILES: FileMetadata[] = [];
+
 export default function CreateProductForm({
   onSuccess,
   open,
@@ -69,6 +71,7 @@ export default function CreateProductForm({
       subTitle: "",
       slogan: "",
       categoryId: "",
+      arAnimation: "default",
       scentId: "",
       imageUrl: "",
     },
@@ -114,7 +117,11 @@ export default function CreateProductForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       toast.success("Produit créé avec succès");
+      form.reset();
+      setSelectedFiles([]);
+      onOpenChange(false);
       onSuccess();
     },
     onError: (error: Error) => {
@@ -124,9 +131,22 @@ export default function CreateProductForm({
 
   const onSubmit = async (values: ProductFormData) => {
     try {
+      console.log("🚀 Début de la soumission du formulaire");
+      console.log("📝 Valeurs du formulaire:", values);
+      console.log("📁 Fichiers sélectionnés:", selectedFiles);
+
+      // Vérifier que les champs requis sont présents
+      if (!values.name || !values.description || !values.categoryId || !values.scentId) {
+        console.error("❌ Champs requis manquants");
+        toast.error("Veuillez remplir tous les champs requis");
+        return;
+      }
+
       // Gérer l'upload des images
+      console.log("📤 Upload des images en cours...");
       const uploadedUrls =
         selectedFiles.length > 0 ? await uploadImages(selectedFiles) : [];
+      console.log("✅ Images uploadées:", uploadedUrls);
 
       // Utiliser la première image comme imageUrl principale et toutes comme images
       const finalData = {
@@ -135,14 +155,18 @@ export default function CreateProductForm({
         images: uploadedUrls.map((url) => ({ url })),
       };
 
+      console.log("📦 Données finales à envoyer:", finalData);
+
       await createProduct.mutateAsync(finalData);
+      console.log("✅ Produit créé avec succès!");
     } catch (error) {
-      console.error("Erreur lors de la création:", error);
+      console.error("❌ Erreur lors de la création:", error);
       toast.error("Erreur lors de la création du produit");
     }
   };
 
   const handleFilesChange = (files: FileMetadata[]) => {
+    console.log("📸 Fichiers changés:", files);
     setSelectedFiles(files);
   };
 
@@ -165,7 +189,7 @@ export default function CreateProductForm({
               </div>
               <UploadFiles
                 onFilesChange={handleFilesChange}
-                initialFiles={[]}
+                initialFiles={EMPTY_FILES}
               />
             </div>
             <div className="space-y-4">
