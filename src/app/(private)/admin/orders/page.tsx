@@ -42,6 +42,7 @@ import {
 
 import Loading from "@/components/loading";
 import DialogDetailOrder from "./dialog-detail-order";
+import DialogCreateOrder from "./dialog-create-order";
 import { PaginationComponent } from "@/app/(private)/Pagination";
 
 export default function OrdersPage() {
@@ -162,6 +163,7 @@ export default function OrdersPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestion des commandes</h1>
+        <DialogCreateOrder />
       </div>
 
       <div className="flex items-center gap-4">
