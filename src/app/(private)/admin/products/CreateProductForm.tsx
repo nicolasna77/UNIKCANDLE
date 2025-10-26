@@ -135,7 +135,12 @@ export default function CreateProductForm({
       console.log("📁 Fichiers sélectionnés:", selectedFiles);
 
       // Vérifier que les champs requis sont présents
-      if (!values.name || !values.description || !values.categoryId || !values.scentId) {
+      if (
+        !values.name ||
+        !values.description ||
+        !values.categoryId ||
+        !values.scentId
+      ) {
         console.error("❌ Champs requis manquants");
         toast.error("Veuillez remplir tous les champs requis");
         return;
