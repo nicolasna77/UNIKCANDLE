@@ -12,7 +12,7 @@ const lora = Lora({
   subsets: ["latin"],
 });
 
-interface CategoryWithImage extends Category {
+interface CategoryWithImage extends Omit<Category, 'imageUrl'> {
   imageUrl?: string | null;
   products: Product[];
 }
