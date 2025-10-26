@@ -14,6 +14,7 @@ interface CartItem {
   description: string;
   subTitle: string;
   audioUrl?: string; // URL de l'audio enregistré
+  textMessage?: string; // Message texte personnalisé
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -28,6 +29,8 @@ interface CartContextType {
   clearCart: () => void;
   updateItemAudio: (id: string, audioUrl: string) => void;
   removeItemAudio: (id: string) => void;
+  updateItemTextMessage: (id: string, textMessage: string) => void;
+  removeItemTextMessage: (id: string) => void;
 }
 
 // Creating CartContext with default value
@@ -52,16 +55,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Helper function to generate unique key for cart items
   const getItemKey = (item: CartItem) => {
-    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}`;
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}`;
   };
 
-  // Helper function to check if two items are the same (same product + scent + exact audio)
+  // Helper function to check if two items are the same (same product + scent + exact audio/text)
   const isSameItem = (item1: CartItem, item2: CartItem) => {
     return (
       item1.id === item2.id &&
       item1.selectedScent.id === item2.selectedScent.id &&
       // Même audio exact (même URL ou les deux sans audio)
-      item1.audioUrl === item2.audioUrl
+      item1.audioUrl === item2.audioUrl &&
+      // Même message texte exact
+      item1.textMessage === item2.textMessage
     );
   };
 
@@ -143,6 +148,44 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  // Function to update text message for a specific item
+  const updateItemTextMessage = (itemKey: string, textMessage: string) => {
+    setCart((prevCart) => {
+      const itemIndex = prevCart.findIndex(
+        (cartItem) => getItemKey(cartItem) === itemKey
+      );
+      if (itemIndex === -1) return prevCart;
+
+      const item = prevCart[itemIndex];
+      const updatedItem = { ...item, textMessage };
+
+      // Créer un nouvel élément avec le message texte
+      const newCart = [...prevCart];
+      newCart[itemIndex] = updatedItem;
+
+      return newCart;
+    });
+  };
+
+  // Function to remove text message from a specific item
+  const removeItemTextMessage = (itemKey: string) => {
+    setCart((prevCart) => {
+      const itemIndex = prevCart.findIndex(
+        (cartItem) => getItemKey(cartItem) === itemKey
+      );
+      if (itemIndex === -1) return prevCart;
+
+      const item = prevCart[itemIndex];
+      const updatedItem = { ...item, textMessage: undefined };
+
+      // Créer un nouvel élément sans message texte
+      const newCart = [...prevCart];
+      newCart[itemIndex] = updatedItem;
+
+      return newCart;
+    });
+  };
+
   const clearCart = () => {
     setCart([]);
   };
@@ -157,6 +200,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         clearCart,
         updateItemAudio,
         removeItemAudio,
+        updateItemTextMessage,
+        removeItemTextMessage,
       }}
     >
       {children}

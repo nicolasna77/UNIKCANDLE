@@ -13,6 +13,7 @@ export const productSchema = z.object({
   slogan: z.string().min(2, "Le slogan doit contenir au moins 2 caractères"),
   categoryId: z.string().min(1, "La catégorie est requise"),
   arAnimation: z.string().optional(),
+  messageType: z.enum(["audio", "text"]).default("audio"),
   scentId: z.string().min(1, "Le parfum est requis"),
   imageUrl: z.string().url("L'URL de l'image doit être valide").optional().or(z.literal("")),
   images: z
@@ -39,6 +40,7 @@ export const categorySchema = z.object({
     .min(10, "La description doit contenir au moins 10 caractères"),
   icon: z.string().min(1, "L'icône est requise"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Format de couleur invalide"),
+  imageUrl: z.string().url("L'URL de l'image doit être valide").optional().or(z.literal("")),
 });
 
 export const categoryUpdateSchema = categorySchema
@@ -139,6 +141,7 @@ export interface CategoryWithProducts {
   description: string;
   icon: string;
   color: string;
+  imageUrl?: string;
   _count?: {
     products: number;
   };

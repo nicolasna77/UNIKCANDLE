@@ -1,13 +1,18 @@
 "use client";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Lora } from "next/font/google";
+import { Lora, Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
 import { Candle3D } from "../Candle3D";
 
 const lora = Lora({
   subsets: ["latin"],
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["800"],
 });
 
 const HeroSection = () => {
@@ -48,7 +53,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className={`${lora.className} scroll-m-20 text-5xl  font-bold tracking-tight mb-6 relative`}
+              className={`${montserrat.className} scroll-m-20 text-5xl  font-extrabold tracking-tight mb-6 relative`}
             >
               <span className=" ">UNIKCANDLE</span>
               <motion.div
@@ -65,13 +70,14 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="space-y-4"
             >
-              <p className="text-2xl lg:text-3xl font-light text-foreground leading-relaxed">
-                Bougies d’exception sur-mesure
+              <p className="text-2xl lg:text-3xl font-semibold text-foreground leading-relaxed">
+                Bougies d&apos;exception. Émotions sur-mesure.
+              </p>
+              <p className="text-xl text-foreground font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
+                Les seules bougies parfumées qui parlent avec ta voix.
               </p>
               <p className="text-lg text-muted-foreground max-w-md mx-auto balance-text lg:mx-0 leading-relaxed">
-                Chaque bougie UNIKCANDLE est une pièce unique, créée pour
-                sublimer vos instants précieux avec une touche de sophistication
-                et une technologie innovante de réalité augmentée.
+                Un moment à vivre. Une attention à écouter. Un cadeau surprenant.
               </p>
             </motion.div>
 

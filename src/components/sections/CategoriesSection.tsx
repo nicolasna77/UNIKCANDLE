@@ -5,11 +5,17 @@ import { Category, Product } from "@prisma/client";
 import { useCategories } from "@/hooks/useCategories";
 import { Lora } from "next/font/google";
 import { buttonVariants } from "../ui/button";
+import Image from "next/image";
 
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
 });
+
+interface CategoryWithImage extends Category {
+  imageUrl?: string | null;
+  products: Product[];
+}
 
 const CategoriesSection = () => {
   const { data: categories, isLoading, error } = useCategories();
@@ -53,46 +59,59 @@ const CategoriesSection = () => {
               </p>
             </div>
           ) : (
-            categories?.map((category: Category & { products: Product[] }) => (
-              <Card
-                key={category.id}
-                className="group relative p-0 overflow-hidden border border-border  shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Link
-                  href={`/products?category=${category.id}`}
-                  className="w-full h-full"
+            categories
+              ?.filter((category: CategoryWithImage) => category.products.length > 0)
+              .map((category: CategoryWithImage) => (
+                <Card
+                  key={category.id}
+                  className="group relative p-0 overflow-hidden border border-border  shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <div
-                    className="relative aspect-[4/3] bg-muted"
-                    style={{
-                      backgroundColor: category.color,
-                      opacity: 0.3,
-                    }}
-                  ></div>
-                  <div
-                    className={`absolute  inset-0 flex flex-col justify-end p-6 z-10`}
+                  <Link
+                    href={`/products?category=${category.id}`}
+                    className="w-full h-full"
                   >
-                    <h3 className="text-xl  font-semibold tracking-tight mb-2 text-foreground">
-                      {category.icon}
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {category.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        {category.products.length} produits
-                      </span>
-                      <div className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center text-sm text-foreground">
-                        Découvrir
-                        <ArrowRight className="h-4 w-4 ml-2" />
+                    <div className="relative aspect-[4/3] bg-muted">
+                      {category.imageUrl ? (
+                        <Image
+                          src={category.imageUrl}
+                          alt={category.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            backgroundColor: category.color,
+                            opacity: 0.3,
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <div
+                      className={`absolute inset-0 flex flex-col justify-end p-6 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent`}
+                    >
+                      <h3 className="text-xl font-semibold tracking-tight mb-2 text-white">
+                        {category.icon}
+                        {category.name}
+                      </h3>
+                      <p className="text-sm text-white/90 mb-4">
+                        {category.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-white/80">
+                          {category.products.length} produit{category.products.length > 1 ? 's' : ''}
+                        </span>
+                        <div className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center text-sm text-white">
+                          Découvrir
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </Link>
-              </Card>
-            ))
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </Link>
+                </Card>
+              ))
           )}
         </div>
 

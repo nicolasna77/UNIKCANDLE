@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import { categorySchema, type CategoryFormData } from "@/lib/admin-schemas";
+import { useState } from "react";
+import Image from "next/image";
 
 interface CreateCategoryFormProps {
   onSuccess: () => void;
@@ -26,6 +28,7 @@ export default function CreateCategoryForm({
   onSuccess,
 }: CreateCategoryFormProps) {
   const queryClient = useQueryClient();
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema) as Resolver<CategoryFormData>,
@@ -34,6 +37,7 @@ export default function CreateCategoryForm({
       description: "",
       icon: "",
       color: "#000000",
+      imageUrl: "",
     },
   });
 
@@ -67,6 +71,32 @@ export default function CreateCategoryForm({
 
   const onSubmit = (data: CategoryFormData) => {
     createCategory.mutate(data);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/upload/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'upload");
+      }
+
+      const { url } = await response.json();
+      form.setValue("imageUrl", url);
+      toast.success("Image téléchargée avec succès");
+    } catch (error) {
+      toast.error("Erreur lors du téléchargement de l'image");
+      console.error(error);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   return (
@@ -142,6 +172,65 @@ export default function CreateCategoryForm({
                   />
                 </FormControl>
               </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image de la catégorie (optionnel)</FormLabel>
+              <FormControl>
+                <div className="space-y-4">
+                  {field.value && (
+                    <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border">
+                      <Image
+                        src={field.value}
+                        alt="Aperçu de la catégorie"
+                        fill
+                        className="object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => form.setValue("imageUrl", "")}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          handleImageUpload(file);
+                        }
+                      }}
+                      disabled={uploadingImage}
+                    />
+                    {uploadingImage && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                  </div>
+                  {field.value && (
+                    <Input
+                      type="text"
+                      placeholder="URL de l'image"
+                      {...field}
+                      disabled
+                      className="text-sm text-muted-foreground"
+                    />
+                  )}
+                </div>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

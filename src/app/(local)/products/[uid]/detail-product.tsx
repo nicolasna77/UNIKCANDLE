@@ -6,6 +6,7 @@ import { useProduct } from "@/hooks/useProducts";
 import LoadingPage from "../loading";
 import { useCart } from "@/context/CartContext";
 import AudioRecord from "./audio-record";
+import TextMessage from "./text-message";
 import { toast } from "sonner";
 import ProductImageCarousel from "@/components/ProductImageCarousel";
 import { Badge } from "@/components/ui/badge";
@@ -123,6 +124,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   };
   const { addToCart } = useCart();
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>();
+  const [currentTextMessage, setCurrentTextMessage] = useState<string | undefined>();
 
   if (isLoading) {
     return (
@@ -170,6 +172,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       subTitle: product.subTitle,
       category: product.category,
       audioUrl: currentAudioUrl,
+      textMessage: currentTextMessage,
       createdAt: new Date(product.createdAt),
       updatedAt: new Date(product.updatedAt),
       deletedAt: product.deletedAt ? new Date(product.deletedAt) : null,
@@ -214,11 +217,18 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             {/* Affichage du parfum */}
             <ScentDisplay scent={product.scent} />
 
-            {/* Message personnalisé */}
-            <AudioRecord
-              productId={product.id}
-              onAudioChange={setCurrentAudioUrl}
-            />
+            {/* Message personnalisé - Audio ou Texte selon le type */}
+            {product.messageType === "text" ? (
+              <TextMessage
+                productId={product.id}
+                onTextChange={setCurrentTextMessage}
+              />
+            ) : (
+              <AudioRecord
+                productId={product.id}
+                onAudioChange={setCurrentAudioUrl}
+              />
+            )}
 
             {/* Boutons d'action */}
             <div className="flex gap-4">

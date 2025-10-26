@@ -100,6 +100,7 @@ model Product {
   deletedAt   DateTime?
   arAnimation String
   slogan      String
+  messageType String      @default("audio") // "audio" ou "text"
   scentId     String
   categoryId  String
   images      Image[]
@@ -151,6 +152,7 @@ model OrderItem {
   price       Float
   scentId     String
   audioUrl    String?
+  textMessage String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   animationId String?
@@ -240,6 +242,7 @@ model Category {
   description String
   icon        String
   color       String
+  imageUrl    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   products    Product[]
