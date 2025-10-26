@@ -1,14 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Lora, Montserrat } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
 import { Candle3D } from "../Candle3D";
-
-const lora = Lora({
-  subsets: ["latin"],
-});
 
 const montserrat = Montserrat({
   subsets: ["latin"],

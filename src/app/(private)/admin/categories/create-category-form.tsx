@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { categorySchema, type CategoryFormData } from "@/lib/admin-schemas";
 import { useState } from "react";
 import Image from "next/image";
