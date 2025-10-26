@@ -13,7 +13,7 @@ export const productSchema = z.object({
   slogan: z.string().min(2, "Le slogan doit contenir au moins 2 caractères"),
   categoryId: z.string().min(1, "La catégorie est requise"),
   arAnimation: z.string().optional(),
-  messageType: z.enum(["audio", "text"]).default("audio"),
+  messageType: z.enum(["audio", "text"]).optional().default("audio"),
   scentId: z.string().min(1, "Le parfum est requis"),
   imageUrl: z.string().url("L'URL de l'image doit être valide").optional().or(z.literal("")),
   images: z

@@ -73,6 +73,7 @@ export default function CreateProductForm({
       categoryId: "",
       scentId: "",
       imageUrl: "",
+      messageType: "audio",
     },
   });
 
@@ -396,6 +397,35 @@ export default function CreateProductForm({
                               {scent.name}
                             </SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="messageType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type de message personnalisé</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner le type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="audio">
+                            Audio (enregistrement vocal)
+                          </SelectItem>
+                          <SelectItem value="text">
+                            Texte (message écrit gravé dans la cire)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
