@@ -62,7 +62,7 @@ export default function CreateProductForm({
   const { data: categories = [] } = useCategories();
   const { data: scents = [] } = useScents();
 
-  const form = useForm<ProductFormData>({
+  const form = useForm({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
@@ -73,7 +73,7 @@ export default function CreateProductForm({
       categoryId: "",
       scentId: "",
       imageUrl: "",
-      messageType: "audio",
+      messageType: "audio" as const,
     },
   });
 
