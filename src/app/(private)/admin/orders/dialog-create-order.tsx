@@ -19,19 +19,14 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Upload, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { User, Product, Scent, Image as ImageType } from "@prisma/client";
+import { User } from "@prisma/client";
 import { useAdminProducts } from "@/hooks/useProducts";
 import { useScents } from "@/hooks/useScents";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-
-interface ProductWithDetails extends Product {
-  images: ImageType[];
-  scent: Scent;
-}
 
 interface OrderItem {
   productId: string;
@@ -163,7 +158,7 @@ export default function DialogCreateOrder() {
     setAudioFiles(newAudioFiles);
   };
 
-  const updateItem = (index: number, field: keyof OrderItem, value: any) => {
+  const updateItem = (index: number, field: keyof OrderItem, value: string | number | undefined) => {
     const newItems = [...formData.items];
     newItems[index] = { ...newItems[index], [field]: value };
 
@@ -462,7 +457,7 @@ export default function DialogCreateOrder() {
 
             {formData.items.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Aucun article ajouté. Cliquez sur "Ajouter un article" pour
+                Aucun article ajouté. Cliquez sur &quot;Ajouter un article&quot; pour
                 commencer.
               </div>
             )}
