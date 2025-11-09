@@ -25,12 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateReturn } from "@/hooks/useReturns";
 import { RotateCcw, Info, Package } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createReturn } from "@/app/actions/returns";
+import { toast } from "sonner";
 
 interface ReturnRequestDialogProps {
   orderItem: {
@@ -64,7 +66,27 @@ export default function ReturnRequestDialog({
   orderItem,
 }: ReturnRequestDialogProps) {
   const [open, setOpen] = useState(false);
-  const createReturn = useCreateReturn();
+  const queryClient = useQueryClient();
+
+  const createReturnMutation = useMutation({
+    mutationFn: async (data: unknown) => {
+      const result = await createReturn(data);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["returns"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Demande de retour créée avec succès");
+      setOpen(false);
+      form.reset();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Erreur lors de la création du retour");
+    },
+  });
 
   const form = useForm({
     resolver: zodResolver(returnSchema),
@@ -75,17 +97,11 @@ export default function ReturnRequestDialog({
   });
 
   const onSubmit = async (values: { reason: string; description?: string }) => {
-    try {
-      await createReturn.mutateAsync({
-        orderItemId: orderItem.id,
-        reason: values.reason,
-        description: values.description,
-      });
-      setOpen(false);
-      form.reset();
-    } catch (error) {
-      console.error("Erreur lors de la création du retour:", error);
-    }
+    await createReturnMutation.mutateAsync({
+      orderItemId: orderItem.id,
+      reason: values.reason,
+      description: values.description,
+    });
   };
 
   return (
@@ -177,8 +193,8 @@ export default function ReturnRequestDialog({
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={createReturn.isPending}>
-                {createReturn.isPending ? "Envoi..." : "Envoyer la demande"}
+              <Button type="submit" disabled={createReturnMutation.isPending}>
+                {createReturnMutation.isPending ? "Envoi..." : "Envoyer la demande"}
               </Button>
             </div>
           </form>

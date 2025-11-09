@@ -22,8 +22,9 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { User } from "@prisma/client";
-import { useAdminProducts } from "@/hooks/useProducts";
-import { useScents } from "@/hooks/useScents";
+import { fetchAdminProducts, type ProductWithDetails } from "@/services/products";
+import { type Scent } from "@prisma/client";
+import { fetchScents } from "@/services/scents";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
@@ -85,10 +86,16 @@ export default function DialogCreateOrder() {
   });
 
   // Récupérer les produits
-  const { data: products } = useAdminProducts();
+  const { data: products } = useQuery<ProductWithDetails[]>({
+    queryKey: ["admin-products"],
+    queryFn: fetchAdminProducts,
+  });
 
   // Récupérer les senteurs
-  const { data: scents } = useScents();
+  const { data: scents } = useQuery<Scent[]>({
+    queryKey: ["scents"],
+    queryFn: fetchScents,
+  });
 
   // Mutation pour créer la commande
   const createOrderMutation = useMutation({

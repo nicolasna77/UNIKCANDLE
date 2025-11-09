@@ -657,18 +657,21 @@ export default function CartPage() {
                   alt="Visa"
                   width={64}
                   height={40}
+                  unoptimized
                 />
                 <Image
                   src="/payment-method/2.png"
                   alt="Mastercard"
                   width={64}
                   height={40}
+                  unoptimized
                 />
                 <Image
                   src="/payment-method/5.png"
                   alt="PayPal"
                   width={64}
                   height={40}
+                  unoptimized
                 />
               </div>
             </CardContent>

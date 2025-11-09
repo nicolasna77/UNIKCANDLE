@@ -1,35 +1,35 @@
+"use client";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Card } from "../ui/card";
 import { Category, Product } from "@prisma/client";
-import { useCategories } from "@/hooks/useCategories";
-import { Lora } from "next/font/google";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { buttonVariants } from "../ui/button";
 import Image from "next/image";
 
-const lora = Lora({
-  variable: "--font-lora",
-  subsets: ["latin"],
-});
-
-interface CategoryWithImage extends Omit<Category, 'imageUrl'> {
+interface CategoryWithImage extends Omit<Category, "imageUrl"> {
   imageUrl?: string | null;
   products: Product[];
 }
 
 const CategoriesSection = () => {
-  const { data: categories, isLoading, error } = useCategories();
+  const { data: categories, isLoading, error } = useQuery<CategoryWithProducts[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
   return (
     <section className="py-16 px-4">
       <div className="container mx-auto max-w-7xl">
         <div className="text-center mb-12">
           <h2
-            className={`${lora.className} text-3xl lg:text-4xl font-bold text-foreground mb-4`}
+            className={` text-3xl lg:text-4xl font-bold text-foreground mb-4`}
           >
-            Découvrez nos collections
+            Découvrez notre collection
           </h2>
-          <p className="text-muted-foreground text-lg">
-            Explorez nos différentes gammes de bougies personnalisées
+          <p className="text-muted-foreground text-balance text-lg">
+            Explorez nos différentes univers et enregistrez votre message audio
+            directement sur notre site.
           </p>
         </div>
 
@@ -60,7 +60,9 @@ const CategoriesSection = () => {
             </div>
           ) : (
             categories
-              ?.filter((category: CategoryWithImage) => category.products.length > 0)
+              ?.filter(
+                (category: CategoryWithImage) => category.products.length > 0
+              )
               .map((category: CategoryWithImage) => (
                 <Card
                   key={category.id}
@@ -100,7 +102,8 @@ const CategoriesSection = () => {
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-white/80">
-                          {category.products.length} produit{category.products.length > 1 ? 's' : ''}
+                          {category.products.length} produit
+                          {category.products.length > 1 ? "s" : ""}
                         </span>
                         <div className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center text-sm text-white">
                           Découvrir

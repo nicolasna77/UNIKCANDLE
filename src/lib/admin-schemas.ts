@@ -58,7 +58,6 @@ export const scentSchema = z.object({
     .min(10, "La description doit contenir au moins 10 caractères"),
   icon: z.string().min(1, "L'icône est requise"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Format de couleur invalide"),
-  model3dUrl: z.string().url("L'URL du modèle 3D doit être valide").optional(),
   notes: z.array(z.string()).optional().default([]),
 });
 
@@ -153,7 +152,6 @@ export interface ScentWithProducts {
   description: string;
   icon: string;
   color: string;
-  model3dUrl: string;
   notes: string[];
   _count?: {
     products: number;

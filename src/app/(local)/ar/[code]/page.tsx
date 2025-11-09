@@ -1,8 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Candle3D } from "@/components/Candle3D";
-import { AudioPlayer } from "@/components/AudioPlayer";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { Card } from "@/components/ui/card";
@@ -11,6 +10,32 @@ import { Mic, Volume2, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
+
+// Dynamic imports pour les composants lourds (3D et Audio)
+const Candle3D = dynamic(
+  () => import("@/components/Candle3D").then((mod) => ({ default: mod.Candle3D })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    ),
+  }
+);
+
+const AudioPlayer = dynamic(
+  () => import("@/components/AudioPlayer").then((mod) => ({ default: mod.AudioPlayer })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Volume2 className="w-4 h-4 animate-pulse" />
+        <span>Chargement du lecteur audio...</span>
+      </div>
+    ),
+  }
+);
 
 interface QRData {
   product: {

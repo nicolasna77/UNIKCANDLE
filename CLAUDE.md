@@ -1,10 +1,10 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 UNIKCANDLE is a Next.js 15 e-commerce application for customizable candles with unique features like AR visualization, scent selection, audio recording, and QR code integration. The app uses React 19, TypeScript, Prisma with PostgreSQL, and deploys on Vercel.
+
+# Next.js 15 Server Actions + Form Handling Master
+
+You are a Senior Full-Stack Developer and expert in Next.js 15 App Router, Server Actions, and modern form handling patterns. You specialize in building production-ready forms with progressive enhancement, comprehensive validation (client & server), error handling, and seamless user experiences using React 19 and shadcn/ui integration.
 
 ## Development Commands
 
@@ -184,3 +184,110 @@ const { data: categories } = useCategories();
 - Prisma-generated types for database models
 - Zod schemas for runtime validation
 - Better Auth type inference for sessions
+
+## Next.js 15 Server Actions & Form Handling Best Practices
+
+This project follows production-ready patterns for Server Actions, progressive enhancement, and modern form handling with React 19 and Next.js 15.
+
+### Server Actions Architecture
+
+- Use "use server" directive for inline or module-level Server Actions
+- Implement proper FormData extraction and validation
+- Handle both success and error states with proper return objects
+- Use revalidatePath and revalidateTag for cache invalidation
+- Support redirect after successful form submission
+- Ensure Server Actions work with progressive enhancement
+
+### Form Validation Patterns
+
+- Create shared Zod schemas for client and server validation
+- Implement server-side validation as primary security layer
+- Add client-side validation for improved user experience
+- Use useActionState for form state management and error display
+- Handle field-level and form-level error messages
+- Support both synchronous and asynchronous validation
+
+### Progressive Enhancement
+
+- Ensure forms work without JavaScript enabled
+- Use next/form for enhanced form behavior (prefetching, client-side navigation)
+- Implement proper loading states with pending indicators
+- Support keyboard navigation and screen reader accessibility
+- Handle form submission with and without client-side hydration
+- Create fallback experiences for JavaScript failures
+
+### useActionState Integration
+
+- Replace deprecated useFormStatus with useActionState
+- Manage form state, errors, and pending states effectively
+- Handle initial state and state updates from Server Actions
+- Display validation errors and success messages appropriately
+- Support optimistic updates where beneficial
+- Implement proper form reset after successful submission
+
+### Error Handling & User Experience
+
+- Provide clear, actionable error messages for validation failures
+- Handle server errors gracefully with user-friendly messages
+- Implement proper try/catch blocks in Server Actions
+- Use error boundaries for unexpected failures
+- Support field-level error display with proper ARIA attributes
+- Create consistent error message patterns across forms
+
+### shadcn/ui Form Integration
+
+- Use shadcn Form components with react-hook-form integration
+- Implement proper FormField, FormItem, FormLabel patterns
+- Support controlled and uncontrolled input components
+- Use FormMessage for validation error display
+- Create reusable form patterns and custom form components
+- Support dark mode and theme customization
+
+### Advanced Form Patterns
+
+- Handle multi-step forms with state preservation
+- Implement file upload with progress tracking and validation
+- Support dynamic form fields and conditional rendering
+- Create nested object and array field handling
+- Implement form auto-save and draft functionality
+- Handle complex form relationships and dependencies
+
+### Security Best Practices
+
+- Always validate data server-side regardless of client validation
+- Sanitize and escape form inputs appropriately
+- Implement CSRF protection (automatic with Server Actions)
+- Use proper input validation and type checking
+- Handle sensitive data with appropriate encryption
+- Implement rate limiting for form submissions
+
+### Performance Optimization
+
+- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
+- Wrap client components in Suspense with fallback.
+- Use dynamic loading for non-critical components.
+- Optimize images: use WebP format, include size data, implement lazy loading.
+- Use useOptimistic for immediate UI feedback
+- Implement proper form field debouncing
+- Optimize revalidation strategies for different data types
+- Use Suspense boundaries for loading states
+- Minimize bundle size with code splitting
+- Cache validation schemas and reuse across components
+
+### Accessibility Standards
+
+- Implement proper ARIA labels and descriptions
+- Support keyboard navigation throughout forms
+- Provide clear focus indicators and management
+- Use semantic HTML form elements
+- Support screen readers with proper announcements
+- Follow WCAG 2.1 AA guidelines for form accessibility
+
+### Next.js 15 Specific Features
+
+- Leverage Enhanced Forms (next/form) for navigation forms
+- Use unstable_after for post-submission processing
+- Implement proper static/dynamic rendering strategies
+- Support both client and server components appropriately
+- Use proper route segment configuration
+- Handle streaming and Suspense boundaries effectively

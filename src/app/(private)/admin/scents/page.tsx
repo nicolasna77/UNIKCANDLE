@@ -77,7 +77,6 @@ export default function ScentsPage() {
         "Description",
         "Icône",
         "Couleur",
-        "Modèle 3D",
         "Nb Produits",
       ],
       ...data.map((scent) => [
@@ -86,7 +85,6 @@ export default function ScentsPage() {
         scent.description.replace(/,/g, ";"),
         scent.icon,
         scent.color,
-        scent.model3dUrl || "Non défini",
         scent._count?.products?.toString() || "0",
       ]),
     ]
@@ -132,18 +130,6 @@ export default function ScentsPage() {
       accessorKey: "icon",
       header: "Icône",
       cell: ({ row }) => <Badge variant="outline">{row.original.icon}</Badge>,
-    },
-    {
-      accessorKey: "model3dUrl",
-      header: "Modèle 3D",
-      cell: ({ row }) => {
-        const hasModel = row.original.model3dUrl;
-        return (
-          <Badge variant={hasModel ? "default" : "secondary"}>
-            {hasModel ? "Disponible" : "Non défini"}
-          </Badge>
-        );
-      },
     },
     {
       accessorKey: "_count.products",

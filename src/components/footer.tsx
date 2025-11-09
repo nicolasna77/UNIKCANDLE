@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Lora } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { SocialIcon } from "react-social-icons";
-const lora = Lora({
-  variable: "--font-lora",
+
+const montserrat = Montserrat({
   subsets: ["latin"],
+  weight: ["800"],
 });
 
 const Footer = () => {
@@ -12,7 +13,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap text-left lg:text-left">
           <div className="w-full lg:w-6/12 px-4">
-            <h4 className={`${lora.className} text-3xl font-medium `}>
+            <h4 className={`${montserrat.className} text-3xl font-medium `}>
               UNIKCANDLE
             </h4>
             <h5 className="text-lg mt-0 mb-2 text-secondary-foreground">

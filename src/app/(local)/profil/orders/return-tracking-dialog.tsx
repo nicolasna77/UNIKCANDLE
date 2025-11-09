@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useReturns } from "@/hooks/useReturns";
 import {
   Truck,
   Package,
@@ -23,6 +22,8 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ReturnStatus } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { fetchReturns, type ReturnItemWithDetails } from "@/services/returns";
 
 interface ReturnTrackingDialogProps {
   orderItemId: string;
@@ -32,9 +33,14 @@ export default function ReturnTrackingDialog({
   orderItemId,
 }: ReturnTrackingDialogProps) {
   const [open, setOpen] = useState(false);
-  const { data: returns, isLoading } = useReturns(orderItemId);
 
-  const returnItem = returns?.[0]; // Premier retour pour cet article
+  const { data: returns, isLoading } = useQuery<ReturnItemWithDetails[]>({
+    queryKey: ["returns", orderItemId],
+    queryFn: () => fetchReturns(orderItemId),
+    enabled: !!orderItemId,
+  });
+
+  const returnItem = returns?.find((r) => r.orderItemId === orderItemId);
 
   if (!returnItem) return null;
 
@@ -174,7 +180,16 @@ export default function ReturnTrackingDialog({
                           <p className="text-sm text-muted-foreground">
                             Date limite
                           </p>
-                          <p className="text-sm">{returnItem.returnDeadline}</p>
+                          <p className="text-sm">
+                            {new Date(returnItem.returnDeadline).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )}
+                          </p>
                         </div>
                       )}
                     </div>

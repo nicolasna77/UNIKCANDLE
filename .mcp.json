@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "cmd",
+      "args": ["/y", "npx shadcn@latest mcp"]
+    },
+    "next-devtools": {
+      "command": "cmd",
+      "args": ["/y", "npx -y next-devtools-mcp@latest"]
+    }
+  },
+  "servers": {
+    "Prisma-Local": {
+      "command": "cmd",
+      "args": ["/y", "npx -y prisma mcp"]
+    },
+    "Prisma-Remote": {
+      "command": "cmd",
+      "args": ["/y", "npx -y mcp-remote https://mcp.prisma.io/mcp"]
+    }
+  }
+}

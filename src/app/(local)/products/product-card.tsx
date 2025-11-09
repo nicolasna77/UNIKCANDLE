@@ -60,66 +60,76 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
   };
 
   return (
-    <Card className="overflow-hidden border-border justify-between pt-0">
-      <Link href={`/products/${product.id}`}>
-        <div className="aspect-square relative">
-          {product.images[0] && (
-            <Image
-              src={product.images[0].url}
-              alt={product.name}
-              className="object-cover w-full h-full"
-              width={500}
-              height={500}
-            />
-          )}
-        </div>
-      </Link>
-      <CardHeader>
-        <div className="flex relative items-center justify-between">
-          <div className="w-2/3 gap-2">
-            <CardTitle>{product.name}</CardTitle>
+    <article itemScope itemType="https://schema.org/Product">
+      <Card className="overflow-hidden border-border justify-between pt-0">
+        <Link href={`/products/${product.id}`}>
+          <div className="aspect-square relative">
+            {product.images[0] && (
+              <Image
+                src={product.images[0].url}
+                alt={product.name}
+                className="object-cover w-full h-full"
+                width={500}
+                height={500}
+                loading="lazy"
+                itemProp="image"
+              />
+            )}
           </div>
-          <div className="font-semibold">{product.price.toFixed(2)} €</div>
-        </div>
-        <div className="flex items-center gap-4">
-          {product.reviewCount > 0 && (
-            <div className="flex items-center gap-2">
-              <StarIcon className="w-4 h-4 text-yellow-500 fill-current" />
-              <div className="">{product.reviewCount} avis</div>
+        </Link>
+        <CardHeader>
+          <div className="flex relative items-center justify-between">
+            <div className="w-2/3 gap-2">
+              <CardTitle itemProp="name">{product.name}</CardTitle>
+            </div>
+            <div className="font-semibold" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+              <meta itemProp="priceCurrency" content="EUR" />
+              <meta itemProp="price" content={product.price.toFixed(2)} />
+              {product.price.toFixed(2)} €
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            {product.reviewCount > 0 && (
+              <div className="flex items-center gap-2" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+                <StarIcon className="w-4 h-4 text-yellow-500 fill-current" />
+                <meta itemProp="ratingValue" content={product.averageRating.toFixed(1)} />
+                <meta itemProp="reviewCount" content={product.reviewCount.toString()} />
+                <div className="">{product.reviewCount} avis</div>
+              </div>
+            )}
+            {product.category && (
+              <Badge
+                variant="default"
+                style={{
+                  backgroundColor: product.category.color,
+                }}
+              >
+                <span className=" text-white">{product.category.name}</span>
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <CardDescription itemProp="description">{product.subTitle}</CardDescription>
+          {product.scent && (
+            <div className="mt-4">
+              <span className="font-semibold">Parfum : </span>
+              {product.scent.name}
             </div>
           )}
-          {product.category && (
-            <Badge
-              variant="default"
-              style={{
-                backgroundColor: product.category.color,
-              }}
-            >
-              <span className=" text-white">{product.category.name}</span>
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <CardDescription>{product.subTitle}</CardDescription>
-        {product.scent && (
-          <div className="mt-4">
-            <span className="font-semibold">Parfum : </span>
-            {product.scent.name}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button
-          className="w-full"
-          size="lg"
-          onClick={handleAddToCart}
-          disabled={!product.scent}
-        >
-          <ShoppingCartIcon className="w-4 h-4 mr-2" /> Ajouter au panier
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter>
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={handleAddToCart}
+            disabled={!product.scent}
+          >
+            <ShoppingCartIcon className="w-4 h-4 mr-2" /> Ajouter au panier
+          </Button>
+        </CardFooter>
+      </Card>
+    </article>
   );
 }
 

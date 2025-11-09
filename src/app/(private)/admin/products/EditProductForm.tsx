@@ -2,9 +2,10 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { updateProductFromJSON } from "@/app/actions/products";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TipTapEditor } from "@/components/ui/tiptap-editor";
 import {
   Select,
   SelectContent,
@@ -33,8 +35,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, Loader2 } from "lucide-react";
-import { useCategories } from "@/hooks/useCategories";
-import { useScents } from "@/hooks/useScents";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
+import { fetchScents } from "@/services/scents";
+import { type Scent } from "@prisma/client";
 import UploadFiles from "@/components/upload-files";
 import { FileMetadata } from "@/hooks/use-file-upload";
 import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
@@ -62,13 +66,20 @@ export default function EditProductForm({
   onOpenChange,
 }: EditProductFormProps) {
   const queryClient = useQueryClient();
+  const [isPending, startTransition] = useTransition();
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
   const [isScentDialogOpen, setIsScentDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
 
-  const { data: categories = [] } = useCategories();
-  const { data: scents = [] } = useScents();
+  const { data: categories = [] } = useQuery<CategoryWithProducts[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
+  const { data: scents = [] } = useQuery<Scent[]>({
+    queryKey: ["scents"],
+    queryFn: fetchScents,
+  });
 
   // Initialiser les fichiers après le montage du composant
   useEffect(() => {
@@ -153,77 +164,71 @@ export default function EditProductForm({
     return Promise.all(uploadPromises);
   };
 
-  const updateProduct = useMutation({
-    mutationFn: async (
-      values: ProductUpdateData & { images?: Array<{ url: string }> }
-    ) => {
-      const response = await fetch(`/api/admin/products/${productId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Une erreur est survenue");
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
-      toast.success("Produit mis à jour avec succès");
-      onSuccess();
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
-
   const onSubmit = async (values: ProductUpdateData) => {
     console.log("=== Début de la soumission du formulaire ===");
     console.log("Valeurs du formulaire:", values);
     console.log("Fichiers sélectionnés:", selectedFiles);
 
-    try {
-      // Supprimer les images supprimées du blob storage
-      if (deletedImages.length > 0) {
-        console.log("Suppression de", deletedImages.length, "images");
-        await Promise.all(
-          deletedImages.map((imageUrl) => deleteImageFromBlob(imageUrl))
+    startTransition(async () => {
+      try {
+        // Supprimer les images supprimées du blob storage
+        if (deletedImages.length > 0) {
+          console.log("Suppression de", deletedImages.length, "images");
+          await Promise.all(
+            deletedImages.map((imageUrl) => deleteImageFromBlob(imageUrl))
+          );
+        }
+
+        // Gérer l'upload des nouvelles images
+        const newFiles = selectedFiles.filter(
+          (file) => file.file && !file.url.startsWith("http")
         );
+        console.log("Nouveaux fichiers à uploader:", newFiles.length);
+
+        const uploadedUrls =
+          newFiles.length > 0 ? await uploadImages(newFiles) : [];
+
+        // Construire la liste finale des URLs d'images
+        const finalImageUrls = selectedFiles.map((file) => {
+          if (file.url.startsWith("http")) return file.url;
+          const newUrl = uploadedUrls.shift();
+          if (!newUrl) throw new Error("Échec de l'upload de l'image");
+          return newUrl;
+        });
+
+        console.log("URLs finales:", finalImageUrls);
+
+        // Appel de la Server Action
+        const finalData = {
+          ...values,
+          images: finalImageUrls.map((url) => ({ url })),
+        };
+
+        const result = await updateProductFromJSON(productId, finalData);
+
+        if (result.success) {
+          // Invalidation manuelle du cache React Query
+          queryClient.invalidateQueries({ queryKey: ["products"] });
+          queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+
+          toast.success("Produit mis à jour avec succès");
+          onSuccess();
+        } else {
+          // Afficher les erreurs de validation
+          if (result.fieldErrors) {
+            Object.entries(result.fieldErrors).forEach(([field, errors]) => {
+              form.setError(field as keyof ProductUpdateData, {
+                message: errors[0],
+              });
+            });
+          }
+          toast.error(result.error || "Erreur lors de la mise à jour du produit");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour:", error);
+        toast.error("Erreur lors de la mise à jour du produit");
       }
-
-      // Gérer l'upload des nouvelles images
-      const newFiles = selectedFiles.filter(
-        (file) => file.file && !file.url.startsWith("http")
-      );
-      console.log("Nouveaux fichiers à uploader:", newFiles.length);
-
-      const uploadedUrls =
-        newFiles.length > 0 ? await uploadImages(newFiles) : [];
-
-      // Construire la liste finale des URLs d'images
-      const finalImageUrls = selectedFiles.map((file) => {
-        if (file.url.startsWith("http")) return file.url;
-        const newUrl = uploadedUrls.shift();
-        if (!newUrl) throw new Error("Échec de l'upload de l'image");
-        return newUrl;
-      });
-
-      console.log("URLs finales:", finalImageUrls);
-
-      await updateProduct.mutateAsync({
-        ...values,
-        images: finalImageUrls.map((url) => ({ url })),
-      });
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour:", error);
-      toast.error("Erreur lors de la mise à jour du produit");
-    }
+    });
   };
 
   const handleFilesChange = (files: FileMetadata[]) => {
@@ -330,10 +335,10 @@ export default function EditProductForm({
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <TipTapEditor
+                        value={field.value || ""}
+                        onChange={field.onChange}
                         placeholder="Description détaillée du produit"
-                        rows={4}
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -439,13 +444,13 @@ export default function EditProductForm({
                   type="button"
                   variant="outline"
                   onClick={onSuccess}
-                  disabled={updateProduct.isPending}
+                  disabled={isPending}
                 >
                   Annuler
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={updateProduct.isPending}>
-                {updateProduct.isPending ? (
+              <Button type="submit" disabled={isPending || form.formState.isSubmitting}>
+                {isPending || form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Mise à jour...

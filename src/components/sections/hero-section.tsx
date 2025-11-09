@@ -1,10 +1,15 @@
 "use client";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import { Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
-import { Candle3D } from "../Candle3D";
+import dynamic from "next/dynamic";
+
+// Dynamic import pour le composant 3D lourd
+const Candle3D = dynamic(() => import("../Candle3D").then(mod => ({ default: mod.Candle3D })), {
+  ssr: false,
+  loading: () => <div className="w-full h-full flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>,
+});
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -12,11 +17,6 @@ const montserrat = Montserrat({
 });
 
 const HeroSection = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
 
   return (
     <section className="relative bg-background py-16 isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
@@ -30,14 +30,14 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 max-w-7xl mx-auto gap-8 lg:gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-center lg:text-left space-y-8 relative"
           >
             {/* Badge élégant */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
-              animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary mb-6"
             >
@@ -47,14 +47,14 @@ const HeroSection = () => {
 
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
-              animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               className={`${montserrat.className} scroll-m-20 text-5xl  font-extrabold tracking-tight mb-6 relative`}
             >
-              <span className=" ">UNIKCANDLE</span>
+              <span>UNIKCANDLE</span>
               <motion.div
                 initial={{ width: 0 }}
-                animate={isLoaded ? { width: "100%" } : {}}
+                animate={{ width: "100%" }}
                 transition={{ duration: 1, delay: 1.2 }}
                 className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full"
               />
@@ -62,24 +62,26 @@ const HeroSection = () => {
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               className="space-y-4"
             >
-              <p className="text-2xl lg:text-3xl font-semibold text-foreground leading-relaxed">
-                Bougies d&apos;exception. Émotions sur-mesure.
-              </p>
-              <p className="text-xl text-foreground font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
-                Les seules bougies parfumées qui parlent avec ta voix.
-              </p>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto balance-text lg:mx-0 leading-relaxed">
-                Un moment à vivre. Une attention à écouter. Un cadeau surprenant.
-              </p>
+              <ul className=" list-none items-start text-3xl text-muted-foreground list-inside space-y-2">
+                <li className="text-muted-foreground leading-relaxed">
+                  Une bougie d&apos;exception.
+                </li>
+                <li className=" text-muted-foreground leading-relaxed">
+                  Un message.
+                </li>
+                <li className=" text-muted-foreground leading-relaxed">
+                  Une emotion.
+                </li>
+              </ul>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4"
             >
@@ -115,32 +117,34 @@ const HeroSection = () => {
             {/* Statistiques élégantes */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.9 }}
               className="flex flex-wrap gap-8 justify-center lg:justify-start pt-8 text-center lg:text-left"
             >
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-primary">1000+</div>
+                <div className="text-2xl font-bold text-primary">100%</div>
                 <div className="text-sm text-muted-foreground">
-                  Créations sur-mesure
+                  Cire Végétale
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-primary">500+</div>
+                <div className="text-2xl font-bold text-primary">100%</div>
                 <div className="text-sm text-muted-foreground">
                   Clients privilégiés
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">100%</div>
-                <div className="text-sm text-muted-foreground">exclusif</div>
+                <div className="text-sm text-muted-foreground">
+                  Made in France
+                </div>
               </div>
             </motion.div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
             className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square mx-auto"
           >

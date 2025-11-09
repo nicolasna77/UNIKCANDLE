@@ -220,6 +220,11 @@ model Return {
   refundAmount Float?
   adminNote    String?
 
+  // Instructions de renvoi
+  returnInstructions String?
+  returnAddress      String?
+  returnDeadline     DateTime?
+
   // Suivi du colis retour
   trackingNumber String?
   carrier        String?

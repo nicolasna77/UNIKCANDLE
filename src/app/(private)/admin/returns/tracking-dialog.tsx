@@ -15,11 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  useUpdateReturnTracking,
-  useProcessRefund,
-  type ReturnItem,
-} from "@/hooks/useReturns";
-import {
   Truck,
   CreditCard,
   Package,
@@ -30,9 +25,13 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateReturnStatus, processRefund } from "@/app/actions/returns";
+import { toast } from "sonner";
+import type { ReturnItemWithDetails } from "@/services/returns";
 
 interface TrackingDialogProps {
-  returnItem: ReturnItem;
+  returnItem: ReturnItemWithDetails;
   trigger?: React.ReactNode;
 }
 
@@ -50,36 +49,73 @@ export default function TrackingDialog({
     returnItem.refundAmount || returnItem.orderItem.price
   );
 
-  const updateTracking = useUpdateReturnTracking();
-  const processRefund = useProcessRefund();
+  const queryClient = useQueryClient();
+
+  const updateTrackingMutation = useMutation({
+    mutationFn: async (data: unknown) => {
+      const result = await updateReturnStatus(returnItem.id, data);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "returns"] });
+      toast.success("Suivi mis à jour");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Erreur lors de la mise à jour du suivi");
+    },
+  });
+
+  const processRefundMutation = useMutation({
+    mutationFn: async (data: { refundAmount: number }) => {
+      const result = await processRefund(returnItem.id, data.refundAmount);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "returns"] });
+      toast.success("Remboursement traité");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Erreur lors du remboursement");
+    },
+  });
 
   const handleUpdateTracking = async () => {
     if (!trackingData.trackingNumber) return;
 
-    await updateTracking.mutateAsync({
-      id: returnItem.id,
-      ...trackingData,
-      status: "RETURN_SHIPPING_SENT",
+    await updateTrackingMutation.mutateAsync({
+      data: {
+        trackingNumber: trackingData.trackingNumber,
+        carrier: trackingData.carrier,
+        trackingUrl: trackingData.trackingUrl,
+        status: "RETURN_SHIPPING_SENT",
+      },
     });
   };
 
   const handleMarkInTransit = async () => {
-    await updateTracking.mutateAsync({
-      id: returnItem.id,
-      status: "RETURN_IN_TRANSIT",
+    await updateTrackingMutation.mutateAsync({
+      data: {
+        status: "RETURN_IN_TRANSIT",
+      },
     });
   };
 
   const handleMarkDelivered = async () => {
-    await updateTracking.mutateAsync({
-      id: returnItem.id,
-      status: "RETURN_DELIVERED",
+    await updateTrackingMutation.mutateAsync({
+      data: {
+        status: "RETURN_DELIVERED",
+      },
     });
   };
 
   const handleProcessRefund = async () => {
-    await processRefund.mutateAsync({
-      id: returnItem.id,
+    await processRefundMutation.mutateAsync({
       refundAmount,
     });
   };
@@ -235,7 +271,7 @@ export default function TrackingDialog({
                         onClick={handleUpdateTracking}
                         disabled={
                           !trackingData.trackingNumber ||
-                          updateTracking.isPending
+                          updateTrackingMutation.isPending
                         }
                       >
                         Envoyer étiquette retour
@@ -245,7 +281,7 @@ export default function TrackingDialog({
                         variant="outline"
                         size="sm"
                         onClick={handleMarkInTransit}
-                        disabled={updateTracking.isPending}
+                        disabled={updateTrackingMutation.isPending}
                       >
                         <MapPin className="h-4 w-4 mr-1" />
                         Marquer en transit
@@ -255,7 +291,7 @@ export default function TrackingDialog({
                         variant="outline"
                         size="sm"
                         onClick={handleMarkDelivered}
-                        disabled={updateTracking.isPending}
+                        disabled={updateTrackingMutation.isPending}
                       >
                         <Package className="h-4 w-4 mr-1" />
                         Marquer livré
@@ -285,7 +321,7 @@ export default function TrackingDialog({
                               size="sm"
                               className="p-0 h-auto"
                               onClick={() =>
-                                window.open(returnItem.trackingUrl, "_blank")
+                                returnItem.trackingUrl && window.open(returnItem.trackingUrl, "_blank")
                               }
                             >
                               <ExternalLink className="h-3 w-3 mr-1" />
@@ -357,11 +393,11 @@ export default function TrackingDialog({
                     {canRefund && (
                       <Button
                         onClick={handleProcessRefund}
-                        disabled={processRefund.isPending}
+                        disabled={processRefundMutation.isPending}
                         className="w-full"
                       >
                         <CreditCard className="h-4 w-4 mr-2" />
-                        {processRefund.isPending
+                        {processRefundMutation.isPending
                           ? "Traitement..."
                           : "Traiter le remboursement"}
                       </Button>

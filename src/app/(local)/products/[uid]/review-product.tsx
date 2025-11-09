@@ -2,12 +2,13 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import ItemReviewProduct from "./item-review-product";
 import { authClient } from "@/lib/auth-client";
-import { useAddReview } from "@/hooks/useReviews";
-import { useQuery } from "@tanstack/react-query";
+import { addReviewFromJSON } from "@/app/actions/reviews";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Pagination,
   PaginationContent,
@@ -24,9 +25,11 @@ const REVIEWS_PER_PAGE = 6;
 
 const ReviewProduct = ({ product }: { product: Product }) => {
   const { data: session } = authClient.useSession();
+  const queryClient = useQueryClient();
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPending, startTransition] = useTransition();
 
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ["reviews", product.id, currentPage],
@@ -41,23 +44,49 @@ const ReviewProduct = ({ product }: { product: Product }) => {
     },
   });
 
-  // Utiliser la mutation TanStack Query
-  const addReviewMutation = useAddReview();
-
   const handleSubmitReview = async () => {
-    try {
-      await addReviewMutation.mutateAsync({
-        productId: product.id,
-        rating,
-        comment,
-      });
-
-      setComment("");
-      setRating(0);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Erreur:", error);
+    if (rating === 0) {
+      toast.error("Veuillez sélectionner une note");
+      return;
     }
+
+    if (comment.trim() === "") {
+      toast.error("Veuillez ajouter un commentaire");
+      return;
+    }
+
+    if (!session?.user?.id) {
+      toast.error("Vous devez être connecté pour laisser un avis");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        // Appel de la Server Action
+        const result = await addReviewFromJSON({
+          productId: product.id,
+          userId: session.user.id,
+          rating,
+          comment,
+        });
+
+        if (result.success) {
+          // Invalidation du cache React Query
+          queryClient.invalidateQueries({ queryKey: ["reviews", product.id] });
+          queryClient.invalidateQueries({ queryKey: ["products"] });
+
+          toast.success("Votre avis a été ajouté avec succès !");
+          setComment("");
+          setRating(0);
+          setCurrentPage(1);
+        } else {
+          toast.error(result.error || "Erreur lors de l'ajout de l'avis");
+        }
+      } catch (error) {
+        console.error("Erreur:", error);
+        toast.error("Erreur lors de l'ajout de l'avis");
+      }
+    });
   };
 
   const totalPages = reviewsData?.totalPages || 1;
@@ -192,9 +221,9 @@ const ReviewProduct = ({ product }: { product: Product }) => {
             />
             <Button
               onClick={handleSubmitReview}
-              disabled={addReviewMutation.isPending}
+              disabled={isPending}
             >
-              {addReviewMutation.isPending ? "Envoi..." : "Publier l'avis"}
+              {isPending ? "Envoi..." : "Publier l'avis"}
             </Button>
           </div>
         ) : (

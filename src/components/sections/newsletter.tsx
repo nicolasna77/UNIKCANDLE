@@ -2,49 +2,44 @@
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Lora } from "next/font/google";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
-import { useFormStatus } from "react-dom";
+import { useTransition, useState } from "react";
 import { toast } from "sonner";
 import { Sparkles, Gift, Flame } from "lucide-react";
+import { Montserrat } from "next/font/google";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
   subsets: ["latin"],
+  weight: ["800"],
 });
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button size="lg" variant="default" type="submit" disabled={pending}>
-      {pending ? (
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-          Inscription...
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">Je m&apos;inscris</div>
-      )}
-    </Button>
-  );
-}
-
 const NewsletterSection = () => {
-  async function handleSubmit(formData: FormData) {
-    const result = await subscribeToNewsletter(formData);
+  const [isPending, startTransition] = useTransition();
+  const [email, setEmail] = useState("");
 
-    if (result.success) {
-      toast.success("Inscription réussie ! 🕯️", {
-        description:
-          "Vous recevrez bientôt nos offres exclusives et nouveautés",
-      });
-    } else {
-      toast.error("Inscription échouée", {
-        description: result.error || "Une erreur est survenue",
-      });
-    }
-  }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append("email", email);
+
+      const result = await subscribeToNewsletter(formData);
+
+      // Afficher les toasts côté client après l'action
+      if (result.success) {
+        toast.success("Inscription réussie ! 🕯️", {
+          description:
+            "Vous recevrez bientôt nos offres exclusives et nouveautés",
+        });
+        setEmail(""); // Reset form
+      } else {
+        toast.error("Inscription échouée", {
+          description: result.error || "Une erreur est survenue",
+        });
+      }
+    });
+  };
 
   return (
     <section
@@ -63,11 +58,11 @@ const NewsletterSection = () => {
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Titre principal */}
           <h2
-            className={`${lora.className} text-4xl lg:text-6xl text-balance font-bold text-card-foreground tracking-tight`}
+            className={` text-4xl lg:text-6xl text-balance font-bold text-card-foreground tracking-tight`}
           >
             Rejoignez l&apos;aventure{" "}
             <span
-              className={`${lora.className} text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text `}
+              className={` ${montserrat.className} text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text `}
             >
               UNIKCANDLE
             </span>
@@ -127,19 +122,43 @@ const NewsletterSection = () => {
             </div>
           </div>
 
-          {/* Formulaire */}
+          {/* Formulaire avec progressive enhancement */}
           <div className="max-w-lg mx-auto">
-            <form action={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="email"
                   name="email"
                   placeholder="Votre adresse email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-label="Adresse email pour la newsletter"
+                  aria-describedby="newsletter-privacy"
                 />
-                <SubmitButton />
+                <Button
+                  size="lg"
+                  variant="default"
+                  type="submit"
+                  disabled={isPending}
+                  aria-label="S'inscrire à la newsletter"
+                >
+                  {isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
+                      Inscription...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      Je m&apos;inscris
+                    </div>
+                  )}
+                </Button>
               </div>
-              <p className="text-sm text-muted-foreground/80 text-center">
+              <p
+                id="newsletter-privacy"
+                className="text-sm text-muted-foreground/80 text-center"
+              >
                 🔒 Vos données sont protégées. Désinscription à tout moment.
               </p>
             </form>

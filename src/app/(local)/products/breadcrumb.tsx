@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { useProductName } from "@/hooks/useProductName";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProductById, type ProductWithDetails } from "@/services/products";
 
 const Breadscrumb = () => {
   const pathname = usePathname();
@@ -21,8 +22,14 @@ const Breadscrumb = () => {
       ? pathnames[1]
       : undefined;
 
-  // Utiliser TanStack Query pour récupérer le nom du produit
-  const { data: productName, isLoading } = useProductName(productId);
+  // Utiliser TanStack Query pour récupérer le produit
+  const { data: product, isLoading } = useQuery<ProductWithDetails>({
+    queryKey: ["productdetail", productId],
+    queryFn: () => fetchProductById(productId!),
+    enabled: !!productId,
+    retry: 1,
+    retryDelay: 1000,
+  });
 
   const getBreadcrumbName = (path: string, index: number) => {
     const breadcrumbNames: { [key: string]: string } = {
@@ -31,8 +38,8 @@ const Breadscrumb = () => {
     };
 
     // Si nous sommes sur la page d'un produit spécifique et avons récupéré son nom
-    if (index === 1 && pathnames[0] === "products" && productName) {
-      return productName.name;
+    if (index === 1 && pathnames[0] === "products" && product) {
+      return product.name;
     } else if (index === 1 && pathnames[0] === "products" && isLoading) {
       return "Chargement...";
     }

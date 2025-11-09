@@ -1,6 +1,7 @@
 "use client";
-import { useProducts } from "@/hooks/useProducts";
-import { useCategories } from "@/hooks/useCategories";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
+import { fetchProducts, type PaginatedProducts } from "@/services/products";
 import CardSkeleton from "@/components/skeleton/card-skeleton";
 import {
   Select,
@@ -51,14 +52,20 @@ const ProductsList = () => {
     if (urlCategory) setSelectedCategory(urlCategory);
   }, [urlPage, urlSortBy, urlSortOrder, urlCategory]);
 
-  const { data, isLoading } = useProducts({
-    page: currentPage,
-    categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
-    sortBy,
-    sortOrder,
+  const { data, isLoading } = useQuery<PaginatedProducts>({
+    queryKey: ["products", currentPage, selectedCategory !== "all" ? selectedCategory : undefined, sortBy, sortOrder],
+    queryFn: () => fetchProducts({
+      page: currentPage,
+      categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
+      sortBy,
+      sortOrder,
+    }),
   });
 
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [] } = useQuery<CategoryWithProducts[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
 
   if (isLoading) {
     return (

@@ -13,53 +13,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Lora } from "next/font/google";
-import { useFormStatus } from "react-dom";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { Mail, Send, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { sendContactMessage } from "@/app/actions/contact";
+import { contactFormSchema, type ContactFormValues } from "@/lib/schemas";
 
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
 });
 
-// Schéma de validation
-const contactFormSchema = z.object({
-  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  email: z.string().email("Veuillez entrer une adresse email valide"),
-  phone: z.string().optional(),
-  subject: z.string().min(5, "Le sujet doit contenir au moins 5 caractères"),
-  message: z
-    .string()
-    .min(10, "Le message doit contenir au moins 10 caractères"),
-});
-
-type ContactFormValues = z.infer<typeof contactFormSchema>;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button size="lg" variant="default" type="submit" disabled={pending}>
-      {pending ? (
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-          Envoi en cours...
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Send className="w-5 h-5" />
-          Envoyer le message
-        </div>
-      )}
-    </Button>
-  );
-}
-
 const ContactPage = () => {
+  const [isPending, startTransition] = useTransition();
+
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -72,34 +41,28 @@ const ContactPage = () => {
     },
   });
 
-  async function onSubmit(data: ContactFormValues) {
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+  const onSubmit = (data: ContactFormValues) => {
+    startTransition(async () => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
       });
 
-      if (response.ok) {
+      const result = await sendContactMessage(formData);
+
+      // Afficher les toasts selon le résultat
+      if (result.success) {
         toast.success("Message envoyé ! 📧", {
           description: "Nous vous répondrons dans les plus brefs délais",
         });
         form.reset();
       } else {
-        const error = await response.json();
         toast.error("Erreur d'envoi", {
-          description:
-            error.message || "Une erreur est survenue lors de l'envoi",
+          description: result.error || "Une erreur est survenue lors de l'envoi",
         });
       }
-    } catch {
-      toast.error("Erreur de connexion", {
-        description: "Erreur lors de l'envoi du message",
-      });
-    }
-  }
+    });
+  };
 
   return (
     <main className="min-h-screen py-24 bg-gradient-to-br from-background via-background to-primary/5">
@@ -176,6 +139,8 @@ const ContactPage = () => {
                               {...field}
                               className="bg-card/80 backdrop-blur-sm border-primary/20 focus:border-primary/40 focus:ring-primary/20 text-card-foreground placeholder:text-muted-foreground/60 h-12"
                               placeholder="Votre prénom"
+                              aria-label="Prénom"
+                              required
                             />
                           </FormControl>
                           <FormMessage />
@@ -195,6 +160,8 @@ const ContactPage = () => {
                               {...field}
                               className="bg-card/80 backdrop-blur-sm border-primary/20 focus:border-primary/40 focus:ring-primary/20 text-card-foreground placeholder:text-muted-foreground/60 h-12"
                               placeholder="Votre nom"
+                              aria-label="Nom"
+                              required
                             />
                           </FormControl>
                           <FormMessage />
@@ -287,7 +254,25 @@ const ContactPage = () => {
                   />
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <SubmitButton />
+                    <Button
+                      size="lg"
+                      variant="default"
+                      type="submit"
+                      disabled={isPending}
+                      aria-label="Envoyer le message de contact"
+                    >
+                      {isPending ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
+                          Envoi en cours...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Send className="w-5 h-5" />
+                          Envoyer le message
+                        </div>
+                      )}
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"

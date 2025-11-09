@@ -1,14 +1,9 @@
+"use client";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Lora } from "next/font/google";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-const lora = Lora({
-  variable: "--font-lora",
-  subsets: ["latin"],
-});
 
 interface Testimonial {
   name: string;
@@ -52,7 +47,7 @@ export default function TestimonialSection() {
     <section className="py-24 lg:py-32 bg-primary-background overflow-hidden">
       <div className="container mx-auto px-4">
         <h2
-          className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
+          className={` text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
         >
           Ce qu&apos;ils en pensent
         </h2>

@@ -1,7 +1,6 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
 import { toast } from "sonner";
 import {
   Card,
@@ -11,44 +10,63 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+// Schéma de validation Zod
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Le mot de passe actuel est requis"),
+  newPassword: z
+    .string()
+    .min(8, "Le nouveau mot de passe doit contenir au moins 8 caractères")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre"
+    ),
+  confirmPassword: z.string().min(1, "Veuillez confirmer le mot de passe"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
+});
+
+type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 
 const ChangePasswordForm = () => {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const form = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      toast.error("Erreur", {
-        description: "Les mots de passe ne correspondent pas",
-      });
-      return;
-    }
-
-    setIsPasswordLoading(true);
+  const onSubmit = async (data: ChangePasswordFormValues) => {
     try {
       await authClient.changePassword({
-        currentPassword,
-        newPassword,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
       });
       toast.success("Mot de passe mis à jour", {
         description: "Votre mot de passe a été modifié avec succès",
       });
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      form.reset();
     } catch (error: unknown) {
       console.error("Erreur lors de la mise à jour du mot de passe:", error);
       toast.error("Erreur", {
         description:
           "Une erreur est survenue lors de la mise à jour du mot de passe",
       });
-    } finally {
-      setIsPasswordLoading(false);
     }
   };
   return (
@@ -60,64 +78,82 @@ const ChangePasswordForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handlePasswordSubmit} className="space-y-6">
-          <div className="space-y-4 max-w-md">
-            <div className="space-y-2">
-              <Label
-                htmlFor="currentPassword"
-                className="text-base font-medium"
-              >
-                Mot de passe actuel
-              </Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                disabled={isPasswordLoading}
-                required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4 max-w-md">
+              <FormField
+                control={form.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Mot de passe actuel
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Entrez votre mot de passe actuel"
+                        {...field}
+                        aria-label="Mot de passe actuel"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Nouveau mot de passe
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Entrez votre nouveau mot de passe"
+                        {...field}
+                        aria-label="Nouveau mot de passe"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Confirmer le nouveau mot de passe
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirmez votre nouveau mot de passe"
+                        {...field}
+                        aria-label="Confirmer le nouveau mot de passe"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-base font-medium">
-                Nouveau mot de passe
-              </Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                disabled={isPasswordLoading}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="confirmPassword"
-                className="text-base font-medium"
-              >
-                Confirmer le nouveau mot de passe
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={isPasswordLoading}
-                required
-              />
-            </div>
-          </div>
-          <Button
-            type="submit"
-            disabled={isPasswordLoading}
-            className="w-full sm:w-auto"
-          >
-            {isPasswordLoading
-              ? "Mise à jour..."
-              : "Mettre à jour le mot de passe"}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="w-full sm:w-auto"
+              aria-label="Mettre à jour le mot de passe"
+            >
+              {form.formState.isSubmitting
+                ? "Mise à jour..."
+                : "Mettre à jour le mot de passe"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

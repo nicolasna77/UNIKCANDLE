@@ -2,20 +2,21 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { TipTapEditor } from "@/components/ui/tiptap-editor";
 import {
   Select,
   SelectContent,
@@ -26,20 +27,27 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Loader2 } from "lucide-react";
-import { useCategories } from "@/hooks/useCategories";
-import { useScents } from "@/hooks/useScents";
+import { Plus, Loader2, Upload, Info, Package, Tag, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
+import { fetchScents } from "@/services/scents";
+import { type Scent } from "@prisma/client";
 import UploadFiles from "@/components/upload-files";
 import { FileMetadata } from "@/hooks/use-file-upload";
 import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
 import CreateCategoryForm from "@/app/(private)/admin/categories/create-category-form";
 import { productSchema, type ProductFormData } from "@/lib/admin-schemas";
 import { Category } from "@prisma/client";
-import { CardFooter } from "@/components/ui/card";
+import { createProductFromJSON } from "@/app/actions/products";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreateProductFormProps {
   onSuccess: () => void;
@@ -58,9 +66,16 @@ export default function CreateProductForm({
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
   const [isScentDialogOpen, setIsScentDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const { data: categories = [] } = useCategories();
-  const { data: scents = [] } = useScents();
+  const { data: categories = [] } = useQuery<CategoryWithProducts[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
+  const { data: scents = [] } = useQuery<Scent[]>({
+    queryKey: ["scents"],
+    queryFn: fetchScents,
+  });
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -96,79 +111,71 @@ export default function CreateProductForm({
     return Promise.all(uploadPromises);
   };
 
-  const createProduct = useMutation({
-    mutationFn: async (
-      values: ProductFormData & { images?: Array<{ url: string }> }
-    ) => {
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Une erreur est survenue");
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
-      toast.success("Produit créé avec succès");
-      form.reset();
-      setSelectedFiles([]);
-      onOpenChange(false);
-      onSuccess();
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
-
   const onSubmit = async (values: ProductFormData) => {
-    try {
-      console.log("🚀 Début de la soumission du formulaire");
-      console.log("📝 Valeurs du formulaire:", values);
-      console.log("📁 Fichiers sélectionnés:", selectedFiles);
+    startTransition(async () => {
+      try {
+        console.log("🚀 Début de la soumission du formulaire");
+        console.log("📝 Valeurs du formulaire:", values);
+        console.log("📁 Fichiers sélectionnés:", selectedFiles);
 
-      // Vérifier que les champs requis sont présents
-      if (
-        !values.name ||
-        !values.description ||
-        !values.categoryId ||
-        !values.scentId
-      ) {
-        console.error("❌ Champs requis manquants");
-        toast.error("Veuillez remplir tous les champs requis");
-        return;
+        // Vérifier que les champs requis sont présents
+        if (
+          !values.name ||
+          !values.description ||
+          !values.categoryId ||
+          !values.scentId
+        ) {
+          console.error("❌ Champs requis manquants");
+          toast.error("Veuillez remplir tous les champs requis");
+          return;
+        }
+
+        // Gérer l'upload des images
+        console.log("📤 Upload des images en cours...");
+        const uploadedUrls =
+          selectedFiles.length > 0 ? await uploadImages(selectedFiles) : [];
+        console.log("✅ Images uploadées:", uploadedUrls);
+
+        // Utiliser la première image comme imageUrl principale et toutes comme images
+        const finalData = {
+          ...values,
+          arAnimation: values.arAnimation || "default",
+          imageUrl: uploadedUrls[0] || "",
+          images: uploadedUrls.map((url) => ({ url })),
+        };
+
+        console.log("📦 Données finales à envoyer:", finalData);
+
+        // Appel de la Server Action (version JSON)
+        const result = await createProductFromJSON(finalData);
+
+        if (result.success) {
+          // Invalidation manuelle du cache React Query
+          queryClient.invalidateQueries({ queryKey: ["products"] });
+          queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+
+          toast.success("Produit créé avec succès");
+          form.reset();
+          setSelectedFiles([]);
+          onOpenChange(false);
+          onSuccess();
+          console.log("✅ Produit créé avec succès!");
+        } else {
+          // Afficher les erreurs de validation
+          if (result.fieldErrors) {
+            Object.entries(result.fieldErrors).forEach(([field, errors]) => {
+              form.setError(field as keyof ProductFormData, {
+                message: errors[0],
+              });
+            });
+          }
+          toast.error(result.error || "Erreur lors de la création du produit");
+        }
+      } catch (error) {
+        console.error("❌ Erreur lors de la création:", error);
+        toast.error("Erreur lors de la création du produit");
       }
-
-      // Gérer l'upload des images
-      console.log("📤 Upload des images en cours...");
-      const uploadedUrls =
-        selectedFiles.length > 0 ? await uploadImages(selectedFiles) : [];
-      console.log("✅ Images uploadées:", uploadedUrls);
-
-      // Utiliser la première image comme imageUrl principale et toutes comme images
-      const finalData = {
-        ...values,
-        arAnimation: values.arAnimation || "default",
-        imageUrl: uploadedUrls[0] || "",
-        images: uploadedUrls.map((url) => ({ url })),
-      };
-
-      console.log("📦 Données finales à envoyer:", finalData);
-
-      await createProduct.mutateAsync(finalData);
-      console.log("✅ Produit créé avec succès!");
-    } catch (error) {
-      console.error("❌ Erreur lors de la création:", error);
-      toast.error("Erreur lors de la création du produit");
-    }
+    });
   };
 
   const handleFilesChange = (files: FileMetadata[]) => {
@@ -180,30 +187,59 @@ export default function CreateProductForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Créer un produit</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Créer un nouveau produit
+          </DialogTitle>
+          <DialogDescription>
+            Remplissez les informations pour créer un nouveau produit dans le catalogue
+          </DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Informations générales */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Alert d'aide */}
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Les champs marqués d&apos;un astérisque (*) sont obligatoires.
+                Assurez-vous d&apos;avoir au moins une image pour le produit.
+              </AlertDescription>
+            </Alert>
+
             {/* Images du produit */}
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Images du produit</h3>
-                <p className="text-sm text-muted-foreground">
-                  Téléchargez les images du produit
-                </p>
+              <div className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Images du produit *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Téléchargez au moins une image (recommandé : 3-5 images)
+                  </p>
+                </div>
+                {selectedFiles.length > 0 && (
+                  <Badge variant="secondary" className="ml-auto">
+                    {selectedFiles.length} {selectedFiles.length === 1 ? "image" : "images"}
+                  </Badge>
+                )}
               </div>
               <UploadFiles
                 onFilesChange={handleFilesChange}
                 initialFiles={EMPTY_FILES}
               />
             </div>
+
+            <Separator />
+            {/* Informations générales */}
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Informations générales</h3>
-                <p className="text-sm text-muted-foreground">
-                  Nom, description et prix du produit
-                </p>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Informations générales *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Nom, description et prix du produit
+                  </p>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -211,10 +247,18 @@ export default function CreateProductForm({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom du produit</FormLabel>
+                      <FormLabel>Nom du produit *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du produit" {...field} />
+                        <Input
+                          placeholder="Ex: Bougie Lavande Relaxante"
+                          {...field}
+                          aria-required="true"
+                          disabled={isPending}
+                        />
                       </FormControl>
+                      <FormDescription>
+                        Le nom principal affiché aux clients
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -225,18 +269,24 @@ export default function CreateProductForm({
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prix (€)</FormLabel>
+                      <FormLabel>Prix (€) *</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="0.01"
-                          placeholder="Prix du produit"
+                          min="0"
+                          placeholder="29.99"
                           {...field}
                           onChange={(e) =>
                             field.onChange(parseFloat(e.target.value) || 0)
                           }
+                          aria-required="true"
+                          disabled={isPending}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Prix de vente en euros
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -247,10 +297,17 @@ export default function CreateProductForm({
                   name="subTitle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sous-titre</FormLabel>
+                      <FormLabel>Sous-titre *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Sous-titre du produit" {...field} />
+                        <Input
+                          placeholder="Ex: Détente et sérénité"
+                          {...field}
+                          disabled={isPending}
+                        />
                       </FormControl>
+                      <FormDescription>
+                        Court texte descriptif
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -263,8 +320,15 @@ export default function CreateProductForm({
                     <FormItem>
                       <FormLabel>Slogan</FormLabel>
                       <FormControl>
-                        <Input placeholder="Slogan du produit" {...field} />
+                        <Input
+                          placeholder="Ex: Votre moment de paix"
+                          {...field}
+                          disabled={isPending}
+                        />
                       </FormControl>
+                      <FormDescription>
+                        Phrase d&apos;accroche (optionnel)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -272,40 +336,45 @@ export default function CreateProductForm({
               </div>
             </div>
 
+            <Separator />
+
             {/* Description */}
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Description</h3>
-                <p className="text-sm text-muted-foreground">
-                  Description détaillée du produit
-                </p>
-              </div>
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-lg font-semibold">Description *</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Description détaillée du produit"
-                        rows={4}
-                        {...field}
+                      <TipTapEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Décrivez votre produit en détail : caractéristiques, utilisation, bienfaits..."
+                        disabled={isPending}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Minimum 10 caractères - Soyez précis et engageant
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
+            <Separator />
+
             {/* Catégories et parfums */}
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium">Catégories et parfums</h3>
-                <p className="text-sm text-muted-foreground">
-                  Assignez une catégorie et un parfum au produit
-                </p>
+              <div className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Classification *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Catégorie, parfum et type de message personnalisé
+                  </p>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -314,14 +383,21 @@ export default function CreateProductForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
-                        Catégorie
+                        Catégorie *
                         <Dialog
                           open={isCategoryDialogOpen}
                           onOpenChange={setIsCategoryDialogOpen}
                         >
                           <DialogTrigger asChild>
-                            <Button type="button" variant="outline" size="sm">
-                              <Plus className="h-4 w-4" />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2"
+                              disabled={isPending}
+                            >
+                              <Plus className="h-3 w-3" />
+                              <span className="sr-only">Nouvelle catégorie</span>
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -339,9 +415,10 @@ export default function CreateProductForm({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger aria-required="true">
                             <SelectValue placeholder="Sélectionner une catégorie" />
                           </SelectTrigger>
                         </FormControl>
@@ -353,6 +430,9 @@ export default function CreateProductForm({
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Type de bougie (ex: Relaxation, Romance)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -364,14 +444,21 @@ export default function CreateProductForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
-                        Parfum
+                        Parfum *
                         <Dialog
                           open={isScentDialogOpen}
                           onOpenChange={setIsScentDialogOpen}
                         >
                           <DialogTrigger asChild>
-                            <Button type="button" variant="outline" size="sm">
-                              <Plus className="h-4 w-4" />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2"
+                              disabled={isPending}
+                            >
+                              <Plus className="h-3 w-3" />
+                              <span className="sr-only">Nouveau parfum</span>
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -385,9 +472,10 @@ export default function CreateProductForm({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger aria-required="true">
                             <SelectValue placeholder="Sélectionner un parfum" />
                           </SelectTrigger>
                         </FormControl>
@@ -399,6 +487,9 @@ export default function CreateProductForm({
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Fragrance de la bougie
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -409,25 +500,29 @@ export default function CreateProductForm({
                   name="messageType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type de message personnalisé</FormLabel>
+                      <FormLabel>Type de message personnalisé *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger aria-required="true">
                             <SelectValue placeholder="Sélectionner le type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="audio">
-                            Audio (enregistrement vocal)
+                            🎤 Audio (enregistrement vocal)
                           </SelectItem>
                           <SelectItem value="text">
-                            Texte (message écrit gravé dans la cire)
+                            ✍️ Texte (message gravé dans la cire)
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Format de personnalisation proposé aux clients
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -436,26 +531,37 @@ export default function CreateProductForm({
             </div>
 
             {/* Actions */}
-            <CardFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button
                 type="button"
                 variant="outline"
-                onClick={onSuccess}
-                disabled={createProduct.isPending}
+                onClick={() => {
+                  form.reset();
+                  setSelectedFiles([]);
+                  onOpenChange(false);
+                }}
+                disabled={isPending}
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={createProduct.isPending}>
-                {createProduct.isPending ? (
+              <Button
+                type="submit"
+                disabled={isPending || form.formState.isSubmitting}
+                className="min-w-[120px]"
+              >
+                {isPending || form.formState.isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     Création...
                   </>
                 ) : (
-                  "Créer le produit"
+                  <>
+                    <Package className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Créer le produit
+                  </>
                 )}
               </Button>
-            </CardFooter>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus } from "lucide-react";
-import { useCategories } from "@/hooks/useCategories";
+import { type CategoryWithProducts, fetchCategories } from "@/services/categories";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -12,13 +12,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
 
 import { type ColumnDef } from "@tanstack/react-table";
 import CreateCategoryForm from "./create-category-form";
-import { type CategoryWithProducts } from "@/lib/admin-schemas";
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
@@ -26,7 +25,10 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] =
     useState<CategoryWithProducts | null>(null);
 
-  const { data: categories = [], isLoading, refetch } = useCategories();
+  const { data: categories = [], isLoading, refetch } = useQuery<CategoryWithProducts[]>({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
 
   const deleteCategory = useMutation({
     mutationFn: async (id: string) => {

@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Star } from "lucide-react";
 import ReviewProduct from "./review-product";
-import { useProduct } from "@/hooks/useProducts";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProductById, type ProductWithDetails } from "@/services/products";
 import LoadingPage from "../loading";
 import { useCart } from "@/context/CartContext";
 import AudioRecord from "./audio-record";
@@ -12,23 +13,8 @@ import ProductImageCarousel from "@/components/ProductImageCarousel";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Category,
-  Product,
-  Scent,
-  Image as PrismaImage,
-  Review,
-} from "@prisma/client";
+import { Category, Scent } from "@prisma/client";
 import { useState } from "react";
-
-interface ProductWithDetails extends Product {
-  category: Category;
-  scent: Scent;
-  images: PrismaImage[];
-  reviews: Review[];
-  averageRating: number;
-  reviewCount: number;
-}
 
 // Composant pour l'affichage du prix
 const PriceDisplay = ({ price }: { price: number }) => {
@@ -117,14 +103,21 @@ const DetailProduct = ({ productId }: { productId: string }) => {
     data: product,
     isLoading,
     error,
-  } = useProduct(productId) as {
+  } = useQuery<ProductWithDetails>({
+    queryKey: ["productdetail", productId],
+    queryFn: () => fetchProductById(productId),
+    retry: 1,
+    retryDelay: 1000,
+  }) as {
     data: ProductWithDetails | undefined;
     isLoading: boolean;
     error: Error | null;
   };
   const { addToCart } = useCart();
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>();
-  const [currentTextMessage, setCurrentTextMessage] = useState<string | undefined>();
+  const [currentTextMessage, setCurrentTextMessage] = useState<
+    string | undefined
+  >();
 
   if (isLoading) {
     return (
@@ -244,7 +237,10 @@ const DetailProduct = ({ productId }: { productId: string }) => {
         <div className="mt-16 space-y-8">
           <div className=" py-6">
             <h2 className="text-2xl font-bold mb-4">Description</h2>
-            <p className=" leading-relaxed">{product.description}</p>
+            <p
+              className=" leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            ></p>
           </div>
 
           <ReviewProduct product={product} />

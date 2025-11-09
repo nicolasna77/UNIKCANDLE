@@ -4,43 +4,30 @@ import type React from "react";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lora } from "next/font/google";
 
 interface Step {
   number: number;
   title: string;
-  description: string;
   emoji: string;
 }
 
 const steps: Step[] = [
   {
     number: 1,
-    title: "Choisissez votre parfum préféré",
-    description:
-      "Sélectionnez parmi nos fragrances uniques et personnalisez l'ambiance de votre bougie",
+    title: "Choisissez  le théme de votre bougie à offrir",
     emoji: "🌸",
   },
   {
     number: 2,
     title: "Enregistrez votre message audio",
-    description:
-      "Capturez vos émotions en enregistrant un message personnel qui sera révélé à la fin",
     emoji: "🎙️",
   },
   {
     number: 3,
-    title: "Scannez et découvrez la magie AR",
-    description:
-      "Une fois la bougie consumée, scannez le QR code pour révéler votre message en réalité augmentée",
+    title: "Approchez votre téléphone de la bougie et laissez la magie opérer",
     emoji: "🔮",
   },
 ];
-
-const lora = Lora({
-  variable: "--font-lora",
-  subsets: ["latin"],
-});
 
 export default function AboutSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -71,7 +58,7 @@ export default function AboutSection() {
       <div className="container mx-auto flex flex-col gap-y-16 relative z-10">
         <div className="text-center space-y-6">
           <h2
-            className={`${lora.className} text-4xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground tracking-tight`}
+            className={` text-4xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground tracking-tight`}
           >
             Comment ça marche ?
           </h2>
@@ -120,9 +107,6 @@ export default function AboutSection() {
                       </div>
 
                       {/* Description de l'étape */}
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {step.description}
-                      </p>
 
                       {/* Barre de progression avec effet de flamme */}
                       <div className="w-full bg-muted/50 h-2 rounded-full overflow-hidden">

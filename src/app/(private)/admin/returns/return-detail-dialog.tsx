@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
-import type { ReturnItem } from "@/hooks/useReturns";
+import type { ReturnItemWithDetails } from "@/services/returns";
 import Image from "next/image";
 
 interface ReturnDetailDialogProps {
-  returnItem: ReturnItem;
+  returnItem: ReturnItemWithDetails;
 }
 
 export default function ReturnDetailDialog({

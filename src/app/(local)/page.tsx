@@ -1,8 +1,7 @@
-"use client";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Flame, MessageCircle, Sparkles } from "lucide-react";
-import { Lora } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import HeroSection from "@/components/sections/hero-section";
 import TestimonialSection from "@/components/sections/testimonial-section";
 import NewsletterSection from "@/components/sections/newsletter";
@@ -10,9 +9,9 @@ import Link from "next/link";
 import AboutSection from "@/components/sections/AboutSection";
 import CategoriesSection from "@/components/sections/CategoriesSection";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
   subsets: ["latin"],
+  weight: ["800"],
 });
 
 export default function Home() {
@@ -32,15 +31,18 @@ export default function Home() {
                 <span>Le Concept</span>
               </div>
               <h2
-                className={`${lora.className} text-4xl lg:text-5xl font-bold text-foreground tracking-tight`}
+                className={` text-4xl lg:text-5xl font-bold text-foreground tracking-tight`}
               >
                 Et si ta bougie pouvait parler ?
               </h2>
               <p className="text-xl text-muted-foreground leading-relaxed balance-text">
-                Chez UNIKCANDLE, nous pensons qu&apos;une bougie peut être bien plus qu&apos;un simple objet décoratif.
+                Chez UNIKCANDLE, nous pensons qu&apos;une bougie peut être bien
+                plus qu&apos;un simple objet décoratif.
               </p>
               <p className="text-xl text-muted-foreground leading-relaxed balance-text">
-                C&apos;est un véritable vecteur d&apos;émotions, capable de transmettre un message, d&apos;évoquer un souvenir, ou tout simplement de faire naître un sourire.
+                C&apos;est un véritable vecteur d&apos;émotions, capable de
+                transmettre un message, d&apos;évoquer un souvenir, ou tout
+                simplement de faire naître un sourire.
               </p>
             </div>
 
@@ -50,16 +52,18 @@ export default function Home() {
                   Imagine une élégante bougie parfumée…
                 </h3>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  qui, au fil de sa combustion, libère un code à scanner avec ton message audio personnalisé, enregistré par toi.
+                  qui renferme un trésor invisible ...
                 </p>
                 <p className="text-xl font-semibold text-primary italic">
-                  À la chaleur de la cire, les mots prennent vie.
+                  En laissant fondre la cire, un médaillon gravé se révèle.{" "}
                 </p>
                 <p className="text-lg text-muted-foreground">
-                  Un moment unique, intime, inattendu…
+                  Ce médaillon contient un message audio unique: votre voix,
+                  votre mot doux, votre message, ...{" "}
                 </p>
                 <p className="text-xl font-bold text-foreground">
-                  Effet Waouh garanti.
+                  Il suffit d&apos;approcher son téléphone du médaillon pour
+                  écouter, le secret.
                 </p>
               </div>
             </div>
@@ -73,7 +77,9 @@ export default function Home() {
                   Personnalise ta création
                 </h3>
                 <p className="text-base text-card-foreground leading-relaxed">
-                  Enregistre ton audio directement sur notre site, nous nous chargerons de l&apos;insérer dans la cire pour garder la surprise jusqu&apos;à ce que la bougie soit allumée.
+                  Enregistre ton audio directement sur notre site, nous nous
+                  chargerons de l&apos;insérer dans la cire pour garder la
+                  surprise jusqu&apos;à ce que la bougie soit allumée.
                 </p>
               </div>
 
@@ -85,7 +91,10 @@ export default function Home() {
                   Moment unique
                 </h3>
                 <p className="text-base text-card-foreground leading-relaxed">
-                  Une expérience sensorielle unique. Offre la bougie et laisse la magie opérer. Une fois allumée, ta bougie laisse échapper son doux parfum et ton message se dévoile à mesure que la cire fond. Prépare-toi à vivre et à faire vivre un moment suspendu.
+                  Une expérience sensorielle unique. Offre la bougie et laisse
+                  la magie opérer. Une fois allumée, ta bougie laisse échapper
+                  son doux parfum et ton message se dévoile à mesure que la cire
+                  fond. Prépare-toi à vivre et à faire vivre un moment suspendu.
                 </p>
               </div>
             </div>
@@ -102,23 +111,26 @@ export default function Home() {
         </div>
       </section>
       <AboutSection />
-      {/* Section 2 : Comment Ça Marche */}
 
-      {/* Section 3 : Pourquoi UNIKCANDLE */}
       <section className="py-24 lg:py-32 bg-background relative">
         <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
         <div className="container mx-auto px-4">
           <h2
-            className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
+            className={` text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
           >
-            Pourquoi choisir <span className="text-primary">UNIKCANDLE</span> ?
+            Pourquoi choisir
+            <span
+              className={`${montserrat.className} text-primary text-5xl font-extrabold tracking-tight`}
+            >
+              {" "}
+              UNIKCANDLE{" "}
+            </span>
+            ?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="text-center   border-primary/10">
               <CardHeader>
-                <CardTitle
-                  className={`${lora.className} text-primary text-2xl font-bold`}
-                >
+                <CardTitle className={` text-primary text-2xl font-bold`}>
                   Unique
                 </CardTitle>
               </CardHeader>
@@ -131,16 +143,14 @@ export default function Home() {
             </Card>
             <Card className="text-center  border-primary/10">
               <CardHeader>
-                <CardTitle
-                  className={`${lora.className} text-primary text-2xl font-bold`}
-                >
+                <CardTitle className={`text-primary text-2xl font-bold`}>
                   Innovante
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground balance-text">
-                   Notre technologie de réalité augmentée sublime l’expérience
-                  et rend chaque création inoubliable.
+                   Notre technologie audio sublime l’expérience et rend chaque
+                  création inoubliable.
                 </p>
               </CardContent>
             </Card>
@@ -150,9 +160,7 @@ export default function Home() {
              border-primary/10"
             >
               <CardHeader>
-                <CardTitle
-                  className={`${lora.className} text-primary text-2xl font-bold`}
-                >
+                <CardTitle className={` text-primary text-2xl font-bold`}>
                   Émotionnelle
                 </CardTitle>
               </CardHeader>

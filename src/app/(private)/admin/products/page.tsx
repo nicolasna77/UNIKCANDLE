@@ -3,10 +3,11 @@
 import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Eye } from "lucide-react";
-import { useAdminProducts, useDeleteProduct } from "@/hooks/useProducts";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Image from "next/image";
-import { useQueryClient } from "@tanstack/react-query";
+import { deleteProductById } from "@/app/actions/products";
+import { fetchAdminProducts, type ProductWithDetails } from "@/services/products";
 import { formatCurrency } from "@/lib/utils";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
 import {
@@ -39,9 +40,27 @@ export default function ProductsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const { data: products, isLoading, refetch } = useAdminProducts();
-
-  const deleteProductMutation = useDeleteProduct();
+  const { data: products, isLoading, refetch } = useQuery<ProductWithDetails[]>({
+    queryKey: ["admin-products"],
+    queryFn: fetchAdminProducts,
+  });
+  const deleteProductMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const result = await deleteProductById(id);
+      if (!result.success) {
+        throw new Error(result.error || "Erreur lors de la suppression du produit");
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      toast.success("Produit supprimé avec succès");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Erreur lors de la suppression du produit");
+    },
+  });
 
   const handleRefresh = () => {
     refetch();
