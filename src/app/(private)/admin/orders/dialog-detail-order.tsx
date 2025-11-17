@@ -32,7 +32,7 @@ interface OrderItem {
     images: ImageType[];
   };
   scent: Scent;
-  qrCode: QRCode;
+  qrCode: QRCode | null;
 }
 
 interface ExtendedOrder extends Order {

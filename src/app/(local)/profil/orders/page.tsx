@@ -71,7 +71,18 @@ export default function OrdersPage() {
     router.push(`?${params.toString()}`);
   };
 
-  const { data: orders, isLoading } = useQuery<Order[]>({
+  const { data: orders, isLoading } = useQuery<
+    (Order & {
+      items: (OrderItem & {
+        product: Product & {
+          images: Image[];
+        };
+        scent: Scent;
+        qrCode: QRCode | null;
+      })[];
+      shippingAddress: Address;
+    })[]
+  >({
     queryKey: ["orders", dateRange?.from, dateRange?.to, activeTab],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -263,18 +274,7 @@ export default function OrdersPage() {
           {orders.map((order) => (
             <OrderItemCard
               key={order.id}
-              order={
-                order as Order & {
-                  items: (OrderItem & {
-                    product: Product & {
-                      images: Image[];
-                    };
-                    scent: Scent;
-                    qrCode: QRCode | null;
-                  })[];
-                  shippingAddress: Address;
-                }
-              }
+              order={order}
               getStatusDetails={getStatusDetails}
             />
           ))}

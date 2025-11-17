@@ -59,7 +59,7 @@ export default function OrdersPage() {
           images: Image[];
         };
         scent: Scent;
-        qrCode: QRCode;
+        qrCode: QRCode | null;
       })[];
       shippingAddress: Address;
     })[]
