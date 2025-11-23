@@ -64,7 +64,7 @@ const HeroSection = () => {
                   Un message.
                 </li>
                 <li className=" text-muted-foreground leading-relaxed">
-                  Une emotion.
+                  Une émotion.
                 </li>
               </ul>
             </motion.div>
