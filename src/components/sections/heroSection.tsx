@@ -56,7 +56,7 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="space-y-4"
             >
-              <ul className=" list-none items-start text-3xl text-muted-foreground list-inside space-y-2">
+              <ul className=" list-none items-start text-3xl text-muted-foreground list-inside ">
                 <li className="text-muted-foreground leading-relaxed">
                   Une bougie d&apos;exception.
                 </li>
