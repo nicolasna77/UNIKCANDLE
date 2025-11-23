@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "pkg": {
     "assets": [
@@ -16,8 +16,8 @@
     "prisma:generate": "prisma generate",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate --no-engine",
-    "vercel-build": "prisma generate --schema=./prisma/schema.prisma && prisma db push && next build",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma db push && next build",
     "db:generate": "npx prisma generate",
     "db:seed": "npx prisma db seed"
   },
@@ -28,6 +28,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.0.0",
+    "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^6.19.0",
     "@prisma/extension-accelerate": "^2.0.2",
     "@prisma/nextjs-monorepo-workaround-plugin": "^6.7.0",
@@ -70,6 +71,7 @@
     "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "culori": "^4.0.2",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.5.0",
@@ -80,6 +82,7 @@
     "next-qrcode": "^2.5.1",
     "next-themes": "^0.4.6",
     "npm": "^11.3.0",
+    "pg": "^8.16.3",
     "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-day-picker": "^8.10.1",
@@ -111,8 +114,10 @@
     "@faker-js/faker": "^9.6.0",
     "@react-email/preview-server": "^4.2.8",
     "@tailwindcss/postcss": "^4",
+    "@types/culori": "^4.0.1",
     "@types/node": "^20.17.30",
-    "@types/qrcode": "^1.5.5",
+    "@types/pg": "^8.15.6",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.174.0",
@@ -124,7 +129,7 @@
     "tailwindcss": "^4",
     "tailwindcss-bg-patterns": "^0.3.0",
     "ts-node": "^10.9.2",
-    "tsx": "^4.20.5",
+    "tsx": "^4.20.6",
     "typescript": "^5.8.2"
   },
   "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",

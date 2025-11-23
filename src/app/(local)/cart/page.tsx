@@ -43,9 +43,9 @@ export default function CartPage() {
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Helper function to generate unique key for cart items
+  // Helper function to generate unique key for cart items (must match CartContext)
   const getItemKey = (item: (typeof cart)[0]) => {
-    return `${item.id}-${item.selectedScent?.id || ""}-${item.audioUrl || "no-audio"}`;
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}`;
   };
 
   // Vérifier si l'utilisateur revient après annulation

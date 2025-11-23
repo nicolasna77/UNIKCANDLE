@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
-import { useQRCode } from "next-qrcode";
 import { ShoppingCart, Package, MapPin, User, Printer } from "lucide-react";
+import { QRCode } from "@/components/ui/shadcn-io/qr-code";
 
 import {
   Dialog,
@@ -19,7 +19,7 @@ import type {
   Image as ImageType,
   Order,
   Product,
-  QRCode,
+  QRCode as QRCodeType,
   Scent,
   User as UserType,
 } from "@prisma/client";
@@ -32,7 +32,7 @@ interface OrderItem {
     images: ImageType[];
   };
   scent: Scent;
-  qrCode: QRCode | null;
+  qrCode: QRCodeType | null;
 }
 
 interface ExtendedOrder extends Order {
@@ -42,8 +42,6 @@ interface ExtendedOrder extends Order {
 }
 
 const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {
-  const { Canvas } = useQRCode();
-
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = order.items.reduce(
     (acc, item) => acc + item.quantity * item.price,
@@ -375,21 +373,12 @@ const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {
                     <div className="md:col-span-3 flex justify-center">
                       {item.qrCode ? (
                         <div className="flex flex-col items-center space-y-2">
-                          <div className="p-3 bg-white rounded-lg border border-border shadow-sm">
-                            <Canvas
-                              text={`https://${process.env.NEXT_PUBLIC_APP_URL || "localhost:3000"}/ar/${item.qrCode.code}`}
-                              options={{
-                                type: "image/jpeg",
-                                quality: 0.9,
-                                errorCorrectionLevel: "M",
-                                margin: 2,
-                                scale: 4,
-                                width: 100,
-                                color: {
-                                  light: "#ffffff",
-                                  dark: "#000000",
-                                },
-                              }}
+                          <div className="p-3 bg-white rounded-lg border border-border shadow-sm w-[100px] h-[100px]">
+                            <QRCode
+                              data={`https://${process.env.NEXT_PUBLIC_APP_URL || "localhost:3000"}/ar/${item.qrCode.code}`}
+                              foreground="oklch(0 0 0)"
+                              background="oklch(1 0 0)"
+                              robustness="M"
                             />
                           </div>
                         </div>
