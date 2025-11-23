@@ -1,11 +1,50 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
+    const category = await prisma.category.findUnique({
+      where: { id },
+      include: { products: true },
+    });
+
+    if (!category) {
+      return NextResponse.json(
+        { error: "Catégorie introuvable" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(category);
+  } catch (error) {
+    console.error("Erreur lors de la récupération de la catégorie:", error);
+    return NextResponse.json(
+      { error: "Erreur interne" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.role || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const { id } = await params;
 
     // Vérifier si la catégorie est utilisée par des produits
     const productsWithCategory = await prisma.product.findFirst({

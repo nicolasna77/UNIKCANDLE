@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.role || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const data = await request.json();
-    const id = await params.id;
+    const id = (await params).id;
 
     const scent = await prisma.scent.update({
       where: {
@@ -35,6 +45,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.role || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     await prisma.scent.delete({
       where: {
         id: (await params).id,

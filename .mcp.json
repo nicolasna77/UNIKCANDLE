@@ -2,21 +2,19 @@
   "mcpServers": {
     "shadcn": {
       "command": "cmd",
-      "args": ["/y", "npx shadcn@latest mcp"]
+      "args": ["/c", "npx", "-y", "shadcn@latest", "mcp"]
     },
     "next-devtools": {
       "command": "cmd",
-      "args": ["/y", "npx -y next-devtools-mcp@latest"]
-    }
-  },
-  "servers": {
-    "Prisma-Local": {
-      "command": "cmd",
-      "args": ["/y", "npx -y prisma mcp"]
+      "args": ["/c", "npx", "-y", "next-devtools-mcp@latest"]
     },
-    "Prisma-Remote": {
+    "prisma-local": {
       "command": "cmd",
-      "args": ["/y", "npx -y mcp-remote https://mcp.prisma.io/mcp"]
+      "args": ["/c", "npx", "-y", "prisma", "mcp"]
+    },
+    "prisma-remote": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "mcp-remote", "https://mcp.prisma.io/mcp"]
     }
   }
 }
