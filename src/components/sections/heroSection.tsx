@@ -136,7 +136,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="relative w-full max-w-lg sm:max-w-md md:max-w-lg lg:max-w-xl aspect-[3/4] mx-auto order-first lg:order-last"
+            className="relative w-full max-w-lg sm:max-w-md md:max-w-lg lg:max-w-xl py-12 aspect-[3/4] mx-auto order-first lg:order-last"
           >
             {/* Halo lumineux autour de la vidéo */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-full blur-3xl scale-150 animate-pulse" />
