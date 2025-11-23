@@ -30,18 +30,15 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Loader2, Upload, Info, Package, Tag, Sparkles } from "lucide-react";
+import { Loader2, Upload, Info, Package, Tag, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { fetchScents } from "@/services/scents";
 import { type Scent } from "@prisma/client";
 import UploadFiles from "@/components/upload-files";
 import { FileMetadata } from "@/hooks/use-file-upload";
-import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
-import CreateCategoryForm from "@/app/(private)/admin/categories/create-category-form";
 import { productSchema, type ProductFormData } from "@/lib/admin-schemas";
 import { Category } from "@prisma/client";
 import { createProductFromJSON } from "@/app/actions/products";
@@ -64,8 +61,6 @@ export default function CreateProductForm({
 }: CreateProductFormProps) {
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
-  const [isScentDialogOpen, setIsScentDialogOpen] = useState(false);
-  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const { data: categories = [] } = useQuery<CategoryWithProducts[]>({
@@ -382,36 +377,7 @@ export default function CreateProductForm({
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Catégorie *
-                        <Dialog
-                          open={isCategoryDialogOpen}
-                          onOpenChange={setIsCategoryDialogOpen}
-                        >
-                          <DialogTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="h-6 px-2"
-                              disabled={isPending}
-                            >
-                              <Plus className="h-3 w-3" />
-                              <span className="sr-only">Nouvelle catégorie</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>
-                                Créer une nouvelle catégorie
-                              </DialogTitle>
-                            </DialogHeader>
-                            <CreateCategoryForm
-                              onSuccess={() => setIsCategoryDialogOpen(false)}
-                            />
-                          </DialogContent>
-                        </Dialog>
-                      </FormLabel>
+                      <FormLabel>Catégorie *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -443,32 +409,7 @@ export default function CreateProductForm({
                   name="scentId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Parfum *
-                        <Dialog
-                          open={isScentDialogOpen}
-                          onOpenChange={setIsScentDialogOpen}
-                        >
-                          <DialogTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="h-6 px-2"
-                              disabled={isPending}
-                            >
-                              <Plus className="h-3 w-3" />
-                              <span className="sr-only">Nouveau parfum</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Créer un nouveau parfum</DialogTitle>
-                            </DialogHeader>
-                            <CreateScentForm />
-                          </DialogContent>
-                        </Dialog>
-                      </FormLabel>
+                      <FormLabel>Parfum *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}

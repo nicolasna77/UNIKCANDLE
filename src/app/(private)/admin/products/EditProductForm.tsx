@@ -32,17 +32,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { fetchScents } from "@/services/scents";
 import { type Scent } from "@prisma/client";
 import UploadFiles from "@/components/upload-files";
 import { FileMetadata } from "@/hooks/use-file-upload";
-import CreateScentForm from "@/app/(private)/admin/scents/create-scent-form";
-import CreateCategoryForm from "@/app/(private)/admin/categories/create-category-form";
 import {
   productUpdateSchema,
   type ProductUpdateData,
@@ -68,8 +65,6 @@ export default function EditProductForm({
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
-  const [isScentDialogOpen, setIsScentDialogOpen] = useState(false);
-  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
 
   const { data: categories = [] } = useQuery<CategoryWithProducts[]>({
@@ -353,29 +348,7 @@ export default function EditProductForm({
                 name="categoryId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      Catégorie
-                      <Dialog
-                        open={isCategoryDialogOpen}
-                        onOpenChange={setIsCategoryDialogOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <Button type="button" variant="outline" size="sm">
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-h-[90vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>
-                              Créer une nouvelle catégorie
-                            </DialogTitle>
-                          </DialogHeader>
-                          <CreateCategoryForm
-                            onSuccess={() => setIsCategoryDialogOpen(false)}
-                          />
-                        </DialogContent>
-                      </Dialog>
-                    </FormLabel>
+                    <FormLabel>Catégorie</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -400,25 +373,7 @@ export default function EditProductForm({
                 name="scentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      Parfum
-                      <Dialog
-                        open={isScentDialogOpen}
-                        onOpenChange={setIsScentDialogOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <Button type="button" variant="outline" size="sm">
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-h-[90vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>Créer un nouveau parfum</DialogTitle>
-                          </DialogHeader>
-                          <CreateScentForm />
-                        </DialogContent>
-                      </Dialog>
-                    </FormLabel>
+                    <FormLabel>Parfum</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>

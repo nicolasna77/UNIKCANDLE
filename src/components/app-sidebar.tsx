@@ -7,6 +7,7 @@ import {
   IconPackage,
   IconUsers,
   IconRefresh,
+  IconCategory,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -54,6 +55,11 @@ const data = {
       title: "Scents",
       url: "/admin/scents",
       icon: IconPackage,
+    },
+    {
+      title: "Categories",
+      url: "/admin/categories",
+      icon: IconCategory,
     },
   ],
 };
