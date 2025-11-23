@@ -11,7 +11,7 @@ const montserrat = Montserrat({
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-accent py-16 isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
+    <section className="relative bg-accent  isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
       {/* Arrière-plan sophistiqué */}
 
       {/* Éléments décoratifs flottants */}
