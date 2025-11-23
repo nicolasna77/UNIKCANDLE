@@ -7,6 +7,7 @@ import {
   type CategoryWithProducts,
   fetchCategories,
 } from "@/services/categories";
+import { deleteCategoryById } from "@/app/actions/categories";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
@@ -31,13 +32,11 @@ export default function CategoriesPage() {
 
   const deleteCategory = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/admin/categories/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erreur lors de la suppression");
+      const result = await deleteCategoryById(id);
+      if (!result.success) {
+        throw new Error(result.error || "Erreur lors de la suppression");
       }
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
