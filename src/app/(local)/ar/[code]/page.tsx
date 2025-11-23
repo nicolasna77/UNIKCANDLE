@@ -10,19 +10,7 @@ import { Mic, Volume2, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
-
-// Dynamic imports pour les composants lourds (3D et Audio)
-const Candle3D = dynamic(
-  () => import("@/components/Candle3D").then((mod) => ({ default: mod.Candle3D })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    ),
-  }
-);
+import Image from "next/image";
 
 const AudioPlayer = dynamic(
   () => import("@/components/AudioPlayer").then((mod) => ({ default: mod.AudioPlayer })),
@@ -41,10 +29,13 @@ interface QRData {
   product: {
     name: string;
     description: string;
-    model3dUrl: string;
     category: {
       icon: string;
     };
+    images: {
+      id: string;
+      url: string;
+    }[];
   };
   scent: {
     name: string;
@@ -123,9 +114,23 @@ export default function ARPage() {
       {/* Contenu principal */}
       <div className=" flex z-10 container mx-auto px-4 py-8 ">
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Côté gauche : Bougie 3D */}
-          <div className="relative">
-            <Candle3D />
+          {/* Côté gauche : Image du produit */}
+          <div className="relative flex items-center justify-center">
+            {data?.product.images?.[0]?.url ? (
+              <div className="relative w-full max-w-md aspect-square">
+                <Image
+                  src={data.product.images[0].url}
+                  alt={data.product.name}
+                  fill
+                  className="object-contain rounded-2xl"
+                  priority
+                />
+              </div>
+            ) : (
+              <div className="w-full max-w-md aspect-square bg-muted rounded-2xl flex items-center justify-center">
+                <span className="text-muted-foreground">Aucune image disponible</span>
+              </div>
+            )}
             <ConfettiEmojiAuto icon={data?.product.category.icon || ""} />
           </div>
 

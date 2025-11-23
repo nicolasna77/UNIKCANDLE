@@ -3,13 +3,6 @@ import { motion } from "framer-motion";
 import { Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-// Dynamic import pour le composant 3D lourd
-const Candle3D = dynamic(() => import("../Candle3D").then(mod => ({ default: mod.Candle3D })), {
-  ssr: false,
-  loading: () => <div className="w-full h-full flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>,
-});
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -17,7 +10,6 @@ const montserrat = Montserrat({
 });
 
 const HeroSection = () => {
-
   return (
     <section className="relative bg-background py-16 isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
       {/* Arrière-plan sophistiqué */}
@@ -146,20 +138,27 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square mx-auto"
+            className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[3/4] mx-auto"
           >
-            {/* Halo lumineux autour de la bougie */}
+            {/* Halo lumineux autour de la vidéo */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-full blur-3xl scale-150 animate-pulse" />
 
-            {/* Container de la bougie 3D */}
-            <div className="relative w-full h-full overflow-hidden ">
-              <Candle3D />
+            {/* Container de la vidéo */}
+            <div className="relative w-full h-full overflow-hidden rounded-2xl">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover rounded-2xl"
+              >
+                <source src="/asset/hero.MOV" type="video/quicktime" />
+                <source src="/asset/hero.MOV" type="video/mp4" />
+              </video>
 
               {/* Reflet élégant */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-2xl" />
             </div>
-
-            {/* Particules flottantes */}
           </motion.div>
         </div>
       </div>

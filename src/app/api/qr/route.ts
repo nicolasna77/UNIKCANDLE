@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       include: {
         orderItem: {
           include: {
-            product: { include: { category: true } },
+            product: { include: { category: true, images: true } },
             scent: true,
           },
         },
