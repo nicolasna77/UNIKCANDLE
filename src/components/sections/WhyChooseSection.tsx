@@ -33,7 +33,7 @@ export default function WhyChooseSection() {
             <CardContent>
               <p className="text-muted-foreground">
                 Chaque bougie est conçue sur-mesure, exclusivement pour vous
-                ou pour une personne d'exception.
+                ou pour une personne d&apos;exception.
               </p>
             </CardContent>
           </Card>
@@ -45,7 +45,7 @@ export default function WhyChooseSection() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground balance-text">
-                Notre technologie audio sublime l'expérience et rend chaque
+                Notre technologie audio sublime l&apos;expérience et rend chaque
                 création inoubliable.
               </p>
             </CardContent>
