@@ -11,10 +11,8 @@ const montserrat = Montserrat({
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-background py-16 isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
+    <section className="relative bg-accent py-16 isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
       {/* Arrière-plan sophistiqué */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background/50 -z-20" />
-      <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
 
       {/* Éléments décoratifs flottants */}
 
@@ -75,7 +73,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4"
+              className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start pt-4"
             >
               <motion.div
                 whileHover={{ scale: 1.05 }}
