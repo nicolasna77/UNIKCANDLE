@@ -43,7 +43,7 @@ import {
 import Loading from "@/components/loading";
 import DialogDetailOrder from "./dialog-detail-order";
 import DialogCreateOrder from "./dialog-create-order";
-import { PaginationComponent } from "@/app/(private)/Pagination";
+import { PaginationComponent } from "@/app/[locale]/(private)/Pagination";
 
 export default function OrdersPage() {
   const queryClient = useQueryClient();

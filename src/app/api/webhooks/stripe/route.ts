@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
 import Stripe from "stripe";
-import { sendConfirmationEmail } from "@/app/(local)/success/confirm.action";
+import { sendConfirmationEmail } from "@/lib/email";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

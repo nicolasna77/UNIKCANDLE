@@ -33,7 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PaginationComponent } from "@/app/(private)/Pagination";
+import { PaginationComponent } from "@/app/[locale]/(private)/Pagination";
 
 interface DataTableAdvancedProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
