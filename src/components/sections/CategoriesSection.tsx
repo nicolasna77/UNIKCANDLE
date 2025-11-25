@@ -63,7 +63,7 @@ const CategoriesSection = () => {
               ?.filter(
                 (category: CategoryWithImage) => category.products.length > 0
               )
-              .map((category: CategoryWithImage) => (
+              .map((category: CategoryWithImage, index) => (
                 <Card
                   key={category.id}
                   className="group relative p-0 overflow-hidden border border-border  shadow-lg hover:shadow-xl transition-all duration-300"
@@ -79,6 +79,8 @@ const CategoriesSection = () => {
                           alt={category.name}
                           fill
                           className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          priority={index < 3}
                         />
                       ) : (
                         <div

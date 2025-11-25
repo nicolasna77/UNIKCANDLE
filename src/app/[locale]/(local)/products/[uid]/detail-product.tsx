@@ -4,7 +4,7 @@ import { ShoppingBag, Star } from "lucide-react";
 import ReviewProduct from "./review-product";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProductById, type ProductWithDetails } from "@/services/products";
-import LoadingPage from "../loading";
+import LoadingPage from "./loading";
 import { useCart } from "@/context/CartContext";
 import AudioRecord from "./audio-record";
 import TextMessage from "./text-message";

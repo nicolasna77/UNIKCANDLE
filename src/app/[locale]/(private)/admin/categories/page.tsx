@@ -14,6 +14,7 @@ import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
 import { createColumns } from "./columns";
 import CreateCategoryForm from "./create-category-form";
 import EditCategoryForm from "./edit-category-form";
+import { DeleteCategoryDialog } from "./delete-category-dialog";
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();

@@ -63,17 +63,16 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
 
   return (
     <article itemScope itemType="https://schema.org/Product">
-      <Card className="overflow-hidden border-border justify-between pt-0">
+      <Card className="overflow-hidden border-border h-full justify-between pt-0">
         <Link href={`/products/${product.id}`}>
           <div className="aspect-square relative">
             {product.images[0] && (
               <Image
                 src={product.images[0].url}
                 alt={product.name}
-                className="object-cover w-full h-full"
-                width={500}
-                height={500}
-                loading="lazy"
+                className="object-cover"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 itemProp="image"
               />
             )}
@@ -84,7 +83,12 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
             <div className="w-2/3 gap-2">
               <CardTitle itemProp="name">{product.name}</CardTitle>
             </div>
-            <div className="font-semibold" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+            <div
+              className="font-semibold"
+              itemProp="offers"
+              itemScope
+              itemType="https://schema.org/Offer"
+            >
               <meta itemProp="priceCurrency" content="EUR" />
               <meta itemProp="price" content={product.price.toFixed(2)} />
               {product.price.toFixed(2)} €
@@ -92,11 +96,24 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
           </div>
           <div className="flex items-center gap-4">
             {product.reviewCount > 0 && (
-              <div className="flex items-center gap-2" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+              <div
+                className="flex items-center gap-2"
+                itemProp="aggregateRating"
+                itemScope
+                itemType="https://schema.org/AggregateRating"
+              >
                 <StarIcon className="w-4 h-4 text-yellow-500 fill-current" />
-                <meta itemProp="ratingValue" content={product.averageRating.toFixed(1)} />
-                <meta itemProp="reviewCount" content={product.reviewCount.toString()} />
-                <div className="">{product.reviewCount} {t("card.reviews")}</div>
+                <meta
+                  itemProp="ratingValue"
+                  content={product.averageRating.toFixed(1)}
+                />
+                <meta
+                  itemProp="reviewCount"
+                  content={product.reviewCount.toString()}
+                />
+                <div className="">
+                  {product.reviewCount} {t("card.reviews")}
+                </div>
               </div>
             )}
             {product.category && (
@@ -112,7 +129,9 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
           </div>
         </CardHeader>
         <CardContent>
-          <CardDescription itemProp="description">{product.subTitle}</CardDescription>
+          <CardDescription itemProp="description">
+            {product.subTitle}
+          </CardDescription>
           {product.scent && (
             <div className="mt-4">
               <span className="font-semibold">{t("card.scentLabel")}</span>

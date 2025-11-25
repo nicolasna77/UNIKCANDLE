@@ -59,94 +59,102 @@ const OrderItemCard = ({
     day: "numeric",
   });
 
-  console.log("Order data:", {
-    id: order.id,
-    items: order.items.map(item => ({
-      id: item.id,
-      product: item.product,
-      productImages: item.product?.images,
-      scent: item.scent
-    }))
-  });
-
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
-      <CardHeader className="bg-gray-50/80 p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">Commande #{order.id}</h3>
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-lg border-border">
+      <CardHeader className="bg-gradient-to-br from-muted/40 to-muted/20 p-4 md:p-6 border-b">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="text-lg font-semibold text-foreground">
+                Commande #{order.id}
+              </h3>
               {statusDetails.badge}
             </div>
-            <p className="text-sm text-muted-foreground">
-              Commandé le {formattedDate}
-            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>{formattedDate}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <FileText className="mr-2 h-4 w-4" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2">
+              <FileText className="h-4 w-4" />
               Facture
             </Button>
-            <Button size="sm">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Commander à nouveau
+            <Button size="sm" variant="default" className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Recommander
             </Button>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="p-4 md:p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Package className="h-5 w-5 text-muted-foreground" />
-            <h4 className="font-medium">Produits ({order.items.length})</h4>
+        <div className="p-4 md:p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-primary" />
+            <h4 className="font-semibold text-base">
+              Produits ({order.items.length})
+            </h4>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-4">
             {order.items.map((item) => (
-              <div key={item.id} className="flex items-center gap-4">
-                <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-gray-50">
+              <div
+                key={item.id}
+                className="flex gap-4 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+              >
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border bg-muted">
                   <Image
-                    src={item.product?.images?.[0]?.url || "/placeholder-product.jpg"}
+                    src={
+                      item.product?.images?.[0]?.url ||
+                      "/placeholder-product.jpg"
+                    }
                     alt={item.product?.name || "Produit"}
                     fill
+                    sizes="80px"
                     className="object-cover"
                   />
                 </div>
-                <div className="flex-1">
-                  <h5 className="font-medium">{item.product?.name}</h5>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{
-                        backgroundColor: item.scent?.color || "#CBD5E1",
-                      }}
-                    />
-                    <span>{item.scent?.name}</span>
-                  </div>
-                  <p className="text-sm mt-1">
-                    {item.quantity} × {item.price.toFixed(2)}€
-                  </p>
-                  {item.qrCode && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <Link
-                        href={`/ar/${item.qrCode.code}`}
-                        className={buttonVariants({ variant: "link" })}
-                        prefetch
-                      >
-                        Voir en réalité augmentée
-                      </Link>
-                    </div>
-                  )}
-                  {item.animationId && (
-                    <div className="mt-1 flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div>
+                    <h5 className="font-semibold text-base truncate">
+                      {item.product?.name}
+                    </h5>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div
+                        className="h-3 w-3 rounded-full ring-2 ring-background"
+                        style={{
+                          backgroundColor: item.scent?.color || "#CBD5E1",
+                        }}
+                      />
                       <span className="text-sm text-muted-foreground">
-                        Lieu: {item.animationId}
+                        {item.scent?.name}
                       </span>
                     </div>
-                  )}
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  </div>
+
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="font-medium">
+                      {item.quantity} × {item.price.toFixed(2)}€
+                    </span>
+                    <span className="text-muted-foreground">
+                      Total: {(item.quantity * item.price).toFixed(2)}€
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {item.qrCode && (
+                      <Link
+                        href={`/ar/${item.qrCode.code}`}
+                        className={buttonVariants({
+                          variant: "outline",
+                          size: "sm",
+                        })}
+                        prefetch
+                      >
+                        Voir en AR
+                      </Link>
+                    )}
                     <ReturnRequestDialog
                       orderItem={{
                         id: item.id,
@@ -157,50 +165,57 @@ const OrderItemCard = ({
                         id: order.id,
                       }}
                     />
-                    {/* TODO: Système de retour simplifié */}
-                    {/* <Button variant="outline" size="sm">
-                       Suivre le retour
-                     </Button> */}
                   </div>
                 </div>
               </div>
             ))}
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <Separator className="my-4" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <h4 className="font-medium">Adresse de livraison</h4>
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <h4 className="font-semibold text-sm">
+                    Adresse de livraison
+                  </h4>
                 </div>
-                <div className="rounded-lg bg-gray-50/80 p-4 text-sm">
-                  <p className="font-medium">{order.shippingAddress.street}</p>
-                  <p className="text-muted-foreground">
+                <div className="rounded-lg bg-muted/50 border p-4 space-y-1">
+                  <p className="font-medium text-sm">
+                    {order.shippingAddress.street}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     {order.shippingAddress.zipCode} {order.shippingAddress.city}
                   </p>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {order.shippingAddress.country}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  Suivi de commande
-                </h4>
-                <div className="rounded-lg bg-gray-50/80 p-4 text-sm">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  {statusDetails.icon}
+                  <h4 className="font-semibold text-sm">
+                    Statut de la commande
+                  </h4>
+                </div>
+                <div className="rounded-lg bg-muted/50 border p-4 space-y-2">
                   <div className="flex items-center gap-2">
-                    {statusDetails.icon}
-                    <span className={statusDetails.color}>
+                    <span
+                      className={`font-medium text-sm ${statusDetails.color}`}
+                    >
                       {statusDetails.label}
                     </span>
                   </div>
-                  <p className="text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {order.status === "DELIVERED"
                       ? "Votre commande a été livrée avec succès."
                       : order.status === "CANCELLED"
                         ? "Cette commande a été annulée."
-                        : "Votre commande est en cours de préparation."}
+                        : order.status === "SHIPPED"
+                          ? "Votre commande est en cours de livraison."
+                          : "Votre commande est en cours de préparation."}
                   </p>
                 </div>
               </div>
@@ -211,18 +226,24 @@ const OrderItemCard = ({
 
       <Separator />
 
-      <CardFooter className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-6 gap-4">
+      <CardFooter className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-6 gap-4 bg-muted/20">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {order.status === "PROCESSING" && (
-            <Button variant="outline" size="sm" className="text-destructive">
-              <XCircle className="mr-2 h-4 w-4" />
-              Annuler la commande
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:bg-destructive/10 gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Annuler
             </Button>
           )}
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <span className="text-muted-foreground">Total:</span>
-          <span className="text-xl font-semibold">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <span className="text-sm font-medium text-muted-foreground">
+            Montant total
+          </span>
+          <span className="text-2xl font-bold text-foreground">
             {order.total.toFixed(2)}€
           </span>
         </div>

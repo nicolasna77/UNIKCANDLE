@@ -25,6 +25,7 @@ import {
   Truck,
   Shield,
   Loader2,
+  MessageSquare,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,6 +36,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import { useTranslations } from "next-intl";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -335,22 +337,24 @@ export default function CartPage() {
           </div>
 
           <div className="space-y-4">
-            {/* Grouper les produits par type (avec/sans audio) */}
+            {/* Grouper les produits par type (avec/sans personnalisation) */}
             {(() => {
-              const productsWithAudio = cart.filter((item) => item.audioUrl);
-              const productsWithoutAudio = cart.filter(
-                (item) => !item.audioUrl
+              const productsWithCustomization = cart.filter(
+                (item) => item.audioUrl || item.textMessage
+              );
+              const productsWithoutCustomization = cart.filter(
+                (item) => !item.audioUrl && !item.textMessage
               );
 
               return (
                 <>
-                  {/* Produits avec audio */}
-                  {productsWithAudio.length > 0 && (
+                  {/* Produits avec personnalisation (audio ou message) */}
+                  {productsWithCustomization.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">
-                        {t("withAudio")} ({productsWithAudio.length})
+                        {t("withAudio")} ({productsWithCustomization.length})
                       </h3>
-                      {productsWithAudio.map((item) => (
+                      {productsWithCustomization.map((item) => (
                         <Card
                           key={getItemKey(item)}
                           className="overflow-hidden border-border p-0 border-l-4 border-l-primary"
@@ -380,13 +384,41 @@ export default function CartPage() {
                                     <p className="text-muted-foreground text-sm">
                                       {item.selectedScent?.name}
                                     </p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <div className="flex items-center gap-1">
-                                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
-                                          {t("audioCustomized")}
-                                        </span>
+
+                                    {/* Affichage de l'audio */}
+                                    {item.audioUrl && (
+                                      <div className="mt-3 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                                            {t("audioCustomized")}
+                                          </span>
+                                        </div>
+                                        <div className="max-w-md">
+                                          <AudioPlayer
+                                            audioUrl={item.audioUrl}
+                                            showControls={true}
+                                            className="text-xs"
+                                          />
+                                        </div>
                                       </div>
-                                    </div>
+                                    )}
+
+                                    {/* Affichage du message texte */}
+                                    {item.textMessage && (
+                                      <div className="mt-3 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <MessageSquare className="h-3 w-3 text-primary" />
+                                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                                            Message personnalisé
+                                          </span>
+                                        </div>
+                                        <div className="bg-muted/50 border border-border rounded-lg p-3 max-w-md">
+                                          <p className="text-sm text-foreground italic">
+                                            "{item.textMessage}"
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                   <Button
                                     variant="ghost"
@@ -448,13 +480,13 @@ export default function CartPage() {
                     </div>
                   )}
 
-                  {/* Produits sans audio */}
-                  {productsWithoutAudio.length > 0 && (
+                  {/* Produits sans personnalisation */}
+                  {productsWithoutCustomization.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">
-                        {t("standardProducts")} ({productsWithoutAudio.length})
+                        {t("standardProducts")} ({productsWithoutCustomization.length})
                       </h3>
-                      {productsWithoutAudio.map((item) => (
+                      {productsWithoutCustomization.map((item) => (
                         <Card
                           key={getItemKey(item)}
                           className="overflow-hidden border-border p-0"
@@ -484,11 +516,29 @@ export default function CartPage() {
                                     <p className="text-muted-foreground text-sm">
                                       {item.selectedScent?.name}
                                     </p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                                        {t("noAudio")}
-                                      </span>
-                                    </div>
+
+                                    {/* Affichage du message texte si présent */}
+                                    {item.textMessage ? (
+                                      <div className="mt-3 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <MessageSquare className="h-3 w-3 text-primary" />
+                                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                                            Message personnalisé
+                                          </span>
+                                        </div>
+                                        <div className="bg-muted/50 border border-border rounded-lg p-3 max-w-md">
+                                          <p className="text-sm text-foreground italic">
+                                            "{item.textMessage}"
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                          {t("noAudio")}
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                   <Button
                                     variant="ghost"

@@ -1,6 +1,6 @@
 import DetailProduct from "./detail-product";
 import { Suspense } from "react";
-import LoadingPage from "../loading";
+import LoadingPage from "./loading";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 

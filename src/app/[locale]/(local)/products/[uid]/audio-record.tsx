@@ -396,10 +396,11 @@ const AudioRecord = ({ productId, onAudioChange }: AudioRecordProps) => {
 
           {/* Instructions */}
           <div className="text-center space-y-2">
-            <p
-              className="text-xs text-muted-foreground"
-              dangerouslySetInnerHTML={{ __html: t("tip") }}
-            />
+            <p className="text-xs text-muted-foreground">
+              {t.rich("tip", {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </p>
             <p className="text-xs text-muted-foreground">
               {t("recommendedDuration")}
             </p>

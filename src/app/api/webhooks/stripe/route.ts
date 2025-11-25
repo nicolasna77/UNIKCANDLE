@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 import { sendConfirmationEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -28,19 +29,13 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: Request) {
-  console.log("=== Webhook Stripe appelé ===");
-  console.log("Webhook secret configuré:", webhookSecret ? "Oui" : "Non");
-
   try {
     const body = await req.text();
     const headersList = await headers();
     const signature = headersList.get("stripe-signature");
 
-    console.log("Signature reçue:", signature);
-    console.log("Corps de la requête:", body);
-
     if (!signature || !webhookSecret) {
-      console.error("Erreur: Signature ou clé secrète manquante");
+      logger.error("Webhook Stripe: Signature ou clé secrète manquante");
       return new NextResponse("Signature ou clé secrète manquante", {
         status: 400,
       });
@@ -50,20 +45,12 @@ export async function POST(req: Request) {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      console.log("Événement Stripe validé avec succès:", event.type);
-      console.log(
-        "Données de l'événement:",
-        JSON.stringify(event.data.object, null, 2)
-      );
     } catch (error) {
-      console.error("Erreur de vérification de la signature Stripe:", error);
+      logger.error("Webhook Stripe: Erreur de vérification de la signature", error);
       return new NextResponse("Signature invalide", { status: 400 });
     }
 
     if (event.type === "checkout.session.completed") {
-      console.log(
-        "=== Traitement de l'événement checkout.session.completed ==="
-      );
       const session = event.data.object as Stripe.Checkout.Session & {
         shipping_details?: {
           address: {
@@ -97,18 +84,12 @@ export async function POST(req: Request) {
       };
 
       try {
-        console.log("Session complétée - ID:", session.id);
-        console.log("Métadonnées de la session:", session.metadata);
-        console.log("Détails du client:", session.customer_details);
-
         // Vérifier que toutes les données nécessaires sont présentes
         if (!session.metadata?.userId) {
-          console.error("userId manquant dans les métadonnées");
           throw new Error("userId manquant dans les métadonnées");
         }
 
         if (!session.metadata?.orderId) {
-          console.error("orderId manquant dans les métadonnées");
           throw new Error("orderId manquant dans les métadonnées");
         }
 
@@ -118,31 +99,17 @@ export async function POST(req: Request) {
         });
 
         if (!temporaryOrder) {
-          console.error(
-            "Données de commande temporaires non trouvées pour orderId:",
-            session.metadata.orderId
-          );
           throw new Error("Données de commande temporaires non trouvées");
         }
 
         const orderData = JSON.parse(temporaryOrder.orderData);
         const cartItems: CartItem[] = orderData.items;
-        console.log("Items du panier parsés:", cartItems);
-        console.log(
-          "Détail des items avec audio:",
-          cartItems.map((item) => ({
-            id: item.id,
-            audioUrl: item.audioUrl,
-            hasAudio: !!item.audioUrl,
-          }))
-        );
 
         // Vérifier la connexion à la base de données
         try {
           await prisma.$connect();
-          console.log("Connexion à la base de données réussie");
         } catch (error) {
-          console.error("Erreur de connexion à la base de données:", error);
+          logger.error("Webhook Stripe: Erreur de connexion à la base de données", error);
           throw error;
         }
 
@@ -152,32 +119,22 @@ export async function POST(req: Request) {
         });
 
         if (!user) {
-          console.error("Utilisateur non trouvé:", session.metadata.userId);
           throw new Error("Utilisateur non trouvé");
         }
 
-        console.log("Utilisateur trouvé:", user);
-
-        console.log("Création de la commande...");
         // Créer la commande dans la base de données
         const order = await prisma.order.create({
           data: {
             userId: session.metadata.userId,
             total: session.amount_total ? session.amount_total / 100 : 0,
             items: {
-              create: cartItems.map((item: CartItem) => {
-                console.log("Création item avec audioUrl:", {
-                  productId: item.id,
-                  audioUrl: item.audioUrl,
-                });
-                return {
-                  productId: item.id,
-                  quantity: item.quantity,
-                  price: item.price,
-                  scentId: item.scentId,
-                  audioUrl: item.audioUrl,
-                };
-              }),
+              create: cartItems.map((item: CartItem) => ({
+                productId: item.id,
+                quantity: item.quantity,
+                price: item.price,
+                scentId: item.scentId,
+                audioUrl: item.audioUrl,
+              })),
             },
             shippingAddress: {
               create: {
@@ -230,9 +187,6 @@ export async function POST(req: Request) {
           },
         });
 
-        console.log("Commande créée avec succès:", order);
-
-        console.log("Création des QR codes...");
         // Créer les QR codes pour chaque item de la commande
         await Promise.all(
           order.items.map((item, index) =>
@@ -244,9 +198,6 @@ export async function POST(req: Request) {
             })
           )
         );
-
-        console.log("QR codes créés avec succès");
-        console.log("Commande complète:", JSON.stringify(order, null, 2));
 
         // Préparer les données pour l'email de confirmation
         const emailOrderData = {
@@ -274,12 +225,8 @@ export async function POST(req: Request) {
         // Envoyer l'email de confirmation
         try {
           await sendConfirmationEmail(emailOrderData);
-          console.log("Email de confirmation envoyé avec succès");
         } catch (emailError) {
-          console.error(
-            "Erreur lors de l'envoi de l'email de confirmation:",
-            emailError
-          );
+          logger.error("Webhook Stripe: Erreur lors de l'envoi de l'email de confirmation", emailError);
           // Ne pas faire échouer la commande si l'email échoue
         }
 
@@ -288,27 +235,13 @@ export async function POST(req: Request) {
           await prisma.temporaryOrder.delete({
             where: { orderId: session.metadata.orderId },
           });
-          console.log(
-            "Données temporaires nettoyées pour orderId:",
-            session.metadata.orderId
-          );
         } catch (cleanupError) {
-          console.warn(
-            "Erreur lors du nettoyage des données temporaires:",
-            cleanupError
-          );
+          logger.warn("Webhook Stripe: Erreur lors du nettoyage des données temporaires", { error: cleanupError });
         }
 
         return new NextResponse(null, { status: 200 });
       } catch (error) {
-        console.error(
-          "Erreur détaillée lors de la création de la commande:",
-          error
-        );
-        if (error instanceof Error) {
-          console.error("Message d'erreur:", error.message);
-          console.error("Stack trace:", error.stack);
-        }
+        logger.error("Webhook Stripe: Erreur lors de la création de la commande", error);
         return new NextResponse("Erreur lors de la création de la commande", {
           status: 500,
         });
@@ -317,11 +250,7 @@ export async function POST(req: Request) {
 
     return new NextResponse(null, { status: 200 });
   } catch (error) {
-    console.error("Erreur générale du webhook:", error);
-    if (error instanceof Error) {
-      console.error("Message d'erreur:", error.message);
-      console.error("Stack trace:", error.stack);
-    }
+    logger.error("Webhook Stripe: Erreur générale", error);
     return new NextResponse("Erreur interne du serveur", { status: 500 });
   }
 }

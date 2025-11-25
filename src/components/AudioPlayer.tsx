@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -45,11 +48,8 @@ export function AudioPlayer({
             setIsPlaying(true);
             setHasAutoPlayed(true);
           })
-          .catch((error) => {
-            console.log(
-              "Lecture automatique bloquée par le navigateur:",
-              error
-            );
+          .catch(() => {
+            // Lecture automatique bloquée par le navigateur
           });
       }
     };
@@ -87,25 +87,32 @@ export function AudioPlayer({
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play().catch((error) => {
-        console.error("Erreur lors de la lecture:", error);
+      audioRef.current.play().catch(() => {
+        // Erreur lors de la lecture
       });
     }
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeek = (value: number[]) => {
     if (!audioRef.current) return;
-    const time = parseFloat(e.target.value);
+    const time = value[0];
     audioRef.current.currentTime = time;
     setCurrentTime(time);
   };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVolumeChange = (value: number[]) => {
     if (!audioRef.current) return;
-    const newVolume = parseFloat(e.target.value);
+    const newVolume = value[0];
     setVolume(newVolume);
     audioRef.current.volume = newVolume;
     setIsMuted(newVolume === 0);
+  };
+
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const toggleMute = () => {
@@ -124,16 +131,14 @@ export function AudioPlayer({
     audioRef.current.currentTime = 0;
     setCurrentTime(0);
     if (!isPlaying) {
-      audioRef.current.play().catch((error) => {
-        console.error("Erreur lors de la lecture:", error);
+      audioRef.current.play().catch(() => {
+        // Erreur lors de la lecture
       });
     }
   };
 
   return (
-    <div
-      className={`bg-card/50 rounded-lg p-4 backdrop-blur-sm border border-border ${className}`}
-    >
+    <Card className={`p-4 ${className}`}>
       <audio ref={audioRef} src={audioUrl} loop={loop} preload="metadata" />
 
       <div className="space-y-4">
@@ -141,83 +146,86 @@ export function AudioPlayer({
         <div className="flex items-center gap-4">
           <Button
             onClick={togglePlay}
-            variant="ghost"
-            size="sm"
-            className="p-3 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            variant="default"
           >
             {isPlaying ? (
-              <Pause className="w-6 h-6 text-primary-foreground" />
+              <Pause className="h-4 w-4" />
             ) : (
-              <Play className="w-6 h-6 text-primary-foreground" />
+              <Play className="h-4 w-4" />
             )}
           </Button>
 
-          <div className="flex-1">
-            <input
-              type="range"
-              min="0"
-              max={duration}
-              value={currentTime}
-              onChange={handleSeek}
-              className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer"
+          <div className="flex-1 space-y-2">
+            <Slider
+              value={[currentTime]}
+              min={0}
+              max={duration || 100}
+              step={0.1}
+              onValueChange={handleSeek}
+              className="cursor-pointer"
             />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
           </div>
         </div>
 
         {/* Contrôles avancés */}
         {showControls && (
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Contrôle du volume */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 min-w-[180px]">
               <Button
                 onClick={toggleMute}
                 variant="ghost"
-                size="sm"
-                className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors"
+                size="icon"
+                className="h-8 w-8 shrink-0"
               >
                 {isMuted ? (
-                  <VolumeX className="w-4 h-4 text-muted-foreground" />
+                  <VolumeX className="h-4 w-4" />
                 ) : (
-                  <Volume2 className="w-4 h-4 text-muted-foreground" />
+                  <Volume2 className="h-4 w-4" />
                 )}
               </Button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                className="w-20 h-1 bg-muted rounded-full appearance-none cursor-pointer"
+              <Slider
+                value={[isMuted ? 0 : volume]}
+                min={0}
+                max={1}
+                step={0.1}
+                onValueChange={handleVolumeChange}
+                className="flex-1 cursor-pointer"
               />
             </div>
 
             {/* Bouton restart */}
             <Button
               onClick={restart}
-              variant="ghost"
-              size="sm"
-              className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors"
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 shrink-0"
             >
-              <RotateCcw className="w-4 h-4 text-muted-foreground" />
+              <RotateCcw className="h-4 w-4" />
             </Button>
 
             {/* Indicateurs */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap ml-auto">
               {autoPlay && (
-                <span className="text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded">
+                <Badge variant="secondary" className="text-xs">
                   Auto-play
-                </span>
+                </Badge>
               )}
               {loop && (
-                <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded">
+                <Badge variant="secondary" className="text-xs">
                   Loop
-                </span>
+                </Badge>
               )}
             </div>
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
