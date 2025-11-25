@@ -1,8 +1,13 @@
+"use client";
+
 import { buttonVariants } from "@/components/ui/button";
 import { Flame, MessageCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function ConceptSection() {
+  const t = useTranslations("concept");
+
   return (
     <section className="py-24 lg:py-32 bg-accent relative">
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
@@ -11,40 +16,35 @@ export default function ConceptSection() {
           <div className="text-center space-y-6">
             <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-muted text-muted-foreground rounded-full font-medium text-sm border border-amber-400 shadow-sm">
               <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-              <span>Le Concept</span>
+              <span>{t("badge")}</span>
             </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Et si ta bougie pouvait parler ?
+              {t("title")}
             </h2>
             <p className="text-xl text-muted-foreground leading-relaxed balance-text">
-              Chez UNIKCANDLE, nous pensons qu&apos;une bougie peut être bien
-              plus qu&apos;un simple objet décoratif.
+              {t("intro1")}
             </p>
             <p className="text-xl text-muted-foreground leading-relaxed balance-text">
-              C&apos;est un véritable vecteur d&apos;émotions, capable de
-              transmettre un message, d&apos;évoquer un souvenir, ou tout
-              simplement de faire naître un sourire.
+              {t("intro2")}
             </p>
           </div>
 
           <div className="bg-card/50 backdrop-blur-sm rounded-xl p-8 space-y-8 border border-border">
             <div className="text-center space-y-4">
               <h3 className="text-2xl font-bold text-foreground">
-                Imagine une élégante bougie parfumée…
+                {t("imagine.title")}
               </h3>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                qui renferme un trésor invisible ...
+                {t("imagine.subtitle")}
               </p>
               <p className="text-xl font-semibold text-primary italic">
-                En laissant fondre la cire, un médaillon gravé se révèle.{" "}
+                {t("imagine.reveal")}
               </p>
               <p className="text-lg text-muted-foreground">
-                Ce médaillon contient un message audio unique: votre voix,
-                votre mot doux, votre message, ...{" "}
+                {t("imagine.message")}
               </p>
               <p className="text-xl font-bold text-foreground">
-                Il suffit d&apos;approcher son téléphone du médaillon pour
-                écouter, le secret.
+                {t("imagine.listen")}
               </p>
             </div>
           </div>
@@ -55,12 +55,10 @@ export default function ConceptSection() {
                 <MessageCircle className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold text-primary">
-                Personnalise ta création
+                {t("features.personalize.title")}
               </h3>
               <p className="text-base text-card-foreground leading-relaxed">
-                Enregistre ton audio directement sur notre site, nous nous
-                chargerons de l&apos;insérer dans la cire pour garder la
-                surprise jusqu&apos;à ce que la bougie soit allumée.
+                {t("features.personalize.description")}
               </p>
             </div>
 
@@ -69,13 +67,10 @@ export default function ConceptSection() {
                 <Flame className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold text-primary">
-                Moment unique
+                {t("features.moment.title")}
               </h3>
               <p className="text-base text-card-foreground leading-relaxed">
-                Une expérience sensorielle unique. Offre la bougie et laisse
-                la magie opérer. Une fois allumée, ta bougie laisse échapper
-                son doux parfum et ton message se dévoile à mesure que la cire
-                fond. Prépare-toi à vivre et à faire vivre un moment suspendu.
+                {t("features.moment.description")}
               </p>
             </div>
           </div>
@@ -85,7 +80,7 @@ export default function ConceptSection() {
               className={buttonVariants({ variant: "default", size: "lg" })}
               href="/products"
             >
-              Découvrir nos bougies
+              {t("cta")}
             </Link>
           </div>
         </div>

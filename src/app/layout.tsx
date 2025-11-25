@@ -89,7 +89,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://unikcandle.com",
     languages: {
-      "fr-FR": "https://unikcandle.com",
+      "fr-FR": "https://unikcandle.com/fr",
+      "en-US": "https://unikcandle.com/en",
     },
   },
   robots: {
@@ -117,11 +118,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: { locale: string };
 }) {
   return (
-    <html lang="fr" className="smooth-scroll">
+    <html lang={params.locale} className="smooth-scroll">
       <head>
         <StructuredData data={getOrganizationSchema()} />
         <StructuredData data={getWebsiteSchema()} />

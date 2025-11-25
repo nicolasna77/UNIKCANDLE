@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
+
+// Create the i18n middleware
+const intlMiddleware = createMiddleware(routing);
 
 const authRoutes = ["/auth/signin", "/auth/signup"];
 const passwordRoutes = [
@@ -19,11 +24,20 @@ const publicRoutes = [
 const staticRoutes = ["/asset", "/models", "/logo", "/images"];
 
 export async function middleware(request: NextRequest) {
+  // First, handle i18n routing
+  const response = intlMiddleware(request);
+
   const pathName = request.nextUrl.pathname;
-  const isAuthRoute = authRoutes.includes(pathName);
-  const isPasswordRoute = passwordRoutes.includes(pathName);
+
+  // Remove locale prefix from pathname for route matching
+  const localeRegex = /^\/(?:fr|en)(?=\/|$)/;
+  const pathnameWithoutLocale = pathName.replace(localeRegex, "") || "/";
+
+  const isAuthRoute = authRoutes.includes(pathnameWithoutLocale);
+  const isPasswordRoute = passwordRoutes.includes(pathnameWithoutLocale);
   const isPublicRoute =
-    publicRoutes.includes(pathName) || pathName.startsWith("/products/");
+    publicRoutes.includes(pathnameWithoutLocale) ||
+    pathnameWithoutLocale.startsWith("/products/");
   const isStaticRoute = staticRoutes.some((route) =>
     pathName.startsWith(route)
   );
@@ -36,7 +50,7 @@ export async function middleware(request: NextRequest) {
     isPasswordRoute ||
     isApiRoute
   ) {
-    return NextResponse.next();
+    return response;
   }
 
   try {
@@ -46,22 +60,25 @@ export async function middleware(request: NextRequest) {
     });
 
     if (!session) {
-      return NextResponse.redirect(new URL("/auth/signin", request.url));
+      const locale = pathName.match(localeRegex)?.[0] || "/fr";
+      return NextResponse.redirect(new URL(`${locale}/auth/signin`, request.url));
     }
 
-    if (pathName.startsWith("/admin") && session.user.role !== "admin") {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    if (pathnameWithoutLocale.startsWith("/admin") && session.user.role !== "admin") {
+      const locale = pathName.match(localeRegex)?.[0] || "/fr";
+      return NextResponse.redirect(new URL(`${locale}/unauthorized`, request.url));
     }
 
-    return NextResponse.next();
+    return response;
   } catch (error) {
     console.error("Middleware auth error:", error);
 
-    if (pathName.startsWith("/auth/")) {
-      return NextResponse.next();
+    if (pathnameWithoutLocale.startsWith("/auth/")) {
+      return response;
     }
 
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
+    const locale = pathName.match(localeRegex)?.[0] || "/fr";
+    return NextResponse.redirect(new URL(`${locale}/auth/signin`, request.url));
   }
 }
 
@@ -72,6 +89,7 @@ export const config = {
     "/auth/:path*",
     "/reset-password",
     "/profile/:path*",
+    "/profil/:path*",
     "/forgot-password",
     "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt|asset|models|logo|images).*)",
   ],

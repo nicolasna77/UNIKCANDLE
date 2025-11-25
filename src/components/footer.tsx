@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Montserrat } from "next/font/google";
 import { SocialIcon } from "react-social-icons";
+import { useTranslations } from "next-intl";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -8,16 +11,18 @@ const montserrat = Montserrat({
 });
 
 const Footer = () => {
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
   return (
     <footer className="relative bg-background pt-8 pb-6">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap text-left lg:text-left">
           <div className="w-full lg:w-6/12 px-4">
             <h4 className={`${montserrat.className} text-3xl font-medium `}>
-              UNIKCANDLE
+              {t("brandName")}
             </h4>
             <h5 className="text-lg mt-0 mb-2 text-secondary-foreground">
-              La bougie qui parle, qui éclaire, qui émeut.
+              {t("tagline")}
             </h5>
             <div className="mt-6 lg:mb-0 mb-6">
               <button
@@ -51,7 +56,7 @@ const Footer = () => {
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="/"
                     >
-                      Accueil
+                      {tNav("home")}
                     </Link>
                   </li>
                   <li>
@@ -59,7 +64,7 @@ const Footer = () => {
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="/products"
                     >
-                      Produits
+                      {tNav("products")}
                     </Link>
                   </li>
                   <li>
@@ -67,7 +72,7 @@ const Footer = () => {
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="/contact"
                     >
-                      Nous Contacter
+                      {tNav("contact")}
                     </Link>
                   </li>
                   <li>
@@ -75,7 +80,7 @@ const Footer = () => {
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="/about"
                     >
-                      À propos
+                      {tNav("about")}
                     </Link>
                   </li>
                   <li>
@@ -83,7 +88,7 @@ const Footer = () => {
                       className="text-secondary-foreground hover:text-primary font-semibold block pb-2 text-sm"
                       href="/cgu"
                     >
-                      Conditions générales
+                      {t("terms")}
                     </Link>
                   </li>
                 </ul>
@@ -94,16 +99,7 @@ const Footer = () => {
         <div className="flex flex-wrap items-center md:justify-between justify-center">
           <div className="w-full md:w-4/12 px-4 mx-auto text-center">
             <div className="text-sm text-secondary-foreground font-semibold py-1">
-              Copyright © <span id="get-current-year">2025</span>
-              <Link
-                href="#"
-                className="text-secondary-foreground hover:text-primary"
-                target="_blank"
-              >
-                {" "}
-                UNIKCANDLE
-              </Link>
-              .
+              {t("copyright")}
             </div>
           </div>
         </div>

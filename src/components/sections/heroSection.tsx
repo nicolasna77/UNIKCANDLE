@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -10,6 +11,7 @@ const montserrat = Montserrat({
 });
 
 const HeroSection = () => {
+  const t = useTranslations("hero");
   return (
     <section className="relative bg-accent  isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
       {/* Arrière-plan sophistiqué */}
@@ -32,7 +34,7 @@ const HeroSection = () => {
               className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary mb-6"
             >
               <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse" />
-              Nouvelle collection disponible
+              {t("badge")}
             </motion.div>
 
             <motion.h1
@@ -41,7 +43,7 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               className={`${montserrat.className} scroll-m-20 text-5xl  font-extrabold tracking-tight mb-6 relative`}
             >
-              <span>UNIKCANDLE</span>
+              <span>{t("brandName")}</span>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
@@ -58,13 +60,13 @@ const HeroSection = () => {
             >
               <ul className=" list-none items-start text-3xl text-muted-foreground list-inside ">
                 <li className="text-muted-foreground leading-relaxed">
-                  Une bougie d&apos;exception.
+                  {t("tagline1")}
                 </li>
                 <li className=" text-muted-foreground leading-relaxed">
-                  Un message.
+                  {t("tagline2")}
                 </li>
                 <li className=" text-muted-foreground leading-relaxed">
-                  Une émotion.
+                  {t("tagline3")}
                 </li>
               </ul>
             </motion.div>
@@ -84,8 +86,7 @@ const HeroSection = () => {
                   href="/products"
                 >
                   <span className="relative z-10">
-                    {" "}
-                    Explorez notre collection
+                    {t("exploreCollection")}
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
@@ -99,7 +100,7 @@ const HeroSection = () => {
                   className={`${buttonVariants({ variant: "outline", size: "lg" })} `}
                   href="/about"
                 >
-                  L’univers UNIKCANDLE
+                  {t("discoverUniverse")}
                 </Link>
               </motion.div>
             </motion.div>
@@ -114,19 +115,19 @@ const HeroSection = () => {
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">100%</div>
                 <div className="text-sm text-muted-foreground">
-                  Cire Végétale
+                  {t("stats.vegetalWax")}
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">100%</div>
                 <div className="text-sm text-muted-foreground">
-                  Clients privilégiés
+                  {t("stats.privilegedClients")}
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-primary">100%</div>
                 <div className="text-sm text-muted-foreground">
-                  Made in France
+                  {t("stats.madeInFrance")}
                 </div>
               </div>
             </motion.div>

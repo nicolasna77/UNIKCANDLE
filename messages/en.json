@@ -1,0 +1,467 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "submit": "Submit",
+    "back": "Back",
+    "menu": "Menu",
+    "openMenu": "Open menu"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "contact": "Contact",
+    "cart": "Cart",
+    "profile": "Profile",
+    "orders": "Orders",
+    "admin": "Admin",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "metadata": {
+    "home": {
+      "title": "Home - Personalized candles with audio messages",
+      "description": "Discover UNIKCANDLE: unique candles with audio messages hidden in the wax. Personalize your candle with your voice, choose your scent, and create an unforgettable emotional experience. Made in France with recycled materials.",
+      "ogTitle": "UNIKCANDLE - Candles with hidden audio messages",
+      "ogDescription": "Create a unique experience: personalized candles that reveal your audio message as they melt. Eco-friendly and made in France.",
+      "ogImageAlt": "UNIKCANDLE candle with audio message"
+    }
+  },
+  "concept": {
+    "badge": "The Concept",
+    "title": "What if your candle could talk?",
+    "intro1": "At UNIKCANDLE, we believe that a candle can be much more than just a decorative object.",
+    "intro2": "It's a true vector of emotions, capable of conveying a message, evoking a memory, or simply bringing a smile.",
+    "imagine": {
+      "title": "Imagine an elegant scented candle…",
+      "subtitle": "that holds an invisible treasure...",
+      "reveal": "As the wax melts, an engraved medallion is revealed.",
+      "message": "This medallion contains a unique audio message: your voice, your sweet words, your message, ...",
+      "listen": "Simply bring your phone close to the medallion to listen to the secret."
+    },
+    "features": {
+      "personalize": {
+        "title": "Personalize your creation",
+        "description": "Record your audio directly on our website, we'll take care of inserting it into the wax to keep the surprise until the candle is lit."
+      },
+      "moment": {
+        "title": "Unique moment",
+        "description": "A unique sensory experience. Give the candle and let the magic happen. Once lit, your candle releases its sweet scent and your message is revealed as the wax melts. Get ready to experience and create a suspended moment."
+      }
+    },
+    "cta": "Discover our candles"
+  },
+  "howItWorks": {
+    "title": "How does it work?",
+    "subtitle": "Light up the magic of your memories",
+    "steps": {
+      "1": {
+        "title": "Choose the theme of your candle to give",
+        "emoji": "🌸"
+      },
+      "2": {
+        "title": "Record your audio message",
+        "emoji": "🎙️"
+      },
+      "3": {
+        "title": "Bring your phone close to the candle and let the magic happen",
+        "emoji": "🔮"
+      }
+    }
+  },
+  "whyChoose": {
+    "title": "Why choose",
+    "brandName": "UNIKCANDLE",
+    "unique": {
+      "title": "Unique",
+      "description": "Each candle is custom-made, exclusively for you or for someone exceptional."
+    },
+    "innovative": {
+      "title": "Innovative",
+      "description": "Our audio technology enhances the experience and makes each creation unforgettable."
+    },
+    "emotional": {
+      "title": "Emotional",
+      "description": "A refined gift, carrying intimate emotions, for memories engraved with elegance."
+    },
+    "cta": "Give or treat yourself to a unique emotion"
+  },
+  "products": {
+    "title": "Our Products",
+    "discover": "Discover our products",
+    "addToCart": "Add to cart",
+    "price": "Price",
+    "category": "Category",
+    "scent": "Scent",
+    "noProducts": "No products found",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "metadata": {
+      "title": "Our Products - Artisanal Custom Candles",
+      "description": "Discover our collection of customizable artisanal candles with audio messages. Choose from our various categories, scents, and designs. French craftsmanship, recycled materials, unique AR experience.",
+      "keywords": "buy custom candle, artisanal candle collection, customizable scented candle, candle catalog, French candles, eco-friendly candles shop",
+      "ogTitle": "Our Custom Candles - UNIKCANDLE Collection",
+      "ogDescription": "Explore our collection of customizable artisanal candles with integrated audio messages. Each candle is unique.",
+      "ogAlt": "UNIKCANDLE candle collection"
+    },
+    "pageHeader": {
+      "title": "Our products",
+      "description": "Discover our artisanal candle collection"
+    },
+    "list": {
+      "unexpectedDataFormat": "Unexpected data format",
+      "retry": "Try again",
+      "sortBy": "Sort by",
+      "name": "Name",
+      "allCategories": "All categories"
+    },
+    "card": {
+      "noScentError": "No scent associated with this product",
+      "addedToCart": "Product added to cart",
+      "reviews": "reviews",
+      "scentLabel": "Scent: "
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products",
+      "loading": "Loading..."
+    },
+    "detail": {
+      "noCategory": "No category",
+      "scent": "Scent",
+      "noName": "No name",
+      "errorLoading": "Error loading product",
+      "productNotFound": "The product you are looking for does not exist or is no longer available.",
+      "retry": "Try again",
+      "priceNotAvailable": "Product price not available",
+      "description": "Description"
+    },
+    "audioRecord": {
+      "uploadError": "Error uploading audio",
+      "savedSuccess": "Message recorded and saved successfully!",
+      "savedDescription": "Your message will be played when the candle is lit",
+      "recordedSuccess": "Message recorded successfully!",
+      "title": "Custom message",
+      "recorded": "Recorded",
+      "uploading": "Uploading...",
+      "saved": "Saved",
+      "description": "Record a message that will be played when the candle is lit",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "recordingInProgress": "Recording in progress...",
+      "pressToRecord": "Press to record",
+      "recordedSuccessfully": "Message recorded successfully",
+      "playing": "Playing...",
+      "listen": "Listen",
+      "delete": "Delete",
+      "tip": "💡 <strong>Tip:</strong> Speak clearly and close to the microphone",
+      "recommendedDuration": "Recommended duration: 10-30 seconds"
+    }
+  },
+  "orders": {
+    "title": "Order History",
+    "description": "View past orders.",
+    "filters": {
+      "all": "All",
+      "processing": "Processing",
+      "delivered": "Delivered",
+      "clearFilters": "Clear filters",
+      "selectPeriod": "Select a period"
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "noOrders": "No orders found",
+    "noOrdersDescription": "You haven't placed any orders yet or no orders match your search criteria.",
+    "orderNumber": "Order #",
+    "orderDate": "Ordered on",
+    "totalAmount": "Total amount",
+    "viewDetails": "View details"
+  },
+  "cart": {
+    "title": "Cart",
+    "myCart": "My cart",
+    "empty": "Your cart is empty",
+    "emptyDescription": "Discover our products and find your perfect candle!",
+    "discoverProducts": "Discover our products",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "shippingFree": "Free",
+    "tax": "Tax",
+    "checkout": "Checkout",
+    "continueShopping": "Continue shopping",
+    "removeItem": "Remove from cart",
+    "quantity": "Quantity",
+    "updateQuantity": "Update quantity",
+    "itemsInCart": "in your cart",
+    "item": "item",
+    "items": "items",
+    "emptyCart": "Empty cart",
+    "emptyCartConfirm": "Are you sure you want to empty your cart?",
+    "emptyCartSuccess": "Cart emptied successfully",
+    "withAudio": "🎵 Products with custom audio",
+    "audioCustomized": "🎵 Custom audio",
+    "standardProducts": "📦 Standard products",
+    "noAudio": "No audio",
+    "orderSummaryTitle": "Order summary",
+    "orderSummaryDescription": "Review your order details and shipping",
+    "shippingMethod": "Shipping method",
+    "standardShipping": "Standard shipping",
+    "standardShippingPlaceholder": "Free standard shipping",
+    "deliveryTime": "3-5 days",
+    "freeReturns": "Free returns within 30 days",
+    "securePayment": "Secure payment",
+    "fastDelivery": "Fast delivery",
+    "proceedToPayment": "Proceed to payment",
+    "redirectingToStripe": "Redirecting to Stripe...",
+    "popupBlockedMessage": "If the Stripe page doesn't open, check that pop-ups are not blocked.",
+    "paymentCancelled": "Payment cancelled. You can continue shopping.",
+    "stripeConfigMissing": "Stripe configuration missing. Please contact support.",
+    "cartIsEmpty": "Your cart is empty",
+    "invalidQuantity": "Some items have an invalid quantity",
+    "invalidCartData": "Invalid cart data. Please check your items.",
+    "mustBeLoggedIn": "You must be logged in to proceed with payment.",
+    "serverError": "Server error. Please try again in a few moments.",
+    "cannotInitializePayment": "Unable to initialize payment system",
+    "redirectionError": "Error redirecting to payment"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "billingAddress": "Billing address",
+    "shippingAddress": "Shipping address",
+    "paymentMethod": "Payment method",
+    "orderSummary": "Order summary",
+    "placeOrder": "Place order",
+    "processing": "Processing..."
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signInButton": "Sign In",
+    "signInDescription": "Enter your email below to sign in to your account",
+    "signUp": "Sign Up",
+    "signUpButton": "Create account",
+    "signUpDescription": "Create an account to get started",
+    "signUpTitle": "Create an account",
+    "signUpDescriptionLong": "Fill in your information to sign up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "emailPlaceholder": "m@example.com",
+    "emailInvalid": "Invalid email",
+    "password": "Password",
+    "passwordPlaceholder": "password",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "Passwords do not match",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordTitle": "Forgot password",
+    "forgotPasswordDescription": "Enter your email to receive a reset link",
+    "resetPassword": "Reset password",
+    "resetPasswordTitle": "Reset password",
+    "resetPasswordDescription": "Enter your new password",
+    "resetPasswordButton": "Reset password",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "googleSignIn": "Sign in with Google",
+    "createAccount": "Sign up",
+    "signInLink": "Sign in",
+    "welcomeBack": "Welcome back",
+    "name": "Name",
+    "firstName": "First name",
+    "firstNamePlaceholder": "John",
+    "firstNameMinLength": "First name must be at least 2 characters",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Doe",
+    "lastNameMinLength": "Last name must be at least 2 characters",
+    "rememberMe": "Remember me",
+    "profilePicture": "Profile picture (optional)",
+    "profilePreview": "Profile preview",
+    "verificationEmailSent": "A verification email has been sent to your email address",
+    "emailSent": "Email sent",
+    "checkInboxMessage": "Check your inbox to reset your password",
+    "sendLink": "Send link",
+    "backToSignIn": "Back to sign in",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm password",
+    "passwordResetSuccess": "Password reset",
+    "passwordResetSuccessDescription": "You can now sign in with your new password",
+    "invalidToken": "Invalid token",
+    "invalidTokenDescription": "The reset link is invalid or has expired.",
+    "requestNewLink": "Request a new link",
+    "missingResetToken": "Missing reset token",
+    "error": "Error",
+    "errorOccurred": "An error occurred",
+    "signInError": "An error occurred during sign in",
+    "signUpError": "An error occurred during sign up",
+    "sendEmailError": "An error occurred while sending the email",
+    "resetPasswordError": "An error occurred while resetting the password"
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal information",
+    "addresses": "Addresses",
+    "orders": "My orders",
+    "settings": "Settings",
+    "editProfile": "Edit profile",
+    "changePassword": "Change password",
+    "deleteAccount": "Delete account"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "A question? A special project? We're here to help you create your unique candle.",
+    "availability": "24/7 Available",
+    "responseTime": "Response within 48h",
+    "formTitle": "Send us a message",
+    "formDescription": "Fill out the form below and we'll get back to you quickly.",
+    "firstName": "First name",
+    "firstNameRequired": "First name *",
+    "lastName": "Last name",
+    "lastNameRequired": "Last name *",
+    "email": "Email",
+    "emailRequired": "Email *",
+    "phone": "Phone",
+    "subject": "Subject",
+    "subjectRequired": "Subject *",
+    "message": "Message",
+    "messageRequired": "Message *",
+    "firstNamePlaceholder": "Your first name",
+    "lastNamePlaceholder": "Your last name",
+    "emailPlaceholder": "your.email@example.com",
+    "phonePlaceholder": "+1 234 567 8900",
+    "subjectPlaceholder": "Your request",
+    "messagePlaceholder": "Describe your project or ask your question...",
+    "sending": "Sending...",
+    "send": "Send message",
+    "cancel": "Cancel",
+    "successToast": "Message sent! 📧",
+    "successDescription": "We'll get back to you as soon as possible",
+    "errorToast": "Send error",
+    "errorDescription": "An error occurred while sending"
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "Our story",
+    "hero": {
+      "title": "At",
+      "brandName": "UNIKCANDLE",
+      "description": "Each flame reveals a unique story, each candle becomes a treasure of emotions and refinement."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "We have created exceptional, custom candles that combine emotion, elegance, and sophistication. With UNIKCANDLE, illuminate your most precious moments with exclusive creations that blend craftsmanship, luxury, and innovation. One candle, one message, one unforgettable experience.",
+      "cta": "Discover our products",
+      "imageAlt": "Our mission"
+    },
+    "process": {
+      "title": "Our Process",
+      "description1": "Each UNIKCANDLE candle is crafted like a work of art: our containers are selected from noble materials and worked with the greatest precision to reveal an elegant and timeless design. This process of excellence ensures that each creation is a rare and exclusive piece, designed to enhance your spaces.",
+      "description2": "This artisanal process allows us to reduce waste while bringing a touch of authenticity to our creations.",
+      "imageAlt": "Our process"
+    },
+    "commitment": {
+      "title": "Our Commitment",
+      "description": "Our candles are designed and made in France, with noble materials and rare fragrances, carefully selected from the finest perfume houses. Each creation embodies artisanal excellence and offers an unparalleled olfactory, visual, and emotional experience.",
+      "imageAlt": "Our commitment"
+    }
+  },
+  "hero": {
+    "badge": "New collection available",
+    "brandName": "UNIKCANDLE",
+    "tagline1": "An exceptional candle.",
+    "tagline2": "A message.",
+    "tagline3": "An emotion.",
+    "exploreCollection": "Explore our collection",
+    "discoverUniverse": "The UNIKCANDLE universe",
+    "stats": {
+      "vegetalWax": "Vegetal Wax",
+      "privilegedClients": "Privileged clients",
+      "madeInFrance": "Made in France"
+    }
+  },
+  "newsletter": {
+    "title": "Join the adventure",
+    "brandName": "UNIKCANDLE",
+    "description": "Discover our new candles, exclusive offers and",
+    "specialDiscounts": "special discounts",
+    "subscribers": "reserved for our subscribers.",
+    "benefits": {
+      "exclusive": {
+        "title": "Exclusive offers",
+        "description": "-20% on your first order"
+      },
+      "news": {
+        "title": "News",
+        "description": "Be the first to know"
+      },
+      "tips": {
+        "title": "Tips",
+        "description": "Tips and inspirations"
+      }
+    },
+    "form": {
+      "placeholder": "Your email address",
+      "ariaLabel": "Email address for newsletter",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing...",
+      "privacy": "🔒 Your data is protected. Unsubscribe at any time."
+    },
+    "toast": {
+      "success": "Subscription successful! 🕯️",
+      "successDescription": "You will soon receive our exclusive offers and news",
+      "error": "Subscription failed",
+      "errorDescription": "An error occurred"
+    }
+  },
+  "footer": {
+    "brandName": "UNIKCANDLE",
+    "tagline": "The candle that speaks, that lights, that moves.",
+    "aboutUs": "About us",
+    "followUs": "Follow us",
+    "legal": "Legal notice",
+    "privacy": "Privacy policy",
+    "terms": "Terms and conditions",
+    "copyright": "© 2025 UNIKCANDLE. All rights reserved."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "orders": "Orders",
+    "users": "Users",
+    "categories": "Categories",
+    "scents": "Scents",
+    "returns": "Returns",
+    "settings": "Settings",
+    "analytics": "Analytics",
+    "addProduct": "Add product",
+    "editProduct": "Edit product",
+    "deleteProduct": "Delete product",
+    "totalOrders": "Total orders",
+    "totalRevenue": "Total revenue",
+    "totalUsers": "Total users"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "tryAgain": "Try again",
+    "goHome": "Go home",
+    "contactSupport": "Contact support"
+  }
+}

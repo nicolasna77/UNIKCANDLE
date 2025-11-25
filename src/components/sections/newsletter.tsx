@@ -7,6 +7,7 @@ import { useTransition, useState } from "react";
 import { toast } from "sonner";
 import { Sparkles, Gift, Flame } from "lucide-react";
 import { Montserrat } from "next/font/google";
+import { useTranslations } from "next-intl";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -14,6 +15,7 @@ const montserrat = Montserrat({
 });
 
 const NewsletterSection = () => {
+  const t = useTranslations("newsletter");
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
 
@@ -28,14 +30,13 @@ const NewsletterSection = () => {
 
       // Afficher les toasts côté client après l'action
       if (result.success) {
-        toast.success("Inscription réussie ! 🕯️", {
-          description:
-            "Vous recevrez bientôt nos offres exclusives et nouveautés",
+        toast.success(t("toast.success"), {
+          description: t("toast.successDescription"),
         });
         setEmail(""); // Reset form
       } else {
-        toast.error("Inscription échouée", {
-          description: result.error || "Une erreur est survenue",
+        toast.error(t("toast.error"), {
+          description: result.error || t("toast.errorDescription"),
         });
       }
     });
@@ -60,23 +61,22 @@ const NewsletterSection = () => {
           <h2
             className={` text-4xl lg:text-6xl text-balance font-bold text-card-foreground tracking-tight`}
           >
-            Rejoignez l&apos;aventure{" "}
+            {t("title")}{" "}
             <span
               className={` ${montserrat.className} text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text `}
             >
-              UNIKCANDLE
+              {t("brandName")}
             </span>
           </h2>
 
           {/* Description */}
           <p className="text-xl lg:text-2xl text-center text-balance mb-8 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            Découvrez en avant-première nos nouvelles bougies, offres exclusives
-            et
+            {t("description")}
             <span className="text-primary font-semibold">
               {" "}
-              réductions spéciales
+              {t("specialDiscounts")}
             </span>{" "}
-            réservées à nos abonnés.
+            {t("subscribers")}
           </p>
 
           {/* Avantages */}
@@ -87,10 +87,10 @@ const NewsletterSection = () => {
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-card-foreground">
-                  Offres exclusives
+                  {t("benefits.exclusive.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  -20% sur votre première commande
+                  {t("benefits.exclusive.description")}
                 </p>
               </div>
             </div>
@@ -101,10 +101,10 @@ const NewsletterSection = () => {
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-card-foreground">
-                  Nouveautés
+                  {t("benefits.news.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Soyez les premiers informés
+                  {t("benefits.news.description")}
                 </p>
               </div>
             </div>
@@ -114,9 +114,11 @@ const NewsletterSection = () => {
                 <Flame className="w-5 h-5 text-primary" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-card-foreground">Conseils</h3>
+                <h3 className="font-semibold text-card-foreground">
+                  {t("benefits.tips.title")}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Astuces et inspirations
+                  {t("benefits.tips.description")}
                 </p>
               </div>
             </div>
@@ -129,11 +131,11 @@ const NewsletterSection = () => {
                 <Input
                   type="email"
                   name="email"
-                  placeholder="Votre adresse email"
+                  placeholder={t("form.placeholder")}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  aria-label="Adresse email pour la newsletter"
+                  aria-label={t("form.ariaLabel")}
                   aria-describedby="newsletter-privacy"
                 />
                 <Button
@@ -141,16 +143,16 @@ const NewsletterSection = () => {
                   variant="default"
                   type="submit"
                   disabled={isPending}
-                  aria-label="S'inscrire à la newsletter"
+                  aria-label={t("form.ariaLabel")}
                 >
                   {isPending ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-                      Inscription...
+                      {t("form.subscribing")}
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      Je m&apos;inscris
+                      {t("form.subscribe")}
                     </div>
                   )}
                 </Button>
@@ -159,7 +161,7 @@ const NewsletterSection = () => {
                 id="newsletter-privacy"
                 className="text-sm text-muted-foreground/80 text-center"
               >
-                🔒 Vos données sont protégées. Désinscription à tout moment.
+                {t("form.privacy")}
               </p>
             </form>
           </div>

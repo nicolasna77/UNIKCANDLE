@@ -1,0 +1,467 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "clear": "Effacer",
+    "submit": "Soumettre",
+    "back": "Retour",
+    "menu": "Menu",
+    "openMenu": "Ouvrir le menu"
+  },
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "about": "À Propos",
+    "contact": "Contact",
+    "cart": "Panier",
+    "profile": "Profil",
+    "orders": "Commandes",
+    "admin": "Administration",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter"
+  },
+  "metadata": {
+    "home": {
+      "title": "Accueil - Bougies personnalisées avec messages audio",
+      "description": "Découvrez UNIKCANDLE : des bougies uniques avec messages audio cachés dans la cire. Personnalisez votre bougie avec votre voix, choisissez votre parfum et créez une expérience émotionnelle inoubliable. Fabriquées en France avec des matériaux recyclés.",
+      "ogTitle": "UNIKCANDLE - Bougies avec messages audio cachés",
+      "ogDescription": "Créez une expérience unique : des bougies personnalisées qui révèlent votre message audio en fondant. Écologiques et fabriquées en France.",
+      "ogImageAlt": "Bougie UNIKCANDLE avec message audio"
+    }
+  },
+  "concept": {
+    "badge": "Le Concept",
+    "title": "Et si ta bougie pouvait parler ?",
+    "intro1": "Chez UNIKCANDLE, nous pensons qu'une bougie peut être bien plus qu'un simple objet décoratif.",
+    "intro2": "C'est un véritable vecteur d'émotions, capable de transmettre un message, d'évoquer un souvenir, ou tout simplement de faire naître un sourire.",
+    "imagine": {
+      "title": "Imagine une élégante bougie parfumée…",
+      "subtitle": "qui renferme un trésor invisible ...",
+      "reveal": "En laissant fondre la cire, un médaillon gravé se révèle.",
+      "message": "Ce médaillon contient un message audio unique: votre voix, votre mot doux, votre message, ...",
+      "listen": "Il suffit d'approcher son téléphone du médaillon pour écouter, le secret."
+    },
+    "features": {
+      "personalize": {
+        "title": "Personnalise ta création",
+        "description": "Enregistre ton audio directement sur notre site, nous nous chargerons de l'insérer dans la cire pour garder la surprise jusqu'à ce que la bougie soit allumée."
+      },
+      "moment": {
+        "title": "Moment unique",
+        "description": "Une expérience sensorielle unique. Offre la bougie et laisse la magie opérer. Une fois allumée, ta bougie laisse échapper son doux parfum et ton message se dévoile à mesure que la cire fond. Prépare-toi à vivre et à faire vivre un moment suspendu."
+      }
+    },
+    "cta": "Découvrir nos bougies"
+  },
+  "howItWorks": {
+    "title": "Comment ça marche ?",
+    "subtitle": "Allumez la magie de vos souvenirs",
+    "steps": {
+      "1": {
+        "title": "Choisissez le théme de votre bougie à offrir",
+        "emoji": "🌸"
+      },
+      "2": {
+        "title": "Enregistrez votre message audio",
+        "emoji": "🎙️"
+      },
+      "3": {
+        "title": "Approchez votre téléphone de la bougie et laissez la magie opérer",
+        "emoji": "🔮"
+      }
+    }
+  },
+  "whyChoose": {
+    "title": "Pourquoi choisir",
+    "brandName": "UNIKCANDLE",
+    "unique": {
+      "title": "Unique",
+      "description": "Chaque bougie est conçue sur-mesure, exclusivement pour vous ou pour une personne d'exception."
+    },
+    "innovative": {
+      "title": "Innovante",
+      "description": "Notre technologie audio sublime l'expérience et rend chaque création inoubliable."
+    },
+    "emotional": {
+      "title": "Émotionnelle",
+      "description": "Un cadeau raffiné, porteur d'émotions intimes, pour des souvenirs gravés avec élégance."
+    },
+    "cta": "Offrez ou offrez-vous une émotion unique"
+  },
+  "products": {
+    "title": "Nos Produits",
+    "discover": "Découvrir nos produits",
+    "addToCart": "Ajouter au panier",
+    "price": "Prix",
+    "category": "Catégorie",
+    "scent": "Senteur",
+    "noProducts": "Aucun produit trouvé",
+    "inStock": "En stock",
+    "outOfStock": "Rupture de stock",
+    "metadata": {
+      "title": "Nos Produits - Bougies personnalisées artisanales",
+      "description": "Découvrez notre collection de bougies artisanales personnalisables avec messages audio. Choisissez parmi nos différentes catégories, parfums et designs. Fabrication française, matériaux recyclés, expérience AR unique.",
+      "keywords": "acheter bougie personnalisée, collection bougies artisanales, bougie parfumée personnalisable, catalogue bougies, bougies françaises, bougies écologiques boutique",
+      "ogTitle": "Nos Bougies Personnalisées - Collection UNIKCANDLE",
+      "ogDescription": "Explorez notre collection de bougies artisanales personnalisables avec messages audio intégrés. Chaque bougie est unique.",
+      "ogAlt": "Collection de bougies UNIKCANDLE"
+    },
+    "pageHeader": {
+      "title": "Nos produits",
+      "description": "Découvrez notre collection de bougies artisanales"
+    },
+    "list": {
+      "unexpectedDataFormat": "Format de données inattendu",
+      "retry": "Réessayer",
+      "sortBy": "Trier par",
+      "name": "Nom",
+      "allCategories": "Toutes les catégories"
+    },
+    "card": {
+      "noScentError": "Aucun parfum associé à ce produit",
+      "addedToCart": "Produit ajouté au panier",
+      "reviews": "avis",
+      "scentLabel": "Parfum : "
+    },
+    "breadcrumb": {
+      "home": "Accueil",
+      "products": "Produits",
+      "loading": "Chargement..."
+    },
+    "detail": {
+      "noCategory": "Sans catégorie",
+      "scent": "Parfum",
+      "noName": "Sans nom",
+      "errorLoading": "Erreur lors du chargement du produit",
+      "productNotFound": "Le produit que vous recherchez n'existe pas ou n'est plus disponible.",
+      "retry": "Réessayer",
+      "priceNotAvailable": "Prix du produit non disponible",
+      "description": "Description"
+    },
+    "audioRecord": {
+      "uploadError": "Erreur lors de l'upload de l'audio",
+      "savedSuccess": "Message enregistré et sauvegardé avec succès !",
+      "savedDescription": "Votre message sera lu à l'allumage de la bougie",
+      "recordedSuccess": "Message enregistré avec succès !",
+      "title": "Message personnalisé",
+      "recorded": "Enregistré",
+      "uploading": "Upload...",
+      "saved": "Sauvegardé",
+      "description": "Enregistrez un message qui sera lu à l'allumage de la bougie",
+      "enabled": "Activé",
+      "disabled": "Désactivé",
+      "recordingInProgress": "Enregistrement en cours...",
+      "pressToRecord": "Appuyez pour enregistrer",
+      "recordedSuccessfully": "Message enregistré avec succès",
+      "playing": "En lecture...",
+      "listen": "Écouter",
+      "delete": "Supprimer",
+      "tip": "💡 <strong>Conseil :</strong> Parlez clairement et proche du microphone",
+      "recommendedDuration": "Durée recommandée : 10-30 secondes"
+    }
+  },
+  "orders": {
+    "title": "Historique des commandes",
+    "description": "Voir les commandes passées.",
+    "filters": {
+      "all": "Toutes",
+      "processing": "En cours",
+      "delivered": "Livrées",
+      "clearFilters": "Effacer les filtres",
+      "selectPeriod": "Sélectionner une période"
+    },
+    "status": {
+      "pending": "En attente",
+      "processing": "En préparation",
+      "shipped": "En cours de livraison",
+      "delivered": "Livré",
+      "cancelled": "Annulé",
+      "unknown": "Inconnu"
+    },
+    "noOrders": "Aucune commande trouvée",
+    "noOrdersDescription": "Vous n'avez pas encore passé de commande ou aucune commande ne correspond à vos critères de recherche.",
+    "orderNumber": "Commande n°",
+    "orderDate": "Commandé le",
+    "totalAmount": "Montant total",
+    "viewDetails": "Voir les détails"
+  },
+  "cart": {
+    "title": "Panier",
+    "myCart": "Mon panier",
+    "empty": "Votre panier est vide",
+    "emptyDescription": "Découvrez nos produits et trouvez votre bougie parfaite !",
+    "discoverProducts": "Découvrir nos produits",
+    "total": "Total",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "shippingFree": "Gratuite",
+    "tax": "TVA",
+    "checkout": "Passer commande",
+    "continueShopping": "Continuer mes achats",
+    "removeItem": "Retirer du panier",
+    "quantity": "Quantité",
+    "updateQuantity": "Mettre à jour la quantité",
+    "itemsInCart": "dans votre panier",
+    "item": "article",
+    "items": "articles",
+    "emptyCart": "Vider le panier",
+    "emptyCartConfirm": "Êtes-vous sûr de vouloir vider votre panier ?",
+    "emptyCartSuccess": "Panier vidé avec succès",
+    "withAudio": "🎵 Produits avec audio personnalisé",
+    "audioCustomized": "🎵 Audio personnalisé",
+    "standardProducts": "📦 Produits standard",
+    "noAudio": "Sans audio",
+    "orderSummaryTitle": "Récapitulatif de la commande",
+    "orderSummaryDescription": "Vérifiez les détails de votre commande et la livraison",
+    "shippingMethod": "Méthode de livraison",
+    "standardShipping": "Livraison standard",
+    "standardShippingPlaceholder": "Livraison standard gratuite",
+    "deliveryTime": "3-5 jours",
+    "freeReturns": "Retours gratuits sous 30 jours",
+    "securePayment": "Paiement sécurisé",
+    "fastDelivery": "Livraison rapide",
+    "proceedToPayment": "Procéder au paiement",
+    "redirectingToStripe": "Redirection vers Stripe...",
+    "popupBlockedMessage": "Si la page Stripe ne s'ouvre pas, vérifiez que les pop-ups ne sont pas bloqués.",
+    "paymentCancelled": "Paiement annulé. Vous pouvez continuer vos achats.",
+    "stripeConfigMissing": "Configuration Stripe manquante. Veuillez contacter le support.",
+    "cartIsEmpty": "Votre panier est vide",
+    "invalidQuantity": "Certains articles ont une quantité invalide",
+    "invalidCartData": "Données du panier invalides. Veuillez vérifier vos articles.",
+    "mustBeLoggedIn": "Vous devez être connecté pour procéder au paiement.",
+    "serverError": "Erreur du serveur. Veuillez réessayer dans quelques instants.",
+    "cannotInitializePayment": "Impossible d'initialiser le système de paiement",
+    "redirectionError": "Erreur lors de la redirection vers le paiement"
+  },
+  "checkout": {
+    "title": "Paiement",
+    "billingAddress": "Adresse de facturation",
+    "shippingAddress": "Adresse de livraison",
+    "paymentMethod": "Méthode de paiement",
+    "orderSummary": "Récapitulatif de la commande",
+    "placeOrder": "Passer la commande",
+    "processing": "Traitement en cours..."
+  },
+  "auth": {
+    "signIn": "Connexion",
+    "signInButton": "Se connecter",
+    "signInDescription": "Entrez votre email ci-dessous pour vous connecter à votre compte",
+    "signUp": "S'inscrire",
+    "signUpButton": "Créer un compte",
+    "signUpDescription": "Créez un compte pour commencer",
+    "signUpTitle": "Créer un compte",
+    "signUpDescriptionLong": "Remplissez vos informations pour vous inscrire",
+    "signOut": "Se déconnecter",
+    "email": "Email",
+    "emailPlaceholder": "m@example.com",
+    "emailInvalid": "Email invalide",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "password",
+    "passwordRequired": "Le mot de passe est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotPasswordTitle": "Mot de passe oublié",
+    "forgotPasswordDescription": "Entrez votre email pour recevoir un lien de réinitialisation",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetPasswordTitle": "Réinitialiser le mot de passe",
+    "resetPasswordDescription": "Entrez votre nouveau mot de passe",
+    "resetPasswordButton": "Réinitialiser le mot de passe",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "googleSignIn": "Se connecter avec Google",
+    "createAccount": "Inscrivez-vous",
+    "signInLink": "Connectez-vous",
+    "welcomeBack": "Bienvenue",
+    "name": "Nom",
+    "firstName": "Prénom",
+    "firstNamePlaceholder": "Jean",
+    "firstNameMinLength": "Le prénom doit contenir au moins 2 caractères",
+    "lastName": "Nom de famille",
+    "lastNamePlaceholder": "Dupont",
+    "lastNameMinLength": "Le nom doit contenir au moins 2 caractères",
+    "rememberMe": "Se souvenir de moi",
+    "profilePicture": "Photo de profil (optionnel)",
+    "profilePreview": "Aperçu du profil",
+    "verificationEmailSent": "Un email de vérification a été envoyé à votre adresse email",
+    "emailSent": "Email envoyé",
+    "checkInboxMessage": "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe",
+    "sendLink": "Envoyer le lien",
+    "backToSignIn": "Retour à la connexion",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le mot de passe",
+    "passwordResetSuccess": "Mot de passe réinitialisé",
+    "passwordResetSuccessDescription": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe",
+    "invalidToken": "Token invalide",
+    "invalidTokenDescription": "Le lien de réinitialisation est invalide ou a expiré.",
+    "requestNewLink": "Demander un nouveau lien",
+    "missingResetToken": "Token de réinitialisation manquant",
+    "error": "Erreur",
+    "errorOccurred": "Une erreur est survenue",
+    "signInError": "Une erreur est survenue lors de la connexion",
+    "signUpError": "Une erreur est survenue lors de l'inscription",
+    "sendEmailError": "Une erreur est survenue lors de l'envoi de l'email",
+    "resetPasswordError": "Une erreur est survenue lors de la réinitialisation du mot de passe"
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "personalInfo": "Informations personnelles",
+    "addresses": "Adresses",
+    "orders": "Mes commandes",
+    "settings": "Paramètres",
+    "editProfile": "Modifier le profil",
+    "changePassword": "Changer le mot de passe",
+    "deleteAccount": "Supprimer le compte"
+  },
+  "contact": {
+    "title": "Nous Contacter",
+    "subtitle": "Une question ? Un projet spécial ? Nous sommes là pour vous accompagner dans la création de votre bougie unique.",
+    "availability": "24h/24, 7j/7",
+    "responseTime": "Réponse sous 48h",
+    "formTitle": "Envoyez-nous un message",
+    "formDescription": "Remplissez le formulaire ci-dessous et nous vous répondrons rapidement.",
+    "firstName": "Prénom",
+    "firstNameRequired": "Prénom *",
+    "lastName": "Nom",
+    "lastNameRequired": "Nom *",
+    "email": "Email",
+    "emailRequired": "Email *",
+    "phone": "Téléphone",
+    "subject": "Sujet",
+    "subjectRequired": "Sujet *",
+    "message": "Message",
+    "messageRequired": "Message *",
+    "firstNamePlaceholder": "Votre prénom",
+    "lastNamePlaceholder": "Votre nom",
+    "emailPlaceholder": "votre.email@exemple.com",
+    "phonePlaceholder": "+33 6 12 34 56 78",
+    "subjectPlaceholder": "Votre demande",
+    "messagePlaceholder": "Décrivez votre projet ou posez votre question...",
+    "sending": "Envoi en cours...",
+    "send": "Envoyer le message",
+    "cancel": "Annuler",
+    "successToast": "Message envoyé ! 📧",
+    "successDescription": "Nous vous répondrons dans les plus brefs délais",
+    "errorToast": "Erreur d'envoi",
+    "errorDescription": "Une erreur est survenue lors de l'envoi"
+  },
+  "about": {
+    "title": "À Propos",
+    "subtitle": "Notre histoire",
+    "hero": {
+      "title": "Chez",
+      "brandName": "UNIKCANDLE",
+      "description": "Chaque flamme révèle une histoire unique, chaque bougie devient un écrin d'émotions et de raffinement."
+    },
+    "mission": {
+      "title": "Notre Mission",
+      "description": "Nous avons imaginé des bougies d'exception, sur-mesure, alliant émotion, élégance et sophistication. Avec UNIKCANDLE, illuminez vos instants les plus précieux grâce à des créations exclusives qui marient savoir-faire, luxe et innovation. Une bougie, un message, une expérience inoubliable.",
+      "cta": "Découvrir nos produits",
+      "imageAlt": "Notre mission"
+    },
+    "process": {
+      "title": "Notre Processus",
+      "description1": "Chaque bougie UNIKCANDLE est façonnée comme une œuvre d'art : nos contenants sont sélectionnés parmi des matériaux nobles et travaillés avec la plus grande précision, pour révéler un design élégant et intemporel. Ce processus d'excellence garantit que chaque création est une pièce rare et exclusive, pensée pour sublimer vos espaces.",
+      "description2": "Ce processus artisanal nous permet de réduire les déchets tout en apportant une touche d'authenticité à nos créations.",
+      "imageAlt": "Notre processus"
+    },
+    "commitment": {
+      "title": "Notre Engagement",
+      "description": "Nos bougies sont imaginées et réalisées en France, avec des matériaux nobles et des fragrances rares, soigneusement sélectionnées parmi les plus belles maisons de parfum. Chaque création incarne l'excellence artisanale et offre une expérience olfactive, visuelle et émotionnelle inégalée.",
+      "imageAlt": "Notre engagement"
+    }
+  },
+  "hero": {
+    "badge": "Nouvelle collection disponible",
+    "brandName": "UNIKCANDLE",
+    "tagline1": "Une bougie d'exception.",
+    "tagline2": "Un message.",
+    "tagline3": "Une émotion.",
+    "exploreCollection": "Explorez notre collection",
+    "discoverUniverse": "L'univers UNIKCANDLE",
+    "stats": {
+      "vegetalWax": "Cire Végétale",
+      "privilegedClients": "Clients privilégiés",
+      "madeInFrance": "Made in France"
+    }
+  },
+  "newsletter": {
+    "title": "Rejoignez l'aventure",
+    "brandName": "UNIKCANDLE",
+    "description": "Découvrez en avant-première nos nouvelles bougies, offres exclusives et",
+    "specialDiscounts": "réductions spéciales",
+    "subscribers": "réservées à nos abonnés.",
+    "benefits": {
+      "exclusive": {
+        "title": "Offres exclusives",
+        "description": "-20% sur votre première commande"
+      },
+      "news": {
+        "title": "Nouveautés",
+        "description": "Soyez les premiers informés"
+      },
+      "tips": {
+        "title": "Conseils",
+        "description": "Astuces et inspirations"
+      }
+    },
+    "form": {
+      "placeholder": "Votre adresse email",
+      "ariaLabel": "Adresse email pour la newsletter",
+      "subscribe": "Je m'inscris",
+      "subscribing": "Inscription...",
+      "privacy": "🔒 Vos données sont protégées. Désinscription à tout moment."
+    },
+    "toast": {
+      "success": "Inscription réussie ! 🕯️",
+      "successDescription": "Vous recevrez bientôt nos offres exclusives et nouveautés",
+      "error": "Inscription échouée",
+      "errorDescription": "Une erreur est survenue"
+    }
+  },
+  "footer": {
+    "brandName": "UNIKCANDLE",
+    "tagline": "La bougie qui parle, qui éclaire, qui émeut.",
+    "aboutUs": "À propos de nous",
+    "followUs": "Suivez-nous",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions générales",
+    "copyright": "© 2025 UNIKCANDLE. Tous droits réservés."
+  },
+  "admin": {
+    "dashboard": "Tableau de bord",
+    "products": "Produits",
+    "orders": "Commandes",
+    "users": "Utilisateurs",
+    "categories": "Catégories",
+    "scents": "Senteurs",
+    "returns": "Retours",
+    "settings": "Paramètres",
+    "analytics": "Analytiques",
+    "addProduct": "Ajouter un produit",
+    "editProduct": "Modifier le produit",
+    "deleteProduct": "Supprimer le produit",
+    "totalOrders": "Total des commandes",
+    "totalRevenue": "Revenu total",
+    "totalUsers": "Total des utilisateurs"
+  },
+  "errors": {
+    "notFound": "Page non trouvée",
+    "unauthorized": "Non autorisé",
+    "serverError": "Erreur serveur",
+    "networkError": "Erreur réseau",
+    "tryAgain": "Réessayer",
+    "goHome": "Retour à l'accueil",
+    "contactSupport": "Contacter le support"
+  }
+}

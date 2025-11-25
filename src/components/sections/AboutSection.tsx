@@ -4,6 +4,7 @@ import type React from "react";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 interface Step {
   number: number;
@@ -11,26 +12,27 @@ interface Step {
   emoji: string;
 }
 
-const steps: Step[] = [
-  {
-    number: 1,
-    title: "Choisissez  le théme de votre bougie à offrir",
-    emoji: "🌸",
-  },
-  {
-    number: 2,
-    title: "Enregistrez votre message audio",
-    emoji: "🎙️",
-  },
-  {
-    number: 3,
-    title: "Approchez votre téléphone de la bougie et laissez la magie opérer",
-    emoji: "🔮",
-  },
-];
-
 export default function AboutSection() {
+  const t = useTranslations("howItWorks");
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const steps: Step[] = [
+    {
+      number: 1,
+      title: t("steps.1.title"),
+      emoji: t("steps.1.emoji"),
+    },
+    {
+      number: 2,
+      title: t("steps.2.title"),
+      emoji: t("steps.2.emoji"),
+    },
+    {
+      number: 3,
+      title: t("steps.3.title"),
+      emoji: t("steps.3.emoji"),
+    },
+  ];
 
   // Parallax pour les éléments décoratifs
   const { scrollYProgress } = useScroll({
@@ -60,10 +62,10 @@ export default function AboutSection() {
           <h2
             className={` text-4xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground tracking-tight`}
           >
-            Comment ça marche ?
+            {t("title")}
           </h2>
           <p className="text-xl sm:text-2xl lg:text-3xl font-medium text-primary/80 max-w-2xl mx-auto">
-            Allumez la magie de vos souvenirs
+            {t("subtitle")}
           </p>
         </div>
 
@@ -105,8 +107,6 @@ export default function AboutSection() {
                           {step.emoji}
                         </div>
                       </div>
-
-                      {/* Description de l'étape */}
 
                       {/* Barre de progression avec effet de flamme */}
                       <div className="w-full bg-muted/50 h-2 rounded-full overflow-hidden">
