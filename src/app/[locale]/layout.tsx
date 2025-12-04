@@ -13,14 +13,26 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "common" });
+  const t = await getTranslations({ locale, namespace: "metadata.home" });
 
   return {
     title: {
-      default: "UNIKCANDLE",
+      default: t("title"),
       template: "%s | UNIKCANDLE",
     },
-    description: t("error"),
+    description: t("description"),
+    openGraph: {
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: t("ogImageAlt"),
+        },
+      ],
+    },
   };
 }
 

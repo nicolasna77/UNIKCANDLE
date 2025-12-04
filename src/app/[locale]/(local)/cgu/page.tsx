@@ -1,8 +1,9 @@
-import { Lora } from "next/font/google";
+import { Montserrat } from "next/font/google";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
   subsets: ["latin"],
+  weight: ["800"],
+  variable: "--font-montserrat",
 });
 
 export default function CGUPage() {
@@ -10,7 +11,7 @@ export default function CGUPage() {
     <main className="min-h-screen bg-background pt-24 pb-16">
       <div className="container mx-auto px-4">
         <h1
-          className={`${lora.className} text-4xl lg:text-5xl font-bold text-center mb-12 text-foreground`}
+          className={`${montserrat.className} text-4xl lg:text-5xl font-bold text-center mb-12 text-foreground`}
         >
           Conditions Générales d&apos;Utilisation
         </h1>
@@ -18,7 +19,7 @@ export default function CGUPage() {
         <div className="max-w-3xl mx-auto space-y-8 text-muted-foreground">
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               1. Présentation du site
             </h2>
@@ -36,7 +37,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               2. Objet
             </h2>
@@ -57,7 +58,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               3. Accès au site
             </h2>
@@ -75,7 +76,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               4. Propriété intellectuelle
             </h2>
@@ -89,7 +90,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               5. Responsabilités
             </h2>
@@ -115,7 +116,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               6. Protection des données personnelles
             </h2>
@@ -135,7 +136,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               7. Cookies
             </h2>
@@ -148,7 +149,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               8. Modification des CGU
             </h2>
@@ -161,7 +162,7 @@ export default function CGUPage() {
 
           <section>
             <h2
-              className={`${lora.className} text-2xl font-semibold mb-4 text-foreground`}
+              className={`${montserrat.className} text-2xl font-semibold mb-4 text-foreground`}
             >
               9. Droit applicable et litiges
             </h2>

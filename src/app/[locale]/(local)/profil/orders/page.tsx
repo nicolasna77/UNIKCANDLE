@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { DateRange } from "react-day-picker";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,6 @@ type OrderWithDetails = Order & {
 };
 
 export default function OrdersPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = authClient.useSession();
 
@@ -196,7 +195,7 @@ export default function OrdersPage() {
     return <OrdersPageSkeleton />;
   }
 
-  const hasFilters = dateRange?.from || dateRange?.to || activeTab !== "all";
+  const hasFilters = Boolean(dateRange?.from || dateRange?.to || activeTab !== "all");
 
   return (
     <section className="space-y-6">

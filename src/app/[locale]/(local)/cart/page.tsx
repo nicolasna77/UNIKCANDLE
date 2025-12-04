@@ -414,7 +414,7 @@ export default function CartPage() {
                                         </div>
                                         <div className="bg-muted/50 border border-border rounded-lg p-3 max-w-md">
                                           <p className="text-sm text-foreground italic">
-                                            "{item.textMessage}"
+                                            &quot;{item.textMessage}&quot;
                                           </p>
                                         </div>
                                       </div>
@@ -528,7 +528,7 @@ export default function CartPage() {
                                         </div>
                                         <div className="bg-muted/50 border border-border rounded-lg p-3 max-w-md">
                                           <p className="text-sm text-foreground italic">
-                                            "{item.textMessage}"
+                                            &quot;{item.textMessage}&quot;
                                           </p>
                                         </div>
                                       </div>

@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Lora, Montserrat } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/providers/query-provider";
@@ -11,78 +11,24 @@ import {
   getWebsiteSchema,
 } from "@/lib/structured-data";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
   subsets: ["latin"],
-});
-
-const geistMono = Montserrat({
+  weight: ["800"],
   variable: "--font-montserrat",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://unikcandle.com"),
-  title: {
-    default: "UNIKCANDLE - Bougies personnalisées et écologiques",
-    template: "%s | UNIKCANDLE",
-  },
-  description:
-    "Découvrez UNIKCANDLE, des bougies uniques et personnalisables avec messages audio intégrés. Alliant émotion, élégance et engagement écologique. Créez votre bougie unique à partir de bouteilles recyclées.",
-  keywords: [
-    "bougies personnalisées",
-    "bougies écologiques",
-    "bougies avec message audio",
-    "bougies recyclées",
-    "bougies artisanales",
-    "bougies françaises",
-    "bougies uniques",
-    "cadeau personnalisé",
-    "décoration maison",
-    "bougie parfumée",
-    "bougie artisanale",
-    "QR code bougie",
-    "AR bougie",
-    "réalité augmentée",
-    "cadeau émotion",
-  ],
+  applicationName: "UNIKCANDLE",
   authors: [{ name: "UNIKCANDLE", url: "https://unikcandle.com" }],
   creator: "UNIKCANDLE",
   publisher: "UNIKCANDLE",
-  applicationName: "UNIKCANDLE",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   category: "E-commerce",
-  openGraph: {
-    type: "website",
-    locale: "fr_FR",
-    url: "https://unikcandle.com",
-    title: "UNIKCANDLE - Bougies personnalisées avec messages audio",
-    description:
-      "Des bougies uniques et personnalisables avec messages audio intégrés. Alliant émotion, élégance et engagement écologique.",
-    siteName: "UNIKCANDLE",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "UNIKCANDLE - Bougies personnalisées",
-        type: "image/png",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "UNIKCANDLE - Bougies personnalisées avec messages audio",
-    description:
-      "Des bougies uniques et personnalisables avec messages audio intégrés. Créez votre bougie unique.",
-    images: ["/twitter-image.png"],
-    creator: "@unikcandle",
-    site: "@unikcandle",
-  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
@@ -130,7 +76,7 @@ export default function RootLayout({
         <StructuredData data={getWebsiteSchema()} />
       </head>
       <Analytics />
-      <body className={`${lora.variable} ${geistMono.variable} antialiased `}>
+      <body className={`${montserrat.variable} antialiased `}>
         <CartProvider>
           <QueryProvider>
             {children}

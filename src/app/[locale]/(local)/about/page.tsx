@@ -1,14 +1,15 @@
 "use client";
 
-import { Lora } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
   subsets: ["latin"],
+  weight: ["800"],
+  variable: "--font-montserrat",
 });
 
 export default function AboutPage() {
@@ -19,7 +20,7 @@ export default function AboutPage() {
         {/* Hero */}
         <div className="space-y-4 text-center">
           <h2
-            className={`${lora.className} text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter`}
+            className={`${montserrat.className} text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter`}
           >
             {t("hero.title")} <span className="text-primary">{t("hero.brandName")}</span>
           </h2>

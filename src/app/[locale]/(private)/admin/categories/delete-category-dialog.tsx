@@ -1,5 +1,8 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
+import { type CategoryWithProducts } from "@/services/categories";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle } from "lucide-react";
-import { type CategoryWithProducts } from "@/services/categories";
 
 interface DeleteCategoryDialogProps {
   category: CategoryWithProducts | null;
@@ -64,7 +64,7 @@ export function DeleteCategoryDialog({
                   ⚠️ Impossible de supprimer cette catégorie
                 </p>
                 <p className="text-sm text-destructive mt-1">
-                  {category._count.products} produit(s) utilisent encore cette
+                  {category._count?.products} produit(s) utilisent encore cette
                   catégorie. Veuillez d&apos;abord réassigner ou supprimer ces
                   produits.
                 </p>

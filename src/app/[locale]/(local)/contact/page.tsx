@@ -12,7 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Lora } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Mail, Send, Clock } from "lucide-react";
@@ -22,9 +22,10 @@ import { sendContactMessage } from "@/app/actions/contact";
 import { contactFormSchema, type ContactFormValues } from "@/lib/schemas";
 import { useTranslations } from "next-intl";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
   subsets: ["latin"],
+  weight: ["800"],
+  variable: "--font-montserrat",
 });
 
 const ContactPage = () => {
@@ -81,7 +82,7 @@ const ContactPage = () => {
           {/* En-tête */}
           <div className="text-center space-y-6 mb-16">
             <h1
-              className={`${lora.className} text-3xl lg:text-6xl font-bold text-foreground tracking-tight`}
+              className={`${montserrat.className} text-3xl lg:text-6xl font-bold text-foreground tracking-tight`}
             >
               {t("title")}
             </h1>
@@ -111,7 +112,7 @@ const ContactPage = () => {
           <Card className="bg-card/80 backdrop-blur-sm border-primary/10 shadow-xl max-w-2xl mx-auto">
             <CardHeader className="text-center">
               <CardTitle
-                className={`${lora.className} text-2xl font-bold text-card-foreground`}
+                className={`${montserrat.className} text-2xl font-bold text-card-foreground`}
               >
                 {t("formTitle")}
               </CardTitle>

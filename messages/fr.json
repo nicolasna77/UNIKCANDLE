@@ -143,7 +143,19 @@
       "productNotFound": "Le produit que vous recherchez n'existe pas ou n'est plus disponible.",
       "retry": "Réessayer",
       "priceNotAvailable": "Prix du produit non disponible",
-      "description": "Description"
+      "description": "Description",
+      "metadata": {
+        "notFound": "Produit non trouvé",
+        "titleSuffix": "Bougie personnalisée",
+        "descriptionTemplate": "Découvrez {productName}, une bougie artisanale personnalisable avec message audio intégré. {price}€ - Fabrication française, matériaux recyclés.",
+        "ogDescriptionTemplate": "Bougie artisanale personnalisable avec message audio. {price}€",
+        "keywords": {
+          "personalized": "bougie personnalisée",
+          "artisanal": "bougie artisanale",
+          "audioMessage": "message audio",
+          "uniqueGift": "cadeau unique"
+        }
+      }
     },
     "audioRecord": {
       "uploadError": "Erreur lors de l'upload de l'audio",

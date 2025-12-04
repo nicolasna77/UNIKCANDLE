@@ -6,7 +6,8 @@
 
 import { Product, Category, Scent, Image, Review } from "@prisma/client";
 
-export interface ProductWithDetails extends Product {
+export interface ProductWithDetails extends Omit<Product, 'messageType'> {
+  messageType: "audio" | "text";
   category: Category;
   scent: Scent;
   images: Image[];

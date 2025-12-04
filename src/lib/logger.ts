@@ -64,7 +64,7 @@ class Logger {
   /**
    * Send error to external monitoring service (e.g., Sentry)
    */
-  private sendToErrorTracking(message: string, error?: Error | unknown, context?: LogContext) {
+  private sendToErrorTracking() {
     // TODO: Integrate with Sentry, LogRocket, or other error tracking service
     // Example:
     // if (this.isProduction && typeof Sentry !== 'undefined') {
@@ -121,7 +121,7 @@ class Logger {
 
     // Send to error tracking in production
     if (this.isProduction) {
-      this.sendToErrorTracking(message, error, sanitized);
+      this.sendToErrorTracking();
     }
   }
 

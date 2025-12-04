@@ -11,10 +11,6 @@
     "prisma-local": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "prisma", "mcp"]
-    },
-    "prisma-remote": {
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "mcp-remote", "https://mcp.prisma.io/mcp"]
     }
   }
 }

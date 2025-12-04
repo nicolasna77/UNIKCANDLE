@@ -29,6 +29,7 @@ interface Product {
   price: number;
   subTitle: string;
   slogan: string;
+  messageType: "audio" | "text";
   category: Category;
   arAnimation: string;
   scent: Scent;

@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { TipTapEditor } from "@/components/ui/tiptap-editor";
 import {
   Select,
@@ -27,13 +27,16 @@ import {
 } from "@/components/ui/select";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, Info, Package, Tag, Sparkles } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { fetchScents } from "@/services/scents";
@@ -125,6 +128,7 @@ export default function EditProductForm({
       subTitle: initialData.subTitle,
       categoryId: initialData.category?.id || "",
       scentId: initialData.scent?.id || "",
+      messageType: initialData.messageType || "audio",
     },
   });
 
@@ -245,173 +249,302 @@ export default function EditProductForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl overflow-y-auto ">
         <DialogHeader>
-          <DialogTitle>Modifier le produit</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Modifier le produit
+          </DialogTitle>
+          <DialogDescription>
+            Modifiez les informations du produit dans le catalogue
+          </DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            onKeyDown={(e) => {
-              // Empêcher la soumission avec Enter
-              if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
-                e.preventDefault();
-              }
-            }}
-            className="max-h-[90vh]  "
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Alert d'aide */}
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Les champs marqués d&apos;un astérisque (*) sont obligatoires.
+                Assurez-vous d&apos;avoir au moins une image pour le produit.
+              </AlertDescription>
+            </Alert>
+
+            {/* Images du produit */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Images du produit *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Téléchargez au moins une image (recommandé : 3-5 images)
+                  </p>
+                </div>
+                {selectedFiles.length > 0 && (
+                  <Badge variant="secondary" className="ml-auto">
+                    {selectedFiles.length} {selectedFiles.length === 1 ? "image" : "images"}
+                  </Badge>
+                )}
+              </div>
+              <UploadFiles
+                onFilesChange={handleFilesChange}
+                initialFiles={selectedFiles}
+              />
+            </div>
+
+            <Separator />
+
             {/* Informations générales */}
-            <div className="grid grid-cols-1 gap-5">
-              <div className="py-8">
-                <UploadFiles
-                  initialFiles={selectedFiles}
-                  onFilesChange={handleFilesChange}
-                  key={selectedFiles.length} // Force re-render when files change
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Informations générales *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Nom, description et prix du produit
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nom du produit *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Bougie Lavande Relaxante"
+                          {...field}
+                          aria-required="true"
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Le nom principal affiché aux clients
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prix (€) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="29.99"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value) || 0)
+                          }
+                          aria-required="true"
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Prix de vente en euros
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="subTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sous-titre *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Détente et sérénité"
+                          {...field}
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Court texte descriptif
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom du produit</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nom du produit" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <Separator />
 
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prix (€)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="Prix du produit"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="subTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sous-titre</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Sous-titre du produit"
-                        {...field}
-                        rows={2}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-
+            {/* Description */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-lg font-semibold">Description *</FormLabel>
                     <FormControl>
                       <TipTapEditor
                         value={field.value || ""}
                         onChange={field.onChange}
-                        placeholder="Description détaillée du produit"
+                        placeholder="Décrivez votre produit en détail : caractéristiques, utilisation, bienfaits..."
+                        disabled={isPending}
                       />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Catégories et parfums */}
-
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Catégorie</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une catégorie" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((category: Category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="scentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Parfum</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un parfum" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {scents.map((scent) => (
-                          <SelectItem key={scent.id} value={scent.id}>
-                            {scent.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormDescription>
+                      Minimum 10 caractères - Soyez précis et engageant
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <DialogFooter className="flex justify-end gap-2  ">
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onSuccess}
-                  disabled={isPending}
-                >
-                  Annuler
-                </Button>
-              </DialogClose>
-              <Button type="submit" disabled={isPending || form.formState.isSubmitting}>
+
+            <Separator />
+
+            {/* Catégories et parfums */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Classification *</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Catégorie, parfum et type de message personnalisé
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="categoryId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Catégorie *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isPending}
+                      >
+                        <FormControl>
+                          <SelectTrigger aria-required="true">
+                            <SelectValue placeholder="Sélectionner une catégorie" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category: Category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Type de bougie (ex: Relaxation, Romance)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="scentId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parfum *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isPending}
+                      >
+                        <FormControl>
+                          <SelectTrigger aria-required="true">
+                            <SelectValue placeholder="Sélectionner un parfum" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {scents.map((scent) => (
+                            <SelectItem key={scent.id} value={scent.id}>
+                              {scent.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Fragrance de la bougie
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="messageType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type de message personnalisé *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isPending}
+                      >
+                        <FormControl>
+                          <SelectTrigger aria-required="true">
+                            <SelectValue placeholder="Sélectionner le type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="audio">
+                            🎤 Audio (enregistrement vocal)
+                          </SelectItem>
+                          <SelectItem value="text">
+                            ✍️ Texte (message gravé dans la cire)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Format de personnalisation proposé aux clients
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  onOpenChange(false);
+                }}
+                disabled={isPending}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || form.formState.isSubmitting}
+                className="min-w-[120px]"
+              >
                 {isPending || form.formState.isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     Mise à jour...
                   </>
                 ) : (
-                  "Mettre à jour"
+                  <>
+                    <Package className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Mettre à jour
+                  </>
                 )}
               </Button>
             </DialogFooter>

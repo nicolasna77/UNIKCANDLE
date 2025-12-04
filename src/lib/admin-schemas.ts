@@ -114,6 +114,7 @@ export interface ProductWithRelations {
   price: number;
   subTitle: string;
   slogan: string;
+  messageType: "audio" | "text";
   category: {
     id: string;
     name: string;

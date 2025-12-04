@@ -3,13 +3,15 @@ import { Suspense } from "react";
 import LoadingPage from "./loading";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
-  params: { uid: string };
+  params: Promise<{ uid: string; locale: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { uid } = await params;
+  const { uid, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "products.detail.metadata" });
 
   const product = await prisma.product.findFirst({
     where: {
@@ -27,31 +29,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) {
     return {
-      title: "Produit non trouvé",
+      title: t("notFound"),
     };
   }
 
   const imageUrl = product.images[0]?.url || "/og-product-default.png";
   const price = typeof product.price === 'number' ? product.price : Number(product.price);
 
+  const description = product.description || t("descriptionTemplate", { productName: product.name, price: price.toString() });
+  const ogDescription = product.description || t("ogDescriptionTemplate", { price: price.toString() });
+
   return {
-    title: `${product.name} - Bougie personnalisée`,
-    description:
-      product.description ||
-      `Découvrez ${product.name}, une bougie artisanale personnalisable avec message audio intégré. ${price}€ - Fabrication française, matériaux recyclés.`,
+    title: `${product.name} - ${t("titleSuffix")}`,
+    description,
     keywords: [
       product.name,
       product.category.name,
-      "bougie personnalisée",
-      "bougie artisanale",
-      "message audio",
-      "cadeau unique",
+      t("keywords.personalized"),
+      t("keywords.artisanal"),
+      t("keywords.audioMessage"),
+      t("keywords.uniqueGift"),
     ],
     openGraph: {
       title: `${product.name} - UNIKCANDLE`,
-      description:
-        product.description ||
-        `Bougie artisanale personnalisable avec message audio. ${price}€`,
+      description: ogDescription,
       images: [
         {
           url: imageUrl,
@@ -65,9 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `${product.name} - UNIKCANDLE`,
-      description:
-        product.description ||
-        `Bougie artisanale personnalisable avec message audio. ${price}€`,
+      description: ogDescription,
       images: [imageUrl],
     },
   };
