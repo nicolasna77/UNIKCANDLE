@@ -23,7 +23,7 @@ const publicRoutes = [
 ];
 const staticRoutes = ["/asset", "/models", "/logo", "/images"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // First, handle i18n routing
   const response = intlMiddleware(request);
 
@@ -61,12 +61,19 @@ export async function middleware(request: NextRequest) {
 
     if (!session) {
       const locale = pathName.match(localeRegex)?.[0] || "/fr";
-      return NextResponse.redirect(new URL(`${locale}/auth/signin`, request.url));
+      return NextResponse.redirect(
+        new URL(`${locale}/auth/signin`, request.url)
+      );
     }
 
-    if (pathnameWithoutLocale.startsWith("/admin") && session.user.role !== "admin") {
+    if (
+      pathnameWithoutLocale.startsWith("/admin") &&
+      session.user.role !== "admin"
+    ) {
       const locale = pathName.match(localeRegex)?.[0] || "/fr";
-      return NextResponse.redirect(new URL(`${locale}/unauthorized`, request.url));
+      return NextResponse.redirect(
+        new URL(`${locale}/unauthorized`, request.url)
+      );
     }
 
     return response;
@@ -83,7 +90,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  runtime: "nodejs",
   matcher: [
     "/admin/:path*",
     "/auth/:path*",

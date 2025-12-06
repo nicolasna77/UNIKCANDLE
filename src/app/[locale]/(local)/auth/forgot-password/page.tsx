@@ -48,7 +48,7 @@ export default function ForgotPassword() {
   async function onSubmit(data: FormValues) {
     try {
       setLoading(true);
-      await authClient.forgetPassword({
+      await authClient.requestPasswordReset({
         email: data.email,
         redirectTo: "/reset-password",
       });
