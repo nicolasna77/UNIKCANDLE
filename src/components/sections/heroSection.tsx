@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 const montserrat = Montserrat({

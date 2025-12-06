@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, Home } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function UnauthorizedPage() {

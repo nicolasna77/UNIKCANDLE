@@ -3,7 +3,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Montserrat } from "next/font/google";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 const montserrat = Montserrat({

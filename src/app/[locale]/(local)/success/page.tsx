@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useCart } from "@/context/CartContext";
 import confetti from "canvas-confetti";
 import { useSearchParams } from "next/navigation";

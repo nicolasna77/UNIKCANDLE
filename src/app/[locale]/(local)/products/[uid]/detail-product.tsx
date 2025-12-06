@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Category, Scent } from "@prisma/client";
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { getProductTranslation, getCategoryTranslation } from "@/lib/product-translation";
+import { getProductTranslation, getCategoryTranslation, getScentTranslation } from "@/lib/product-translation";
 
 // Composant pour l'affichage du prix
 const PriceDisplay = ({ price }: { price: number }) => {
@@ -63,9 +63,12 @@ const CategoryDisplay = ({
 };
 
 // Composant pour l'affichage du parfum
-const ScentDisplay = ({ scent }: { scent: Scent | null | undefined }) => {
+const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; locale: string }) => {
   const t = useTranslations("products.detail");
   if (!scent) return null;
+
+  const translatedName = getScentTranslation(scent, "name", locale);
+  const translatedDescription = getScentTranslation(scent, "description", locale);
 
   return (
     <Card className="border-border/50 bg-card/50">
@@ -84,11 +87,11 @@ const ScentDisplay = ({ scent }: { scent: Scent | null | undefined }) => {
           )}
           <div className="flex-1 space-y-2">
             <h4 className="font-semibold text-card-foreground text-lg">
-              {scent.name || t("noName")}
+              {translatedName || t("noName")}
             </h4>
-            {scent.description && (
+            {translatedDescription && (
               <p className="text-sm text-muted-foreground leading-relaxed">
-                {scent.description}
+                {translatedDescription}
               </p>
             )}
             {scent.notes && scent.notes.length > 0 && (
@@ -224,7 +227,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             <Separator />
 
             {/* Affichage du parfum */}
-            <ScentDisplay scent={product.scent} />
+            <ScentDisplay scent={product.scent} locale={locale} />
 
             {/* Message personnalisé - Audio ou Texte selon le type */}
             {product.messageType === "text" ? (

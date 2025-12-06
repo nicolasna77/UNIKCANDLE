@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Montserrat } from "next/font/google";
 import { SocialIcon } from "react-social-icons";
 import { useTranslations } from "next-intl";

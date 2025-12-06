@@ -20,7 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { NavUser } from "./admin/nav-user";
 import { authClient } from "@/lib/auth-client";
 import { User } from "better-auth";

@@ -19,11 +19,11 @@ import {
   Category,
 } from "@prisma/client";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ShoppingCartIcon, StarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations, useLocale } from "next-intl";
-import { getProductTranslation, getCategoryTranslation } from "@/lib/product-translation";
+import { getProductTranslation, getCategoryTranslation, getScentTranslation } from "@/lib/product-translation";
 
 type ProductWithDetails = Product & {
   scent: Scent;
@@ -44,6 +44,7 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
   const translatedDescription = getProductTranslation(product, "description", locale);
   const translatedSubTitle = getProductTranslation(product, "subTitle", locale);
   const translatedCategoryName = getCategoryTranslation(product.category, "name", locale);
+  const translatedScentName = product.scent ? getScentTranslation(product.scent, "name", locale) : "";
 
   const handleAddToCart = () => {
     if (!product.scent) {
@@ -143,7 +144,7 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
           {product.scent && (
             <div className="mt-4">
               <span className="font-semibold">{t("card.scentLabel")}</span>
-              {product.scent.name}
+              {translatedScentName}
             </div>
           )}
         </CardContent>

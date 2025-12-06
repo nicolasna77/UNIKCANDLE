@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { signIn, useSession, authClient } from "@/lib/auth-client";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/form";
 import { ControllerRenderProps, Resolver } from "react-hook-form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Alert } from "@/components/ui/alert";

@@ -14,7 +14,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, Download } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

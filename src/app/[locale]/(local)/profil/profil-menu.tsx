@@ -4,8 +4,8 @@ import { User, ListOrdered } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tabs } from "@/components/ui/tabs";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 
 const page = [
   {

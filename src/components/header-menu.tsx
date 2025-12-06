@@ -10,7 +10,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function HeaderMenu({
   links,

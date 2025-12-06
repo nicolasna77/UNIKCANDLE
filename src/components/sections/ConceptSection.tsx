@@ -2,7 +2,7 @@
 
 import { buttonVariants } from "@/components/ui/button";
 import { Flame, MessageCircle, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 export default function ConceptSection() {

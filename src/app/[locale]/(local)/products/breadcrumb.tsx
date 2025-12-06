@@ -7,7 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProductById, type ProductWithDetails } from "@/services/products";

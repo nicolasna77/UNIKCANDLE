@@ -3,7 +3,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import { useState, useTransition } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import ItemReviewProduct from "./item-review-product";
 import { authClient } from "@/lib/auth-client";
 import { addReviewFromJSON } from "@/app/actions/reviews";

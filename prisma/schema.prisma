@@ -132,7 +132,9 @@ model Image {
 model Scent {
   id          String      @id @default(uuid())
   name        String
+  nameEN      String?
   description String
+  descriptionEN String?
   icon        String
   color       String
   createdAt   DateTime    @default(now())

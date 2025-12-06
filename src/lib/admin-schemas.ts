@@ -59,9 +59,11 @@ export const categoryUpdateSchema = categorySchema
 // Schéma pour les senteurs
 export const scentSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  nameEN: z.string().min(2, "The name must contain at least 2 characters").optional().or(z.literal("")),
   description: z
     .string()
     .min(10, "La description doit contenir au moins 10 caractères"),
+  descriptionEN: z.string().min(10, "The description must contain at least 10 characters").optional().or(z.literal("")),
   icon: z.string().min(1, "L'icône est requise"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Format de couleur invalide"),
   notes: z.array(z.string()).optional().default([]),
@@ -162,7 +164,9 @@ export interface CategoryWithProducts {
 export interface ScentWithProducts {
   id: string;
   name: string;
+  nameEN?: string | null;
   description: string;
+  descriptionEN?: string | null;
   icon: string;
   color: string;
   notes: string[];

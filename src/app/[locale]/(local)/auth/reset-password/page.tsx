@@ -25,8 +25,9 @@ import {
 } from "@/components/ui/form";
 import { ControllerRenderProps, Resolver } from "react-hook-form";
 import { toast } from "sonner";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 export default function ResetPassword() {

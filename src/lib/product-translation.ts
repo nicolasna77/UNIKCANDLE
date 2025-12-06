@@ -1,4 +1,4 @@
-import { Product, Category } from "@prisma/client";
+import { Product, Category, Scent } from "@prisma/client";
 
 /**
  * Récupère le texte traduit d'un produit selon la locale
@@ -75,5 +75,42 @@ export function getTranslatedCategory<T extends Partial<Category>>(
   return {
     name: getCategoryTranslation(category, "name", locale),
     description: getCategoryTranslation(category, "description", locale),
+  };
+}
+
+/**
+ * Récupère le texte traduit d'un scent selon la locale
+ */
+export function getScentTranslation<T extends Partial<Scent>>(
+  scent: T,
+  field: "name" | "description",
+  locale: string
+): string {
+  if (locale === "en") {
+    const enField = `${field}EN` as keyof T;
+    const enValue = scent[enField];
+    // Si la traduction EN existe et n'est pas vide, l'utiliser
+    if (enValue && typeof enValue === "string" && enValue.trim() !== "") {
+      return enValue;
+    }
+  }
+
+  // Fallback sur la version FR
+  return (scent[field as keyof T] as string) || "";
+}
+
+/**
+ * Récupère toutes les traductions d'un scent selon la locale
+ */
+export function getTranslatedScent<T extends Partial<Scent>>(
+  scent: T,
+  locale: string
+): {
+  name: string;
+  description: string;
+} {
+  return {
+    name: getScentTranslation(scent, "name", locale),
+    description: getScentTranslation(scent, "description", locale),
   };
 }

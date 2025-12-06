@@ -8,9 +8,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function PrivateLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -23,6 +26,6 @@ export default async function PrivateLayout({
     return <>{children}</>;
   } catch (error) {
     console.error("Error checking admin permission:", error);
-    redirect("/auth/signin");
+    redirect(`/${locale}/auth/signin`);
   }
 }

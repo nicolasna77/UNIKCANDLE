@@ -28,12 +28,13 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import { useTranslations } from "next-intl";
 import { AudioPlayer } from "@/components/AudioPlayer";

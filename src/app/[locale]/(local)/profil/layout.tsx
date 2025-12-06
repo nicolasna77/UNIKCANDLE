@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import ProfilMenu from "./profil-menu";
 import { getUser } from "@/lib/auth-session";
 
-const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = async ({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) => {
+  const { locale } = await params;
   const session = await getUser();
   if (!session) {
-    redirect("/auth/signin");
+    redirect(`/${locale}/auth/signin`);
   }
   return (
     <div className="mt-16">

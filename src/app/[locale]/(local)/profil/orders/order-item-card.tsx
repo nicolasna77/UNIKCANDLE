@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import type {
   Order,
   OrderItem,
