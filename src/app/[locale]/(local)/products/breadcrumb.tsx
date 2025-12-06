@@ -11,10 +11,12 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProductById, type ProductWithDetails } from "@/services/products";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { getProductTranslation } from "@/lib/product-translation";
 
 const Breadscrumb = () => {
   const t = useTranslations("products.breadcrumb");
+  const locale = useLocale();
   const pathname = usePathname();
   const allPathnames = pathname.split("/").filter((item) => item);
 
@@ -44,7 +46,7 @@ const Breadscrumb = () => {
 
     // Si nous sommes sur la page d'un produit spécifique et avons récupéré son nom
     if (index === 1 && pathnames[0] === "products" && product) {
-      return product.name;
+      return getProductTranslation(product, "name", locale);
     } else if (index === 1 && pathnames[0] === "products" && isLoading) {
       return t("loading");
     }

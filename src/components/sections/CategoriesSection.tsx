@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { buttonVariants } from "../ui/button";
 import Image from "next/image";
+import { useLocale } from "next-intl";
+import { getCategoryTranslation } from "@/lib/product-translation";
 
 interface CategoryWithImage extends Omit<Category, "imageUrl"> {
   imageUrl?: string | null;
@@ -14,6 +16,7 @@ interface CategoryWithImage extends Omit<Category, "imageUrl"> {
 }
 
 const CategoriesSection = () => {
+  const locale = useLocale();
   const { data: categories, isLoading, error } = useQuery<CategoryWithProducts[]>({
     queryKey: ["categories"],
     queryFn: fetchCategories,
@@ -63,7 +66,11 @@ const CategoriesSection = () => {
               ?.filter(
                 (category: CategoryWithImage) => category.products.length > 0
               )
-              .map((category: CategoryWithImage, index) => (
+              .map((category: CategoryWithImage, index) => {
+                const translatedName = getCategoryTranslation(category, "name", locale);
+                const translatedDescription = getCategoryTranslation(category, "description", locale);
+
+                return (
                 <Card
                   key={category.id}
                   className="group relative p-0 overflow-hidden border border-border  shadow-lg hover:shadow-xl transition-all duration-300"
@@ -76,7 +83,7 @@ const CategoriesSection = () => {
                       {category.imageUrl ? (
                         <Image
                           src={category.imageUrl}
-                          alt={category.name}
+                          alt={translatedName}
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -97,10 +104,10 @@ const CategoriesSection = () => {
                     >
                       <h3 className="text-xl font-semibold tracking-tight mb-2 text-white">
                         {category.icon}
-                        {category.name}
+                        {translatedName}
                       </h3>
                       <p className="text-sm text-white/90 mb-4">
-                        {category.description}
+                        {translatedDescription}
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-white/80">
@@ -116,7 +123,8 @@ const CategoriesSection = () => {
                     <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </Link>
                 </Card>
-              ))
+                );
+              })
           )}
         </div>
 

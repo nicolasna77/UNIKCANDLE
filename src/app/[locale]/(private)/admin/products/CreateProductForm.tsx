@@ -45,6 +45,7 @@ import { createProductFromJSON } from "@/app/actions/products";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CreateProductFormProps {
   onSuccess: () => void;
@@ -76,10 +77,14 @@ export default function CreateProductForm({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
+      nameEN: "",
       description: "",
+      descriptionEN: "",
       price: 0,
       subTitle: "",
+      subTitleEN: "",
       slogan: "",
+      sloganEN: "",
       categoryId: "",
       scentId: "",
       imageUrl: "",
@@ -225,137 +230,232 @@ export default function CreateProductForm({
             </div>
 
             <Separator />
-            {/* Informations générales */}
+
+            {/* Informations générales avec onglets FR/EN */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <h3 className="text-lg font-semibold">Informations générales *</h3>
                   <p className="text-sm text-muted-foreground">
-                    Nom, description et prix du produit
+                    Nom, description et prix du produit (disponible en FR et EN)
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom du produit *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Bougie Lavande Relaxante"
-                          {...field}
-                          aria-required="true"
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Le nom principal affiché aux clients
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prix (€) *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="29.99"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
-                          aria-required="true"
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Prix de vente en euros
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="subTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sous-titre *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Détente et sérénité"
-                          {...field}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Court texte descriptif
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="slogan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Slogan</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Votre moment de paix"
-                          {...field}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Phrase d&apos;accroche (optionnel)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Description */}
-            <div className="space-y-4">
+              {/* Prix (commun aux deux langues) */}
               <FormField
                 control={form.control}
-                name="description"
+                name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg font-semibold">Description *</FormLabel>
+                    <FormLabel>Prix (€) *</FormLabel>
                     <FormControl>
-                      <TipTapEditor
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Décrivez votre produit en détail : caractéristiques, utilisation, bienfaits..."
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="29.99"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
+                        aria-required="true"
                         disabled={isPending}
                       />
                     </FormControl>
                     <FormDescription>
-                      Minimum 10 caractères - Soyez précis et engageant
+                      Prix de vente en euros
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* Onglets FR/EN */}
+              <Tabs defaultValue="fr" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="fr">🇫🇷 Français</TabsTrigger>
+                  <TabsTrigger value="en">🇬🇧 English</TabsTrigger>
+                </TabsList>
+
+                {/* Onglet Français */}
+                <TabsContent value="fr" className="space-y-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom du produit *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Bougie Lavande Relaxante"
+                            {...field}
+                            aria-required="true"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Le nom principal affiché aux clients français
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="subTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sous-titre *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Détente et sérénité"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Court texte descriptif en français
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="slogan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Slogan</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Votre moment de paix"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Phrase d&apos;accroche en français (optionnel)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description *</FormLabel>
+                        <FormControl>
+                          <TipTapEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Décrivez votre produit en détail : caractéristiques, utilisation, bienfaits..."
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Minimum 10 caractères - Description en français
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Onglet English */}
+                <TabsContent value="en" className="space-y-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="nameEN"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Lavender Relaxing Candle"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Product name displayed to English customers (optional, falls back to French)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="subTitleEN"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Subtitle</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Relaxation and serenity"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Short descriptive text in English (optional)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="sloganEN"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Slogan</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Your moment of peace"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Catchphrase in English (optional)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="descriptionEN"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <TipTapEditor
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="Describe your product in detail: features, usage, benefits..."
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Minimum 10 characters - Description in English (optional)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
 
             <Separator />

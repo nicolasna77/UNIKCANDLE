@@ -94,14 +94,18 @@ model Verification {
 model Product {
   id          String      @id @default(uuid())
   name        String
+  nameEN      String?
   description String
+  descriptionEN String?
   price       Float
   subTitle    String
+  subTitleEN  String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   deletedAt   DateTime?
   arAnimation String
   slogan      String
+  sloganEN    String?
   messageType String      @default("audio") // "audio" ou "text"
   scentId     String
   categoryId  String
@@ -265,7 +269,9 @@ model Return {
 model Category {
   id          String    @id @default(uuid())
   name        String    @unique
+  nameEN      String?
   description String
+  descriptionEN String?
   icon        String
   color       String
   imageUrl    String?

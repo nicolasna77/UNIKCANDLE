@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader2,
   X,
@@ -61,7 +62,9 @@ export default function EditCategoryForm({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: category.name,
+      nameEN: category.nameEN || "",
       description: category.description,
+      descriptionEN: category.descriptionEN || "",
       icon: category.icon,
       color: category.color,
       imageUrl: category.imageUrl || "",
@@ -72,7 +75,9 @@ export default function EditCategoryForm({
   useEffect(() => {
     form.reset({
       name: category.name,
+      nameEN: category.nameEN || "",
       description: category.description,
+      descriptionEN: category.descriptionEN || "",
       icon: category.icon,
       color: category.color,
       imageUrl: category.imageUrl || "",
@@ -133,7 +138,9 @@ export default function EditCategoryForm({
   const handleClose = () => {
     form.reset({
       name: category.name,
+      nameEN: category.nameEN || "",
       description: category.description,
+      descriptionEN: category.descriptionEN || "",
       icon: category.icon,
       color: category.color,
       imageUrl: category.imageUrl || "",
@@ -150,7 +157,8 @@ export default function EditCategoryForm({
             Modifier la catégorie
           </DialogTitle>
           <DialogDescription>
-            Modifiez les informations de la catégorie &quot;{category.name}&quot;
+            Modifiez les informations de la catégorie &quot;{category.name}
+            &quot;
           </DialogDescription>
         </DialogHeader>
 
@@ -163,77 +171,146 @@ export default function EditCategoryForm({
               </AlertDescription>
             </Alert>
 
-            {/* Informations principales */}
+            {/* Informations principales avec onglets FR/EN */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <FolderOpen className="h-5 w-5 text-muted-foreground" />
-                Informations principales
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Relaxation, Romance"
-                          {...field}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormDescription>Nom affiché aux clients</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="icon"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Icône *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Flame, Heart, Sparkles"
-                          {...field}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormDescription>Nom de l&apos;icône Lucide</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Informations principales
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Nom et description (disponible en FR et EN)
+                  </p>
+                </div>
               </div>
+
+              {/* Icône (commun aux deux langues) */}
+              <FormField
+                control={form.control}
+                name="icon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icône *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Flame, Heart, Sparkles"
+                        {...field}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Nom de l&apos;icône Lucide
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Onglets FR/EN */}
+              <Tabs defaultValue="fr" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="fr">🇫🇷 Français</TabsTrigger>
+                  <TabsTrigger value="en">🇬🇧 English</TabsTrigger>
+                </TabsList>
+
+                {/* Onglet Français */}
+                <TabsContent value="fr" className="space-y-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Relaxation, Romance"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Nom affiché aux clients français
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description *</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Décrivez cette catégorie..."
+                            rows={4}
+                            className="resize-none"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Aide les clients français à comprendre cette catégorie
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Onglet English */}
+                <TabsContent value="en" className="space-y-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="nameEN"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: Relaxation, Romance"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Name displayed to English customers (optional, falls
+                          back to French)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="descriptionEN"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Describe this category..."
+                            rows={4}
+                            className="resize-none"
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Help English customers understand this category
+                          (optional)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
-
-            <Separator />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg font-semibold">Description *</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Décrivez cette catégorie..."
-                      rows={4}
-                      className="resize-none"
-                      {...field}
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Aide les clients à comprendre cette catégorie
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <Separator />
 
@@ -280,7 +357,9 @@ export default function EditCategoryForm({
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-muted-foreground" />
                 Image de bannière
-                <span className="text-sm font-normal text-muted-foreground">(optionnel)</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  (optionnel)
+                </span>
               </h3>
               <FormField
                 control={form.control}
@@ -291,7 +370,12 @@ export default function EditCategoryForm({
                       <div className="space-y-4">
                         {field.value && (
                           <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border bg-muted">
-                            <Image src={field.value} alt="Aperçu" fill className="object-cover" />
+                            <Image
+                              src={field.value}
+                              alt="Aperçu"
+                              fill
+                              className="object-cover"
+                            />
                             <Button
                               type="button"
                               variant="destructive"
@@ -324,7 +408,9 @@ export default function EditCategoryForm({
                         </div>
                       </div>
                     </FormControl>
-                    <FormDescription>Format recommandé : 800x600px, max 2MB</FormDescription>
+                    <FormDescription>
+                      Format recommandé : 800x600px, max 2MB
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -332,10 +418,19 @@ export default function EditCategoryForm({
             </div>
 
             <DialogFooter className="gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isPending}
+              >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isPending || uploadingImage} className="min-w-[120px]">
+              <Button
+                type="submit"
+                disabled={isPending || uploadingImage}
+                className="min-w-[120px]"
+              >
                 {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

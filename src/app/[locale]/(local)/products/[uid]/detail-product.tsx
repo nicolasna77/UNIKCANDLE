@@ -15,7 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Category, Scent } from "@prisma/client";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { getProductTranslation, getCategoryTranslation } from "@/lib/product-translation";
 
 // Composant pour l'affichage du prix
 const PriceDisplay = ({ price }: { price: number }) => {
@@ -41,8 +42,10 @@ const ReviewDisplay = ({ count }: { count: number }) => {
 // Composant pour l'affichage de la catégorie
 const CategoryDisplay = ({
   category,
+  translatedName,
 }: {
   category: Category | null | undefined;
+  translatedName: string;
 }) => {
   const t = useTranslations("products.detail");
   if (!category) return null;
@@ -53,7 +56,7 @@ const CategoryDisplay = ({
       style={{ backgroundColor: category.color || "#ccc" }}
     >
       <span className="text-sm text-white">
-        {category.name || t("noCategory")}
+        {translatedName || t("noCategory")}
       </span>
     </Badge>
   );
@@ -106,6 +109,7 @@ const ScentDisplay = ({ scent }: { scent: Scent | null | undefined }) => {
 
 const DetailProduct = ({ productId }: { productId: string }) => {
   const t = useTranslations("products");
+  const locale = useLocale();
   const {
     data: product,
     isLoading,
@@ -125,6 +129,12 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   const [currentTextMessage, setCurrentTextMessage] = useState<
     string | undefined
   >();
+
+  // Get translated fields based on current locale
+  const translatedName = product ? getProductTranslation(product, "name", locale) : "";
+  const translatedDescription = product ? getProductTranslation(product, "description", locale) : "";
+  const translatedSubTitle = product ? getProductTranslation(product, "subTitle", locale) : "";
+  const translatedCategoryName = product?.category ? getCategoryTranslation(product.category, "name", locale) : "";
 
   if (isLoading) {
     return (
@@ -156,19 +166,19 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   }
 
   const handleAddToCart = () => {
-    if (!product.price) {
+    if (!product || !product.price) {
       toast.error(t("detail.priceNotAvailable"));
       return;
     }
 
     addToCart({
       id: product.id,
-      name: product.name,
+      name: translatedName,
       price: product.price,
       imageUrl: product.images[0]?.url || "",
       selectedScent: product.scent,
-      description: product.description,
-      subTitle: product.subTitle,
+      description: translatedDescription,
+      subTitle: translatedSubTitle,
       category: product.category,
       audioUrl: currentAudioUrl,
       textMessage: currentTextMessage,
@@ -188,7 +198,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
           <div className="relative">
             <ProductImageCarousel
               images={product.images || []}
-              productName={product.name}
+              productName={translatedName}
             />
           </div>
 
@@ -197,17 +207,17 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             {/* En-tête produit */}
             <div className="space-y-4">
               <div className="flex md:flex-row flex-col justify-between md:items-center gap-4">
-                <h1 className="text-3xl font-bold ">{product.name}</h1>
+                <h1 className="text-3xl font-bold ">{translatedName}</h1>
                 <PriceDisplay price={product.price} />
               </div>
 
               <div className="flex items-center gap-4">
                 <ReviewDisplay count={product.reviewCount} />
-                <CategoryDisplay category={product.category} />
+                <CategoryDisplay category={product.category} translatedName={translatedCategoryName} />
               </div>
 
               <p className="text-lg text-muted-foreground">
-                {product.subTitle}
+                {translatedSubTitle}
               </p>
             </div>
 
@@ -245,7 +255,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             <h2 className="text-2xl font-bold mb-4">{t("detail.description")}</h2>
             <p
               className=" leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: product.description }}
+              dangerouslySetInnerHTML={{ __html: translatedDescription }}
             ></p>
           </div>
 

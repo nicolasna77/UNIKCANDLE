@@ -17,7 +17,8 @@ import ProductCard from "./product-card";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Category } from "@prisma/client";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { getCategoryTranslation } from "@/lib/product-translation";
 import {
   Pagination,
   PaginationContent,
@@ -30,6 +31,7 @@ import {
 
 const ProductsList = () => {
   const t = useTranslations("products");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -165,17 +167,20 @@ const ProductsList = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("list.allCategories")}</SelectItem>
-              {categories.map((category: Category) => (
+              {categories.map((category: Category) => {
+                const translatedName = getCategoryTranslation(category, "name", locale);
+                return (
                 <SelectItem key={category.id} value={category.id}>
                   <div className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: category.color }}
                     />
-                    <span>{category.name}</span>
+                    <span>{translatedName}</span>
                   </div>
                 </SelectItem>
-              ))}
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
