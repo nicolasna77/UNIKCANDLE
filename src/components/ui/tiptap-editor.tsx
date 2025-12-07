@@ -272,7 +272,23 @@ export function TipTapEditor({
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: "list-disc pl-6 my-2",
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: "list-decimal pl-6 my-2",
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: "my-1",
+          },
+        },
+      }),
       Underline,
       TiptapImage.configure({
         HTMLAttributes: {
@@ -319,7 +335,13 @@ export function TipTapEditor({
         className={cn(
           "prose prose-sm dark:prose-invert max-w-none",
           "[&_.ProseMirror]:min-h-[150px] [&_.ProseMirror]:p-4",
-          "[&_.ProseMirror]:outline-none [&_.ProseMirror]:focus:outline-none"
+          "[&_.ProseMirror]:outline-none [&_.ProseMirror]:focus:outline-none",
+          // Styles pour les listes
+          "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-2",
+          "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-2",
+          "[&_.ProseMirror_li]:my-1",
+          "[&_.ProseMirror_ul_li]:marker:text-foreground",
+          "[&_.ProseMirror_ol_li]:marker:text-foreground"
         )}
       />
     </div>
