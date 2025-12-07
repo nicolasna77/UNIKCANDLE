@@ -45,10 +45,14 @@ export async function createProduct(
     // Extraction des données du FormData
     const rawData = {
       name: formData.get("name"),
+      nameEN: formData.get("nameEN") || "",
       description: formData.get("description"),
+      descriptionEN: formData.get("descriptionEN") || "",
       price: formData.get("price"),
       subTitle: formData.get("subTitle"),
+      subTitleEN: formData.get("subTitleEN") || "",
       slogan: formData.get("slogan"),
+      sloganEN: formData.get("sloganEN") || "",
       categoryId: formData.get("categoryId"),
       scentId: formData.get("scentId"),
       arAnimation: formData.get("arAnimation") || "default",
@@ -102,10 +106,14 @@ export async function createProduct(
     const product = await prisma.product.create({
       data: {
         name: data.name,
+        nameEN: data.nameEN || undefined,
         description: data.description,
+        descriptionEN: data.descriptionEN || undefined,
         price: data.price,
         subTitle: data.subTitle,
+        subTitleEN: data.subTitleEN || undefined,
         slogan: data.slogan,
+        sloganEN: data.sloganEN || undefined,
         arAnimation: data.arAnimation || "default",
         category: {
           connect: { id: data.categoryId },
@@ -204,10 +212,14 @@ export async function updateProduct(
     const rawData = {
       id: productId,
       name: formData.get("name"),
+      nameEN: formData.get("nameEN") || "",
       description: formData.get("description"),
+      descriptionEN: formData.get("descriptionEN") || "",
       price: formData.get("price"),
       subTitle: formData.get("subTitle"),
+      subTitleEN: formData.get("subTitleEN") || "",
       slogan: formData.get("slogan"),
+      sloganEN: formData.get("sloganEN") || "",
       categoryId: formData.get("categoryId"),
       scentId: formData.get("scentId"),
       arAnimation: formData.get("arAnimation"),
@@ -273,10 +285,14 @@ export async function updateProduct(
       where: { id: productId },
       data: {
         ...(data.name !== undefined && { name: data.name }),
+        ...(data.nameEN !== undefined && { nameEN: data.nameEN || null }),
         ...(data.description !== undefined && { description: data.description }),
+        ...(data.descriptionEN !== undefined && { descriptionEN: data.descriptionEN || null }),
         ...(data.price !== undefined && { price: data.price }),
         ...(data.subTitle !== undefined && { subTitle: data.subTitle }),
+        ...(data.subTitleEN !== undefined && { subTitleEN: data.subTitleEN || null }),
         ...(data.slogan !== undefined && { slogan: data.slogan }),
+        ...(data.sloganEN !== undefined && { sloganEN: data.sloganEN || null }),
         ...(data.arAnimation !== undefined && { arAnimation: data.arAnimation }),
         ...(data.categoryId && {
           category: {
@@ -462,10 +478,14 @@ export async function createProductFromJSON(
     const product = await prisma.product.create({
       data: {
         name: validData.name,
+        nameEN: validData.nameEN || undefined,
         description: validData.description,
+        descriptionEN: validData.descriptionEN || undefined,
         price: validData.price,
         subTitle: validData.subTitle,
+        subTitleEN: validData.subTitleEN || undefined,
         slogan: validData.slogan,
+        sloganEN: validData.sloganEN || undefined,
         arAnimation: validData.arAnimation || "default",
         category: {
           connect: { id: validData.categoryId },
@@ -598,10 +618,14 @@ export async function updateProductFromJSON(
       where: { id },
       data: {
         ...(validData.name !== undefined && { name: validData.name }),
+        ...(validData.nameEN !== undefined && { nameEN: validData.nameEN || null }),
         ...(validData.description !== undefined && { description: validData.description }),
+        ...(validData.descriptionEN !== undefined && { descriptionEN: validData.descriptionEN || null }),
         ...(validData.price !== undefined && { price: validData.price }),
         ...(validData.subTitle !== undefined && { subTitle: validData.subTitle }),
+        ...(validData.subTitleEN !== undefined && { subTitleEN: validData.subTitleEN || null }),
         ...(validData.slogan !== undefined && { slogan: validData.slogan }),
+        ...(validData.sloganEN !== undefined && { sloganEN: validData.sloganEN || null }),
         ...(validData.arAnimation !== undefined && { arAnimation: validData.arAnimation }),
         ...(validData.categoryId && {
           category: { connect: { id: validData.categoryId } },

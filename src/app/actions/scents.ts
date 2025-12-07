@@ -43,7 +43,9 @@ export async function createScent(formData: FormData): Promise<ActionResponse> {
     // Extraction des données du FormData
     const rawData = {
       name: formData.get("name"),
+      nameEN: formData.get("nameEN") || "",
       description: formData.get("description"),
+      descriptionEN: formData.get("descriptionEN") || "",
       icon: formData.get("icon"),
       color: formData.get("color"),
       notes: formData.get("notes")
@@ -86,7 +88,9 @@ export async function createScent(formData: FormData): Promise<ActionResponse> {
     const scent = await prisma.scent.create({
       data: {
         name: data.name,
+        nameEN: data.nameEN || undefined,
         description: data.description,
+        descriptionEN: data.descriptionEN || undefined,
         icon: data.icon,
         color: data.color,
         notes: data.notes || [],
@@ -163,7 +167,9 @@ export async function updateScent(formData: FormData): Promise<ActionResponse> {
     const rawData = {
       id: scentId,
       name: formData.get("name"),
+      nameEN: formData.get("nameEN") || "",
       description: formData.get("description"),
+      descriptionEN: formData.get("descriptionEN") || "",
       icon: formData.get("icon"),
       color: formData.get("color"),
       notes: formData.get("notes")
@@ -212,7 +218,9 @@ export async function updateScent(formData: FormData): Promise<ActionResponse> {
       where: { id: scentId },
       data: {
         ...(data.name && { name: data.name }),
+        ...(data.nameEN !== undefined && { nameEN: data.nameEN || null }),
         ...(data.description && { description: data.description }),
+        ...(data.descriptionEN !== undefined && { descriptionEN: data.descriptionEN || null }),
         ...(data.icon && { icon: data.icon }),
         ...(data.color && { color: data.color }),
         ...(data.notes && { notes: data.notes }),
@@ -375,7 +383,9 @@ export async function createScentFromJSON(
     const scent = await prisma.scent.create({
       data: {
         name: validData.name,
+        nameEN: validData.nameEN || undefined,
         description: validData.description,
+        descriptionEN: validData.descriptionEN || undefined,
         icon: validData.icon,
         color: validData.color,
         notes: validData.notes || [],
@@ -477,7 +487,9 @@ export async function updateScentFromJSON(
       where: { id },
       data: {
         ...(validData.name && { name: validData.name }),
+        ...(validData.nameEN !== undefined && { nameEN: validData.nameEN || null }),
         ...(validData.description && { description: validData.description }),
+        ...(validData.descriptionEN !== undefined && { descriptionEN: validData.descriptionEN || null }),
         ...(validData.icon && { icon: validData.icon }),
         ...(validData.color && { color: validData.color }),
         ...(validData.notes && { notes: validData.notes }),
