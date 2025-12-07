@@ -38,7 +38,7 @@ export async function createProduct(
     if (session.user.role !== "admin") {
       return {
         success: false,
-        error: "Accès refusé. Droits administrateur requis.",
+        error: "Accès refusé. ",
       };
     }
 
@@ -286,14 +286,22 @@ export async function updateProduct(
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.nameEN !== undefined && { nameEN: data.nameEN || null }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(data.descriptionEN !== undefined && { descriptionEN: data.descriptionEN || null }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+        ...(data.descriptionEN !== undefined && {
+          descriptionEN: data.descriptionEN || null,
+        }),
         ...(data.price !== undefined && { price: data.price }),
         ...(data.subTitle !== undefined && { subTitle: data.subTitle }),
-        ...(data.subTitleEN !== undefined && { subTitleEN: data.subTitleEN || null }),
+        ...(data.subTitleEN !== undefined && {
+          subTitleEN: data.subTitleEN || null,
+        }),
         ...(data.slogan !== undefined && { slogan: data.slogan }),
         ...(data.sloganEN !== undefined && { sloganEN: data.sloganEN || null }),
-        ...(data.arAnimation !== undefined && { arAnimation: data.arAnimation }),
+        ...(data.arAnimation !== undefined && {
+          arAnimation: data.arAnimation,
+        }),
         ...(data.categoryId && {
           category: {
             connect: { id: data.categoryId },
@@ -304,11 +312,12 @@ export async function updateProduct(
             connect: { id: data.scentId },
           },
         }),
-        ...(data.images && data.images.length > 0 && {
-          images: {
-            create: data.images,
-          },
-        }),
+        ...(data.images &&
+          data.images.length > 0 && {
+            images: {
+              create: data.images,
+            },
+          }),
       },
       include: {
         scent: true,
@@ -618,26 +627,41 @@ export async function updateProductFromJSON(
       where: { id },
       data: {
         ...(validData.name !== undefined && { name: validData.name }),
-        ...(validData.nameEN !== undefined && { nameEN: validData.nameEN || null }),
-        ...(validData.description !== undefined && { description: validData.description }),
-        ...(validData.descriptionEN !== undefined && { descriptionEN: validData.descriptionEN || null }),
+        ...(validData.nameEN !== undefined && {
+          nameEN: validData.nameEN || null,
+        }),
+        ...(validData.description !== undefined && {
+          description: validData.description,
+        }),
+        ...(validData.descriptionEN !== undefined && {
+          descriptionEN: validData.descriptionEN || null,
+        }),
         ...(validData.price !== undefined && { price: validData.price }),
-        ...(validData.subTitle !== undefined && { subTitle: validData.subTitle }),
-        ...(validData.subTitleEN !== undefined && { subTitleEN: validData.subTitleEN || null }),
+        ...(validData.subTitle !== undefined && {
+          subTitle: validData.subTitle,
+        }),
+        ...(validData.subTitleEN !== undefined && {
+          subTitleEN: validData.subTitleEN || null,
+        }),
         ...(validData.slogan !== undefined && { slogan: validData.slogan }),
-        ...(validData.sloganEN !== undefined && { sloganEN: validData.sloganEN || null }),
-        ...(validData.arAnimation !== undefined && { arAnimation: validData.arAnimation }),
+        ...(validData.sloganEN !== undefined && {
+          sloganEN: validData.sloganEN || null,
+        }),
+        ...(validData.arAnimation !== undefined && {
+          arAnimation: validData.arAnimation,
+        }),
         ...(validData.categoryId && {
           category: { connect: { id: validData.categoryId } },
         }),
         ...(validData.scentId && {
           scent: { connect: { id: validData.scentId } },
         }),
-        ...(validData.images && validData.images.length > 0 && {
-          images: {
-            create: validData.images,
-          },
-        }),
+        ...(validData.images &&
+          validData.images.length > 0 && {
+            images: {
+              create: validData.images,
+            },
+          }),
       },
       include: {
         scent: true,

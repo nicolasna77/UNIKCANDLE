@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import LoadingPage from "./loading";
 import ProductsList from "./products-list";
+import ProductsFilters from "./products-filters";
 import { PageHeader } from "@/components/page-header";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -43,8 +44,10 @@ async function ProductsPage({
   const t = await getTranslations({ locale, namespace: "products.pageHeader" });
 
   return (
-    <div className="container mx-auto  ">
+    <div className="container mx-auto space-y-8">
       <PageHeader title={t("title")} description={t("description")} />
+
+      <ProductsFilters />
 
       <Suspense fallback={<LoadingPage />}>
         <ProductsList />
