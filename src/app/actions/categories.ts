@@ -43,7 +43,9 @@ export async function createCategory(formData: FormData): Promise<ActionResponse
     // Extraction des données du FormData
     const rawData = {
       name: formData.get("name"),
+      nameEN: formData.get("nameEN") || "",
       description: formData.get("description"),
+      descriptionEN: formData.get("descriptionEN") || "",
       icon: formData.get("icon"),
       color: formData.get("color"),
       imageUrl: formData.get("imageUrl") || "",
@@ -84,7 +86,9 @@ export async function createCategory(formData: FormData): Promise<ActionResponse
     const category = await prisma.category.create({
       data: {
         name: data.name,
+        nameEN: data.nameEN || undefined,
         description: data.description,
+        descriptionEN: data.descriptionEN || undefined,
         icon: data.icon,
         color: data.color,
         imageUrl: data.imageUrl || undefined,
@@ -161,7 +165,9 @@ export async function updateCategory(formData: FormData): Promise<ActionResponse
     const rawData = {
       id: categoryId,
       name: formData.get("name"),
+      nameEN: formData.get("nameEN") || "",
       description: formData.get("description"),
+      descriptionEN: formData.get("descriptionEN") || "",
       icon: formData.get("icon"),
       color: formData.get("color"),
       imageUrl: formData.get("imageUrl") || "",
@@ -208,7 +214,9 @@ export async function updateCategory(formData: FormData): Promise<ActionResponse
       where: { id: categoryId },
       data: {
         ...(data.name && { name: data.name }),
+        ...(data.nameEN !== undefined && { nameEN: data.nameEN || null }),
         ...(data.description && { description: data.description }),
+        ...(data.descriptionEN !== undefined && { descriptionEN: data.descriptionEN || null }),
         ...(data.icon && { icon: data.icon }),
         ...(data.color && { color: data.color }),
         ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl || null }),
@@ -369,7 +377,9 @@ export async function createCategoryFromJSON(data: unknown): Promise<ActionRespo
     const category = await prisma.category.create({
       data: {
         name: validData.name,
+        nameEN: validData.nameEN || undefined,
         description: validData.description,
+        descriptionEN: validData.descriptionEN || undefined,
         icon: validData.icon,
         color: validData.color,
         imageUrl: validData.imageUrl || undefined,
@@ -464,7 +474,9 @@ export async function updateCategoryFromJSON(id: string, data: unknown): Promise
       where: { id },
       data: {
         ...(validData.name && { name: validData.name }),
+        ...(validData.nameEN !== undefined && { nameEN: validData.nameEN || null }),
         ...(validData.description && { description: validData.description }),
+        ...(validData.descriptionEN !== undefined && { descriptionEN: validData.descriptionEN || null }),
         ...(validData.icon && { icon: validData.icon }),
         ...(validData.color && { color: validData.color }),
         ...(validData.imageUrl !== undefined && { imageUrl: validData.imageUrl || null }),

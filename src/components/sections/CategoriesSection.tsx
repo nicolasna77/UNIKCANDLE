@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { buttonVariants } from "../ui/button";
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { getCategoryTranslation } from "@/lib/product-translation";
 
 interface CategoryWithImage extends Omit<Category, "imageUrl"> {
@@ -17,6 +17,7 @@ interface CategoryWithImage extends Omit<Category, "imageUrl"> {
 
 const CategoriesSection = () => {
   const locale = useLocale();
+  const t = useTranslations("categoriesSection");
   const { data: categories, isLoading, error } = useQuery<CategoryWithProducts[]>({
     queryKey: ["categories"],
     queryFn: fetchCategories,
@@ -28,11 +29,10 @@ const CategoriesSection = () => {
           <h2
             className={` text-3xl lg:text-4xl font-bold text-foreground mb-4`}
           >
-            Découvrez notre collection
+            {t("title")}
           </h2>
           <p className="text-muted-foreground text-balance text-lg">
-            Explorez nos différentes univers et enregistrez votre message audio
-            directement sur notre site.
+            {t("description")}
           </p>
         </div>
 
@@ -111,11 +111,10 @@ const CategoriesSection = () => {
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-white/80">
-                          {category.products.length} produit
-                          {category.products.length > 1 ? "s" : ""}
+                          {category.products.length} {category.products.length > 1 ? t("products") : t("product")}
                         </span>
                         <div className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center text-sm text-white">
-                          Découvrir
+                          {t("discover")}
                           <ArrowRight className="h-4 w-4 ml-2" />
                         </div>
                       </div>
@@ -133,7 +132,7 @@ const CategoriesSection = () => {
             className={buttonVariants({ variant: "default", size: "lg" })}
             href="/products"
           >
-            Voir toutes nos bougies
+            {t("viewAll")}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Link>
         </div>

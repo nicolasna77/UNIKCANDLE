@@ -95,6 +95,14 @@
     },
     "cta": "Give or treat yourself to a unique emotion"
   },
+  "categoriesSection": {
+    "title": "Discover our collection",
+    "description": "Explore our different universes and record your audio message directly on our website.",
+    "viewAll": "View all our candles",
+    "product": "product",
+    "products": "products",
+    "discover": "Discover"
+  },
   "products": {
     "title": "Our Products",
     "discover": "Discover our products",

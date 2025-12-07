@@ -95,6 +95,14 @@
     },
     "cta": "Offrez ou offrez-vous une émotion unique"
   },
+  "categoriesSection": {
+    "title": "Découvrez notre collection",
+    "description": "Explorez nos différentes univers et enregistrez votre message audio directement sur notre site.",
+    "viewAll": "Voir toutes nos bougies",
+    "product": "produit",
+    "products": "produits",
+    "discover": "Découvrir"
+  },
   "products": {
     "title": "Nos Produits",
     "discover": "Découvrir nos produits",
