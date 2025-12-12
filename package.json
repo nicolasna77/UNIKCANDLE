@@ -81,7 +81,7 @@
     "js-beautify": "^1.15.4",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.483.0",
-    "next": "^16.0.7",
+    "next": "16.0.10",
     "next-intl": "^4.5.5",
     "next-qrcode": "^2.5.1",
     "next-themes": "^0.4.6",
@@ -151,4 +151,3 @@
   },
   "homepage": "https://github.com/nicolasna77/UNIKCANDLE#readme"
 }
-                      
