@@ -17,17 +17,6 @@ interface CartItem {
   audioUrl?: string;
 }
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, stripe-signature",
-    },
-  });
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.text();
@@ -46,7 +35,10 @@ export async function POST(req: Request) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (error) {
-      logger.error("Webhook Stripe: Erreur de vérification de la signature", error);
+      logger.error(
+        "Webhook Stripe: Erreur de vérification de la signature",
+        error
+      );
       return new NextResponse("Signature invalide", { status: 400 });
     }
 
@@ -109,7 +101,10 @@ export async function POST(req: Request) {
         try {
           await prisma.$connect();
         } catch (error) {
-          logger.error("Webhook Stripe: Erreur de connexion à la base de données", error);
+          logger.error(
+            "Webhook Stripe: Erreur de connexion à la base de données",
+            error
+          );
           throw error;
         }
 
@@ -226,7 +221,10 @@ export async function POST(req: Request) {
         try {
           await sendConfirmationEmail(emailOrderData);
         } catch (emailError) {
-          logger.error("Webhook Stripe: Erreur lors de l'envoi de l'email de confirmation", emailError);
+          logger.error(
+            "Webhook Stripe: Erreur lors de l'envoi de l'email de confirmation",
+            emailError
+          );
           // Ne pas faire échouer la commande si l'email échoue
         }
 
@@ -236,12 +234,18 @@ export async function POST(req: Request) {
             where: { orderId: session.metadata.orderId },
           });
         } catch (cleanupError) {
-          logger.warn("Webhook Stripe: Erreur lors du nettoyage des données temporaires", { error: cleanupError });
+          logger.warn(
+            "Webhook Stripe: Erreur lors du nettoyage des données temporaires",
+            { error: cleanupError }
+          );
         }
 
         return new NextResponse(null, { status: 200 });
       } catch (error) {
-        logger.error("Webhook Stripe: Erreur lors de la création de la commande", error);
+        logger.error(
+          "Webhook Stripe: Erreur lors de la création de la commande",
+          error
+        );
         return new NextResponse("Erreur lors de la création de la commande", {
           status: 500,
         });

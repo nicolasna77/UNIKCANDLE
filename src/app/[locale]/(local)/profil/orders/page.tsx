@@ -100,13 +100,13 @@ export default function OrdersPage() {
       case "DELIVERED":
         return {
           label: "Livré",
-          color: "text-green-500",
+          color: "text-green-600",
           bgColor: "bg-green-50",
-          icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
+          icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />,
           badge: (
             <Badge
               variant="outline"
-              className="bg-green-50 text-green-600 border-green-200"
+              className="bg-green-50/80 text-green-700 border-green-200/70 font-bold text-xs px-3 py-1 shadow-sm"
             >
               Livré
             </Badge>
@@ -115,13 +115,13 @@ export default function OrdersPage() {
       case "CANCELLED":
         return {
           label: "Annulé",
-          color: "text-red-500",
+          color: "text-red-600",
           bgColor: "bg-red-50",
-          icon: <XCircle className="h-4 w-4 text-red-500" />,
+          icon: <XCircle className="h-3.5 w-3.5 text-red-600" />,
           badge: (
             <Badge
               variant="outline"
-              className="bg-red-50 text-red-600 border-red-200"
+              className="bg-red-50/80 text-red-700 border-red-200/70 font-bold text-xs px-3 py-1 shadow-sm"
             >
               Annulé
             </Badge>
@@ -130,13 +130,13 @@ export default function OrdersPage() {
       case "PROCESSING":
         return {
           label: "En préparation",
-          color: "text-amber-500",
+          color: "text-amber-600",
           bgColor: "bg-amber-50",
-          icon: <Clock className="h-4 w-4 text-amber-500" />,
+          icon: <Clock className="h-3.5 w-3.5 text-amber-600" />,
           badge: (
             <Badge
               variant="outline"
-              className="bg-amber-50 text-amber-600 border-amber-200"
+              className="bg-amber-50/80 text-amber-700 border-amber-200/70 font-bold text-xs px-3 py-1 shadow-sm"
             >
               En préparation
             </Badge>
@@ -145,13 +145,13 @@ export default function OrdersPage() {
       case "SHIPPED":
         return {
           label: "En cours de livraison",
-          color: "text-blue-500",
+          color: "text-blue-600",
           bgColor: "bg-blue-50",
-          icon: <Package className="h-4 w-4 text-blue-500" />,
+          icon: <Package className="h-3.5 w-3.5 text-blue-600" />,
           badge: (
             <Badge
               variant="outline"
-              className="bg-blue-50 text-blue-600 border-blue-200"
+              className="bg-blue-50/80 text-blue-700 border-blue-200/70 font-bold text-xs px-3 py-1 shadow-sm"
             >
               En cours de livraison
             </Badge>
@@ -160,13 +160,13 @@ export default function OrdersPage() {
       case "PENDING":
         return {
           label: "En attente",
-          color: "text-gray-500",
-          bgColor: "bg-gray-50",
-          icon: <Clock className="h-4 w-4 text-gray-500" />,
+          color: "text-muted-foreground",
+          bgColor: "bg-muted",
+          icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
           badge: (
             <Badge
               variant="outline"
-              className="bg-gray-50 text-gray-600 border-gray-200"
+              className="bg-muted/80 text-muted-foreground border-border font-bold text-xs px-3 py-1 shadow-sm"
             >
               En attente
             </Badge>
@@ -175,13 +175,13 @@ export default function OrdersPage() {
       default:
         return {
           label: "Inconnu",
-          color: "text-gray-500",
-          bgColor: "bg-gray-50",
-          icon: <Clock className="h-4 w-4 text-gray-500" />,
+          color: "text-muted-foreground",
+          bgColor: "bg-muted",
+          icon: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
           badge: (
             <Badge
               variant="outline"
-              className="bg-gray-50 text-gray-600 border-gray-200"
+              className="bg-muted/80 text-muted-foreground border-border font-bold text-xs px-3 py-1 shadow-sm"
             >
               Inconnu
             </Badge>
@@ -216,10 +216,10 @@ export default function OrdersPage() {
       ) : (
         <div className={isRefetching ? "relative" : ""}>
           {isRefetching && (
-            <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
-              <div className="flex flex-col items-center gap-3">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="text-sm font-medium text-muted-foreground">
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-md z-10 flex items-center justify-center rounded-xl border border-border/50">
+              <div className="flex flex-col items-center gap-4 bg-card/90 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-border/50">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+                <p className="text-sm font-bold text-foreground tracking-tight">
                   Chargement des commandes...
                 </p>
               </div>

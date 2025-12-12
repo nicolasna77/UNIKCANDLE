@@ -145,15 +145,24 @@ model Scent {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  userId          String
-  status          OrderStatus @default(PENDING)
-  total           Float
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  shippingAddress Address?
-  user            User        @relation(fields: [userId], references: [id])
-  items           OrderItem[]
+  id                    String      @id @default(uuid())
+  userId                String
+  status                OrderStatus @default(PENDING)
+  total                 Float
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  // Paiement Stripe
+  stripePaymentIntentId String?
+
+  // Remboursement
+  stripeRefundId        String?
+  refundedAt            DateTime?
+  refundAmount          Float?
+
+  shippingAddress       Address?
+  user                  User        @relation(fields: [userId], references: [id])
+  items                 OrderItem[]
 
   @@index([userId, createdAt])
   @@index([status])

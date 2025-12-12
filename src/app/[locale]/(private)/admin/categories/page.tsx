@@ -7,19 +7,22 @@ import {
   type CategoryWithProducts,
   fetchCategories,
 } from "@/services/categories";
-import { deleteCategoryById } from "@/app/actions/categories";
+import { deleteCategoryById, type DeleteCategoryResponse } from "@/app/actions/categories";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
 import { createColumns } from "./columns";
 import CreateCategoryForm from "./create-category-form";
 import EditCategoryForm from "./edit-category-form";
+import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCategory, setEditingCategory] =
     useState<CategoryWithProducts | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
   const {
     data: categories = [],
@@ -38,23 +41,33 @@ export default function CategoriesPage() {
       }
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Catégorie supprimée avec succès");
+      const deletedCount = result?.data?.deletedProductsCount || 0;
+      if (deletedCount > 0) {
+        toast.success(
+          `Catégorie supprimée avec succès. ${deletedCount} produit(s) ont été supprimé(s).`
+        );
+      } else {
+        toast.success("Catégorie supprimée avec succès");
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message);
     },
   });
 
-  const handleDelete = useCallback(
-    (id: string) => {
-      if (confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")) {
-        deleteCategory.mutate(id);
-      }
-    },
-    [deleteCategory]
-  );
+  const handleDelete = useCallback((id: string) => {
+    setCategoryToDelete(id);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (categoryToDelete) {
+      deleteCategory.mutate(categoryToDelete);
+      setCategoryToDelete(null);
+    }
+  }, [categoryToDelete, deleteCategory]);
 
   const handleEdit = (category: CategoryWithProducts) => {
     setEditingCategory(category);
@@ -136,6 +149,18 @@ export default function CategoriesPage() {
           onSuccess={() => setEditingCategory(null)}
         />
       )}
+
+      {/* Dialog de confirmation de suppression */}
+      <ConfirmDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Supprimer la catégorie"
+        description="Êtes-vous sûr de vouloir supprimer cette catégorie ? Tous les produits associés à cette catégorie seront également supprimés. Cette action est irréversible."
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        isLoading={deleteCategory.isPending}
+      />
     </div>
   );
 }

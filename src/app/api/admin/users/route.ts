@@ -1,27 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { verifyAdminAccess } from "@/lib/auth-session";
 
 export async function GET() {
+  // Verify admin authentication
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
-    // Vérifier l'authentification et le rôle admin
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    // Vérifier le rôle admin
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Accès refusé - Admin uniquement" },
-        { status: 403 }
-      );
-    }
-
     // Récupérer tous les utilisateurs
     const users = await prisma.user.findMany({
       orderBy: {

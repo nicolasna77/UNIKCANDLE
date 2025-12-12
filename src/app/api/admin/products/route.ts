@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { verifyAdminAccess } from "@/lib/auth-session";
 
 /**
  * GET /api/admin/products
@@ -10,17 +9,9 @@ import { revalidatePath } from "next/cache";
  * Note: Les mutations (POST, PUT, DELETE) utilisent les Server Actions dans app/actions/products.ts
  */
 export async function GET() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  // Verify admin authentication
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
 
   try {
     const products = await prisma.product.findMany({

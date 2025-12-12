@@ -2,6 +2,8 @@
 
 import { Scent, Category } from "@prisma/client";
 import { createContext, useContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import { migrateCartFromLocalStorage } from "@/lib/migrate-cart";
 
 interface CartItem {
   id: string;
@@ -39,19 +41,48 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // CartProvider component
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Charger le panier depuis les cookies au démarrage
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
+    // Migrer automatiquement depuis localStorage si nécessaire
+    migrateCartFromLocalStorage();
+
+    const savedCart = Cookies.get("cart");
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setCart(parsedCart);
+      } catch (error) {
+        console.error(
+          "Erreur lors du parsing du panier depuis les cookies:",
+          error
+        );
+        // Cookie corrompu, on le supprime
+        Cookies.remove("cart");
+        setCart([]);
+      }
     }
+    setIsInitialized(true);
   }, []);
 
   // Sauvegarder le panier dans les cookies à chaque modification
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    // Ne pas sauvegarder pendant l'initialisation pour éviter d'écraser avec un panier vide
+    if (!isInitialized) return;
+
+    if (cart.length === 0) {
+      // Supprimer le cookie si le panier est vide
+      Cookies.remove("cart");
+    } else {
+      // Sauvegarder dans un cookie avec 7 jours d'expiration
+      Cookies.set("cart", JSON.stringify(cart), {
+        expires: 7, // 7 jours
+        path: "/",
+        sameSite: "lax",
+      });
+    }
+  }, [cart, isInitialized]);
 
   // Helper function to generate unique key for cart items
   const getItemKey = (item: CartItem) => {

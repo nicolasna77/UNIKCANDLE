@@ -26,8 +26,8 @@ export function OrdersFilters({
   const hasFilters = dateRange?.from || dateRange?.to || activeTab !== "all";
 
   return (
-    <Card className="overflow-hidden">
-      <div className="p-4 md:p-6">
+    <Card className="overflow-hidden border border-border/50 shadow-sm">
+      <div className="p-5 md:p-7">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <Tabs
             defaultValue="all"
@@ -35,14 +35,26 @@ export function OrdersFilters({
             onValueChange={onTabChange}
             className="w-full lg:w-auto"
           >
-            <TabsList className="grid grid-cols-3 w-full lg:w-auto lg:grid-cols-3">
-              <TabsTrigger value="all" disabled={isFetching}>
+            <TabsList className="grid grid-cols-3 w-full lg:w-auto lg:grid-cols-3 h-11 p-1 bg-muted/50">
+              <TabsTrigger
+                value="all"
+                disabled={isFetching}
+                className="font-bold data-[state=active]:shadow-sm"
+              >
                 Toutes
               </TabsTrigger>
-              <TabsTrigger value="PROCESSING" disabled={isFetching}>
+              <TabsTrigger
+                value="PROCESSING"
+                disabled={isFetching}
+                className="font-bold data-[state=active]:shadow-sm"
+              >
                 En cours
               </TabsTrigger>
-              <TabsTrigger value="DELIVERED" disabled={isFetching}>
+              <TabsTrigger
+                value="DELIVERED"
+                disabled={isFetching}
+                className="font-bold data-[state=active]:shadow-sm"
+              >
                 Livrées
               </TabsTrigger>
             </TabsList>
@@ -59,7 +71,7 @@ export function OrdersFilters({
                 variant="ghost"
                 size="sm"
                 onClick={onReset}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto font-medium hover:bg-muted/50"
                 disabled={isFetching}
               >
                 Réinitialiser

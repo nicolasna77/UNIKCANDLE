@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { ReturnStatus } from "@prisma/client";
+import { stripe } from "@/lib/stripe";
+import { logger } from "@/lib/logger";
 
 // Types pour les réponses
 interface ActionResponse<T = unknown> {
@@ -392,54 +394,127 @@ export async function processRefund(
       };
     }
 
-    // TODO: Implémenter la logique Stripe pour le remboursement
-    // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-    // const refund = await stripe.refunds.create({
-    //   payment_intent: returnRequest.orderItem.order.stripePaymentIntentId,
-    //   amount: refundAmount || returnRequest.orderItem.price * 100,
-    // });
+    // Vérifier que le statut de remboursement est en attente
+    if (returnRequest.refundStatus !== "PENDING") {
+      return {
+        success: false,
+        error: "Ce retour a déjà été remboursé ou est en cours de traitement",
+      };
+    }
 
-    // Mettre à jour le retour avec les informations de remboursement
-    const updatedReturn = await prisma.return.update({
+    // Vérifier que la commande a un payment intent Stripe
+    if (!returnRequest.orderItem.order.stripePaymentIntentId) {
+      logger.error("Payment Intent manquant pour le remboursement", {
+        returnId: id,
+        orderId: returnRequest.orderItem.order.id,
+      });
+      return {
+        success: false,
+        error:
+          "Impossible de traiter le remboursement : informations de paiement manquantes",
+      };
+    }
+
+    const amountToRefund = refundAmount || returnRequest.orderItem.price;
+
+    // Mettre à jour le statut en cours de traitement
+    await prisma.return.update({
       where: { id },
       data: {
-        refundStatus: "COMPLETED",
-        refundAmount: refundAmount || returnRequest.orderItem.price,
-        refundedAt: new Date(),
-        // stripeRefundId: refund.id,
+        refundStatus: "PROCESSING",
+        refundAmount: amountToRefund,
       },
-      include: {
-        orderItem: {
-          include: {
-            product: {
-              include: {
-                images: true,
+    });
+
+    try {
+      // Créer le remboursement Stripe
+      const refund = await stripe.refunds.create({
+        payment_intent: returnRequest.orderItem.order.stripePaymentIntentId,
+        amount: Math.round(amountToRefund * 100), // Convertir en centimes
+        metadata: {
+          returnId: id,
+          orderItemId: returnRequest.orderItemId,
+          orderId: returnRequest.orderItem.order.id,
+          reason: returnRequest.reason,
+        },
+      });
+
+      logger.info("Remboursement Stripe créé avec succès", {
+        refundId: refund.id,
+        returnId: id,
+        amount: amountToRefund,
+      });
+
+      // Mettre à jour le retour avec les informations de remboursement
+      const updatedReturn = await prisma.return.update({
+        where: { id },
+        data: {
+          refundStatus: "COMPLETED",
+          refundAmount: amountToRefund,
+          refundedAt: new Date(),
+          stripeRefundId: refund.id,
+          status: "COMPLETED",
+          processedAt: new Date(),
+          adminNote: `Remboursement Stripe effectué : ${refund.id} - ${amountToRefund}€`,
+        },
+        include: {
+          orderItem: {
+            include: {
+              product: {
+                include: {
+                  images: true,
+                },
               },
-            },
-            scent: true,
-            order: {
-              include: {
-                user: true,
+              scent: true,
+              order: {
+                include: {
+                  user: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    // Revalidation
-    revalidatePath("/admin/returns");
-    revalidatePath("/profil/orders");
+      // Revalidation
+      revalidatePath("/admin/returns");
+      revalidatePath("/profil/orders");
 
-    return {
-      success: true,
-      data: {
-        return: updatedReturn,
-        message: "Remboursement effectué avec succès",
-      },
-    };
+      return {
+        success: true,
+        data: {
+          return: updatedReturn,
+          refundId: refund.id,
+          message: `Remboursement de ${amountToRefund.toFixed(2)}€ effectué avec succès`,
+        },
+      };
+    } catch (stripeError) {
+      // En cas d'erreur Stripe, mettre à jour le statut en échec
+      logger.error("Erreur lors du remboursement Stripe", {
+        error: stripeError,
+        returnId: id,
+      });
+
+      const errorMessage =
+        stripeError instanceof Error
+          ? stripeError.message
+          : "Erreur inconnue";
+
+      await prisma.return.update({
+        where: { id },
+        data: {
+          refundStatus: "FAILED",
+          adminNote: `Erreur de remboursement Stripe : ${errorMessage}`,
+        },
+      });
+
+      return {
+        success: false,
+        error: `Erreur lors du remboursement Stripe : ${errorMessage}`,
+      };
+    }
   } catch (error) {
-    console.error("Erreur lors du traitement du remboursement:", error);
+    logger.error("Erreur lors du traitement du remboursement", error);
     return {
       success: false,
       error: "Erreur lors du traitement du remboursement",

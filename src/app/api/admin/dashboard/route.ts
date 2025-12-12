@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { verifyAdminAccess } from "@/lib/auth-session";
 
 export async function GET() {
+  // Verify admin authentication
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
     // Dates pour les calculs de comparaison
     const now = new Date();
     const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);

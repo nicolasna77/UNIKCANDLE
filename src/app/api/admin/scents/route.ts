@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { scentSchema } from "@/lib/admin-schemas";
 import { revalidatePath } from "next/cache";
+import { verifyAdminAccess } from "@/lib/auth-session";
 
 export async function GET() {
+  // Verify admin authentication
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
     const scents = await prisma.scent.findMany({
       orderBy: {
@@ -21,6 +26,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Verify admin authentication
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
     const data = await request.json();
 

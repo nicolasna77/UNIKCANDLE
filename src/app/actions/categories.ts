@@ -14,6 +14,12 @@ type ActionResponse<T = unknown> = {
   fieldErrors?: Record<string, string[]>;
 };
 
+// Type spécifique pour la suppression de catégorie
+export type DeleteCategoryResponse = {
+  id: string;
+  deletedProductsCount?: number;
+};
+
 /**
  * Créer une nouvelle catégorie
  * Server Action avec validation Zod et progressive enhancement
@@ -244,8 +250,9 @@ export async function updateCategory(formData: FormData): Promise<ActionResponse
 /**
  * Supprimer une catégorie
  * Server Action avec validation
+ * Supprime la catégorie et soft delete tous les produits associés
  */
-export async function deleteCategory(formData: FormData): Promise<ActionResponse> {
+export async function deleteCategory(formData: FormData): Promise<ActionResponse<DeleteCategoryResponse>> {
   try {
     // Vérification de l'authentification
     const session = await auth.api.getSession({
@@ -276,12 +283,17 @@ export async function deleteCategory(formData: FormData): Promise<ActionResponse
       };
     }
 
-    // Vérifier que la catégorie existe
+    // Vérifier existence et compter les produits actifs (non soft deleted)
     const existingCategory = await prisma.category.findUnique({
       where: { id: categoryId },
       include: {
-        _count: {
-          select: { products: true },
+        products: {
+          where: {
+            deletedAt: null, // Seulement les produits actifs
+          },
+          select: {
+            id: true,
+          },
         },
       },
     });
@@ -293,12 +305,19 @@ export async function deleteCategory(formData: FormData): Promise<ActionResponse
       };
     }
 
-    // Vérifier qu'aucun produit n'utilise cette catégorie
-    if (existingCategory._count.products > 0) {
-      return {
-        success: false,
-        error: `Impossible de supprimer cette catégorie car ${existingCategory._count.products} produit(s) l'utilisent`,
-      };
+    const activeProductsCount = existingCategory.products.length;
+
+    // Soft delete tous les produits actifs de cette catégorie
+    if (activeProductsCount > 0) {
+      await prisma.product.updateMany({
+        where: {
+          categoryId: categoryId,
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
     }
 
     // Suppression de la catégorie
@@ -308,12 +327,16 @@ export async function deleteCategory(formData: FormData): Promise<ActionResponse
 
     // Revalidation des pages affectées
     revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath("/");
 
     return {
       success: true,
-      data: { id: categoryId },
+      data: {
+        id: categoryId,
+        deletedProductsCount: activeProductsCount,
+      },
     };
   } catch (error) {
     console.error("Erreur lors de la suppression de la catégorie:", error);
@@ -503,8 +526,9 @@ export async function updateCategoryFromJSON(id: string, data: unknown): Promise
 
 /**
  * Version alternative pour suppression programmatique
+ * Supprime la catégorie et soft delete tous les produits associés
  */
-export async function deleteCategoryById(id: string): Promise<ActionResponse> {
+export async function deleteCategoryById(id: string): Promise<ActionResponse<DeleteCategoryResponse>> {
   try {
     // Vérification de l'authentification
     const session = await auth.api.getSession({
@@ -518,12 +542,17 @@ export async function deleteCategoryById(id: string): Promise<ActionResponse> {
       };
     }
 
-    // Vérifier existence
+    // Vérifier existence et compter les produits actifs (non soft deleted)
     const existingCategory = await prisma.category.findUnique({
       where: { id },
       include: {
-        _count: {
-          select: { products: true },
+        products: {
+          where: {
+            deletedAt: null, // Seulement les produits actifs
+          },
+          select: {
+            id: true,
+          },
         },
       },
     });
@@ -535,27 +564,38 @@ export async function deleteCategoryById(id: string): Promise<ActionResponse> {
       };
     }
 
-    // Vérifier qu'aucun produit n'utilise cette catégorie
-    if (existingCategory._count.products > 0) {
-      return {
-        success: false,
-        error: `Impossible de supprimer cette catégorie car ${existingCategory._count.products} produit(s) l'utilisent`,
-      };
+    const activeProductsCount = existingCategory.products.length;
+
+    // Soft delete tous les produits actifs de cette catégorie
+    if (activeProductsCount > 0) {
+      await prisma.product.updateMany({
+        where: {
+          categoryId: id,
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
     }
 
-    // Suppression
+    // Suppression de la catégorie
     await prisma.category.delete({
       where: { id },
     });
 
     // Revalidation
     revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath("/");
 
     return {
       success: true,
-      data: { id },
+      data: {
+        id,
+        deletedProductsCount: activeProductsCount,
+      },
     };
   } catch (error) {
     console.error("Erreur lors de la suppression de la catégorie:", error);
