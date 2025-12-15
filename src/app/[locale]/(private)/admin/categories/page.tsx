@@ -41,8 +41,10 @@ export default function CategoriesPage() {
       }
       return result;
     },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: async (result) => {
+      // Invalider et refetch immédiatement
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      await refetch();
       const deletedCount = result?.data?.deletedProductsCount || 0;
       if (deletedCount > 0) {
         toast.success(
@@ -51,9 +53,11 @@ export default function CategoriesPage() {
       } else {
         toast.success("Catégorie supprimée avec succès");
       }
+      setDeleteDialogOpen(false);
     },
     onError: (error: Error) => {
       toast.error(error.message);
+      setDeleteDialogOpen(false);
     },
   });
 
