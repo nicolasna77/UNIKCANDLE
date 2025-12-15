@@ -145,24 +145,26 @@ const ProductsFilters = ({ onFiltersChange }: ProductsFiltersProps) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("list.allCategories")}</SelectItem>
-            {categories.map((category: Category) => {
-              const translatedName = getCategoryTranslation(
-                category,
-                "name",
-                locale
-              );
-              return (
-                <SelectItem key={category.id} value={category.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <span>{translatedName}</span>
-                  </div>
-                </SelectItem>
-              );
-            })}
+            {categories
+              .filter((category) => category.products && category.products.length > 0)
+              .map((category: Category) => {
+                const translatedName = getCategoryTranslation(
+                  category,
+                  "name",
+                  locale
+                );
+                return (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: category.color }}
+                      />
+                      <span>{translatedName}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
           </SelectContent>
         </Select>
       </div>
