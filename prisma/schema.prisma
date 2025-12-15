@@ -1,11 +1,11 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
+  previewFeatures = ["relationJoins", "typedSql"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Newsletter {
@@ -92,28 +92,28 @@ model Verification {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  nameEN      String?
-  description String
+  id            String      @id @default(uuid())
+  name          String
+  nameEN        String?
+  description   String
   descriptionEN String?
-  price       Float
-  subTitle    String
-  subTitleEN  String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
-  arAnimation String
-  slogan      String
-  sloganEN    String?
-  messageType String      @default("audio") // "audio" ou "text"
-  scentId     String
-  categoryId  String
-  images      Image[]
-  orders      OrderItem[]
-  category    Category    @relation(fields: [categoryId], references: [id])
-  scent       Scent       @relation(fields: [scentId], references: [id])
-  reviews     Review[]
+  price         Float
+  subTitle      String
+  subTitleEN    String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+  arAnimation   String
+  slogan        String
+  sloganEN      String?
+  messageType   String      @default("audio") // "audio" ou "text"
+  scentId       String
+  categoryId    String
+  images        Image[]
+  orders        OrderItem[]
+  category      Category    @relation(fields: [categoryId], references: [id])
+  scent         Scent       @relation(fields: [scentId], references: [id])
+  reviews       Review[]
 
   @@index([categoryId])
   @@index([scentId])
@@ -130,39 +130,39 @@ model Image {
 }
 
 model Scent {
-  id          String      @id @default(uuid())
-  name        String
-  nameEN      String?
-  description String
+  id            String      @id @default(uuid())
+  name          String
+  nameEN        String?
+  description   String
   descriptionEN String?
-  icon        String
-  color       String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  notes       String[]
-  orderItems  OrderItem[]
-  products    Product[]
+  icon          String
+  color         String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  notes         String[]
+  orderItems    OrderItem[]
+  products      Product[]
 }
 
 model Order {
-  id                    String      @id @default(uuid())
-  userId                String
-  status                OrderStatus @default(PENDING)
-  total                 Float
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
+  id        String      @id @default(uuid())
+  userId    String
+  status    OrderStatus @default(PENDING)
+  total     Float
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   // Paiement Stripe
   stripePaymentIntentId String?
 
   // Remboursement
-  stripeRefundId        String?
-  refundedAt            DateTime?
-  refundAmount          Float?
+  stripeRefundId String?
+  refundedAt     DateTime?
+  refundAmount   Float?
 
-  shippingAddress       Address?
-  user                  User        @relation(fields: [userId], references: [id])
-  items                 OrderItem[]
+  shippingAddress Address?
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
 
   @@index([userId, createdAt])
   @@index([status])
@@ -278,17 +278,17 @@ model Return {
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  nameEN      String?
-  description String
+  id            String    @id @default(uuid())
+  name          String    @unique
+  nameEN        String?
+  description   String
   descriptionEN String?
-  icon        String
-  color       String
-  imageUrl    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  products    Product[]
+  icon          String
+  color         String
+  imageUrl      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  products      Product[]
 }
 
 enum ReturnStatus {
