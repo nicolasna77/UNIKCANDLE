@@ -9,8 +9,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const category = await prisma.category.findUnique({
-      where: { id },
+    const category = await prisma.category.findFirst({
+      where: {
+        id,
+        deletedAt: null, // Exclure les catégories supprimées
+      },
       include: {
         products: {
           where: {

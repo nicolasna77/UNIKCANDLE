@@ -39,12 +39,25 @@ export default function CategoriesPage() {
       if (!result.success) {
         throw new Error(result.error || "Erreur lors de la suppression");
       }
-      return result;
+      return { result, deletedId: id };
     },
-    onSuccess: async (result) => {
-      // Invalider et refetch immédiatement
-      await queryClient.invalidateQueries({ queryKey: ["categories"] });
-      await refetch();
+    onMutate: async (deletedId) => {
+      // Annuler les refetch en cours pour éviter d'écraser notre mise à jour optimiste
+      await queryClient.cancelQueries({ queryKey: ["categories"] });
+
+      // Snapshot de la valeur précédente
+      const previousCategories = queryClient.getQueryData<CategoryWithProducts[]>(["categories"]);
+
+      // Mise à jour optimiste : supprimer la catégorie immédiatement du cache
+      queryClient.setQueryData<CategoryWithProducts[]>(
+        ["categories"],
+        (old) => old?.filter((cat) => cat.id !== deletedId) ?? []
+      );
+
+      // Retourner le contexte avec les données précédentes pour rollback si erreur
+      return { previousCategories };
+    },
+    onSuccess: async ({ result }) => {
       const deletedCount = result?.data?.deletedProductsCount || 0;
       if (deletedCount > 0) {
         toast.success(
@@ -54,10 +67,18 @@ export default function CategoriesPage() {
         toast.success("Catégorie supprimée avec succès");
       }
       setDeleteDialogOpen(false);
+
+      // Refetch pour s'assurer que les données sont synchronisées
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _deletedId, context) => {
       toast.error(error.message);
       setDeleteDialogOpen(false);
+
+      // Rollback en cas d'erreur
+      if (context?.previousCategories) {
+        queryClient.setQueryData(["categories"], context.previousCategories);
+      }
     },
   });
 

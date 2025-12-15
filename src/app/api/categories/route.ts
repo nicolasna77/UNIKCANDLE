@@ -4,6 +4,9 @@ import prisma from "@/lib/prisma";
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
+      where: {
+        deletedAt: null, // Exclure les catégories supprimées
+      },
       orderBy: {
         name: "asc",
       },
@@ -11,6 +14,15 @@ export async function GET() {
         products: {
           where: {
             deletedAt: null, // Exclure les produits supprimés
+          },
+        },
+        _count: {
+          select: {
+            products: {
+              where: {
+                deletedAt: null, // Compter seulement les produits actifs
+              },
+            },
           },
         },
       },

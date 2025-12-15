@@ -305,6 +305,13 @@ export async function deleteCategory(formData: FormData): Promise<ActionResponse
       };
     }
 
+    if (existingCategory.deletedAt) {
+      return {
+        success: false,
+        error: "Cette catégorie est déjà supprimée",
+      };
+    }
+
     const activeProductsCount = existingCategory.products.length;
 
     // Soft delete tous les produits actifs de cette catégorie
@@ -320,9 +327,12 @@ export async function deleteCategory(formData: FormData): Promise<ActionResponse
       });
     }
 
-    // Suppression de la catégorie
-    await prisma.category.delete({
+    // Soft delete de la catégorie
+    await prisma.category.update({
       where: { id: categoryId },
+      data: {
+        deletedAt: new Date(),
+      },
     });
 
     // Revalidation des pages affectées
@@ -542,7 +552,7 @@ export async function deleteCategoryById(id: string): Promise<ActionResponse<Del
       };
     }
 
-    // Vérifier existence et compter les produits actifs (non soft deleted)
+    // Vérifier existence et compter les produits actifs de cette catégorie
     const existingCategory = await prisma.category.findUnique({
       where: { id },
       include: {
@@ -564,6 +574,13 @@ export async function deleteCategoryById(id: string): Promise<ActionResponse<Del
       };
     }
 
+    if (existingCategory.deletedAt) {
+      return {
+        success: false,
+        error: "Cette catégorie est déjà supprimée",
+      };
+    }
+
     const activeProductsCount = existingCategory.products.length;
 
     // Soft delete tous les produits actifs de cette catégorie
@@ -579,9 +596,12 @@ export async function deleteCategoryById(id: string): Promise<ActionResponse<Del
       });
     }
 
-    // Suppression de la catégorie
-    await prisma.category.delete({
+    // Soft delete la catégorie
+    await prisma.category.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
     });
 
     // Revalidation
