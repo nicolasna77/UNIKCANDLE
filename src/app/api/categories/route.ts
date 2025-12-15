@@ -8,7 +8,11 @@ export async function GET() {
         name: "asc",
       },
       include: {
-        products: true,
+        products: {
+          where: {
+            deletedAt: null, // Exclure les produits supprimés
+          },
+        },
       },
     });
 

@@ -11,7 +11,13 @@ export async function GET(
     const { id } = await params;
     const category = await prisma.category.findUnique({
       where: { id },
-      include: { products: true },
+      include: {
+        products: {
+          where: {
+            deletedAt: null, // Exclure les produits supprimés
+          },
+        },
+      },
     });
 
     if (!category) {
@@ -46,10 +52,11 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Vérifier si la catégorie est utilisée par des produits
+    // Vérifier si la catégorie est utilisée par des produits actifs (non supprimés)
     const productsWithCategory = await prisma.product.findFirst({
       where: {
         categoryId: id,
+        deletedAt: null, // Seulement les produits actifs
       },
     });
 
