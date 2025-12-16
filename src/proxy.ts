@@ -19,6 +19,7 @@ const publicRoutes = [
   "/contact",
   "/unauthorized",
   "/cgu",
+  "/ar",
   "/cart",
 ];
 const staticRoutes = [
@@ -30,12 +31,10 @@ const staticRoutes = [
 ];
 
 export async function proxy(request: NextRequest) {
-  // First, handle i18n routing
   const response = intlMiddleware(request);
 
   const pathName = request.nextUrl.pathname;
 
-  // Remove locale prefix from pathname for route matching
   const localeRegex = /^\/(?:fr|en)(?=\/|$)/;
   const pathnameWithoutLocale = pathName.replace(localeRegex, "") || "/";
 
