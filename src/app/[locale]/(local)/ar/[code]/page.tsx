@@ -13,7 +13,10 @@ import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
 import Image from "next/image";
 
 const AudioPlayer = dynamic(
-  () => import("@/components/AudioPlayer").then((mod) => ({ default: mod.AudioPlayer })),
+  () =>
+    import("@/components/AudioPlayer").then((mod) => ({
+      default: mod.AudioPlayer,
+    })),
   {
     ssr: false,
     loading: () => (
@@ -128,7 +131,9 @@ export default function ARPage() {
               </div>
             ) : (
               <div className="w-full max-w-md aspect-square bg-muted rounded-2xl flex items-center justify-center">
-                <span className="text-muted-foreground">Aucune image disponible</span>
+                <span className="text-muted-foreground">
+                  Aucune image disponible
+                </span>
               </div>
             )}
             <ConfettiEmojiAuto icon={data?.product.category.icon || ""} />
@@ -140,9 +145,10 @@ export default function ARPage() {
               <h1 className="text-4xl font-bold text-foreground">
                 {data.product.name}
               </h1>
-              <p className="text-muted-foreground mt-2">
-                {data.product.description}
-              </p>
+              <p
+                className="text-muted-foreground mt-2"
+                dangerouslySetInnerHTML={{ __html: data.product.description }}
+              ></p>
 
               {/* Information sur le parfum */}
               <div className="mt-4 p-4 rounded-lg bg-card border border-border">
