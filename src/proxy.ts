@@ -42,7 +42,8 @@ export async function proxy(request: NextRequest) {
   const isPasswordRoute = passwordRoutes.includes(pathnameWithoutLocale);
   const isPublicRoute =
     publicRoutes.includes(pathnameWithoutLocale) ||
-    pathnameWithoutLocale.startsWith("/products/");
+    pathnameWithoutLocale.startsWith("/products/") ||
+    pathnameWithoutLocale.startsWith("/ar/");
   const isStaticRoute = staticRoutes.some((route) =>
     pathName.startsWith(route)
   );
