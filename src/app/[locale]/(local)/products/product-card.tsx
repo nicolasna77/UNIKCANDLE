@@ -70,13 +70,27 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
           </div>
         </Link>
 
-        <CardHeader>
-          <div className="flex relative items-center justify-between">
-            <div className="w-2/3 gap-2">
-              <CardTitle itemProp="name">{translatedName}</CardTitle>
+        <CardHeader className="space-y-3">
+          <CardTitle itemProp="name" className="line-clamp-2">
+            {translatedName}
+          </CardTitle>
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              {product.category && (
+                <Badge
+                  variant="default"
+                  style={{
+                    backgroundColor: product.category.color,
+                  }}
+                >
+                  <span className="text-white">{translatedCategoryName}</span>
+                </Badge>
+              )}
             </div>
+
             <div
-              className="font-semibold"
+              className="shrink-0"
               itemProp="offers"
               itemScope
               itemType="https://schema.org/Offer"
@@ -85,7 +99,7 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
               <meta itemProp="price" content={product.price.toFixed(2)} />
               {product.reviewCount > 0 && (
                 <div
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1.5"
                   itemProp="aggregateRating"
                   itemScope
                   itemType="https://schema.org/AggregateRating"
@@ -99,24 +113,12 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
                     itemProp="reviewCount"
                     content={product.reviewCount.toString()}
                   />
-                  <div className="">
+                  <span className="text-sm font-medium">
                     {product.reviewCount} {t("card.reviews")}
-                  </div>
+                  </span>
                 </div>
               )}
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {product.category && (
-              <Badge
-                variant="default"
-                style={{
-                  backgroundColor: product.category.color,
-                }}
-              >
-                <span className=" text-white">{translatedCategoryName}</span>
-              </Badge>
-            )}
           </div>
         </CardHeader>
         <CardContent>
