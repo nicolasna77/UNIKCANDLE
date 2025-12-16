@@ -325,10 +325,8 @@ export default function CartPage() {
               variant="outline"
               size="sm"
               onClick={() => {
-                if (confirm(t("emptyCartConfirm"))) {
-                  clearCart();
-                  toast.success(t("emptyCartSuccess"));
-                }
+                clearCart();
+                toast.success(t("emptyCartSuccess"));
               }}
               className="text-destructive hover:text-destructive"
             >
