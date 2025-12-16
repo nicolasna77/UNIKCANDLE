@@ -115,23 +115,25 @@ export default function ARPage() {
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
 
       {/* Contenu principal */}
-      <div className=" flex z-10 container mx-auto px-4 py-8 ">
-        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="flex z-10 container mx-auto px-4 py-8">
+        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 w-full items-center">
           {/* Côté gauche : Image du produit */}
           <div className="relative flex items-center justify-center">
             {data?.product.images?.[0]?.url ? (
-              <div className="relative w-full max-w-md aspect-square">
-                <Image
-                  src={data.product.images[0].url}
-                  alt={data.product.name}
-                  fill
-                  className="object-contain rounded-2xl"
-                  priority
-                />
+              <div className="relative w-full max-w-md aspect-square bg-card/30 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-2xl">
+                <div className="relative w-full h-full">
+                  <Image
+                    src={data.product.images[0].url}
+                    alt={data.product.name}
+                    fill
+                    className="object-contain rounded-2xl"
+                    priority
+                  />
+                </div>
               </div>
             ) : (
-              <div className="w-full max-w-md aspect-square bg-muted rounded-2xl flex items-center justify-center">
-                <span className="text-muted-foreground">
+              <div className="w-full max-w-md aspect-square bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl flex items-center justify-center shadow-2xl">
+                <span className="text-muted-foreground text-sm">
                   Aucune image disponible
                 </span>
               </div>
@@ -139,34 +141,14 @@ export default function ARPage() {
             <ConfettiEmojiAuto icon={data?.product.category.icon || ""} />
           </div>
 
-          {/* Côté droit : Animation et audio */}
-          <div className="flex flex-col justify-center space-y-8">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">
-                {data.product.name}
-              </h1>
-              <p
-                className="text-muted-foreground mt-2"
-                dangerouslySetInnerHTML={{ __html: data.product.description }}
-              ></p>
-
-              {/* Information sur le parfum */}
-              <div className="mt-4 p-4 rounded-lg bg-card border border-border">
-                <h2 className="text-xl font-semibold text-foreground">
-                  Parfum : {data.scent.name}
-                </h2>
-                <p className="text-muted-foreground mt-2">
-                  {data.scent.description}
-                </p>
-              </div>
-            </div>
-
-            {/* Section audio */}
+          <div className="flex flex-col justify-center space-y-6">
             {data.audioUrl && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Mic className="w-6 h-6 text-primary" />
-                  <h3 className="text-xl font-semibold text-foreground">
+              <div className="space-y-5 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 shadow-lg">
+                <div className="flex items-center gap-3 pb-2 border-b border-border/50">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground">
                     Message personnalisé
                   </h3>
                 </div>
@@ -181,20 +163,24 @@ export default function ARPage() {
                 />
 
                 {/* Contrôles supplémentaires */}
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-2 sm:gap-3 flex-wrap">
                   <Button
                     onClick={() => setShowAudioPlayer(!showAudioPlayer)}
                     variant="outline"
+                    size="sm"
+                    className="transition-all hover:scale-105"
                   >
-                    <Volume2 className="w-4 h-4 mr-2" />
+                    <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                     {showAudioPlayer ? "Masquer" : "Afficher"} les contrôles
                   </Button>
 
                   <Button
                     onClick={() => setAutoPlayEnabled(!autoPlayEnabled)}
                     variant={autoPlayEnabled ? "default" : "outline"}
+                    size="sm"
+                    className="transition-all hover:scale-105"
                   >
-                    <Mic className="w-4 h-4 mr-2" />
+                    <Mic className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                     {autoPlayEnabled
                       ? "Lecture auto activée"
                       : "Lecture auto désactivée"}
@@ -202,8 +188,8 @@ export default function ARPage() {
                 </div>
 
                 {/* Message d'information */}
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
-                  <p className="text-primary-foreground text-sm">
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 shadow-sm">
+                  <p className="text-primary-foreground text-xs sm:text-sm leading-relaxed">
                     💡{" "}
                     {autoPlayEnabled
                       ? "Le message se lance automatiquement. Utilisez les contrôles pour ajuster le volume ou relancer l&apos;audio."
@@ -213,10 +199,10 @@ export default function ARPage() {
 
                 {/* Avertissement sur les restrictions de lecture automatique */}
                 {autoPlayEnabled && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-                    <div className="flex items-start gap-2">
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 shadow-sm">
+                    <div className="flex items-start gap-2.5">
                       <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-yellow-700 dark:text-yellow-300 text-sm">
+                      <p className="text-yellow-700 dark:text-yellow-300 text-xs sm:text-sm leading-relaxed">
                         <strong>Note :</strong> Certains navigateurs bloquent la
                         lecture automatique. Si l&apos;audio ne démarre pas,
                         cliquez sur le bouton play ou désactivez la lecture
@@ -230,14 +216,16 @@ export default function ARPage() {
 
             {/* Message si pas d'audio */}
             {!data.audioUrl && (
-              <div className="bg-muted border border-border rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <Mic className="w-5 h-5 text-muted-foreground" />
+              <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-full bg-muted/50">
+                    <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                  </div>
                   <div>
-                    <h3 className="text-foreground font-medium">
+                    <h3 className="text-foreground font-semibold text-base sm:text-lg">
                       Aucun message enregistré
                     </h3>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground text-xs sm:text-sm mt-1">
                       Ce produit n&apos;a pas de message personnalisé associé.
                     </p>
                   </div>
