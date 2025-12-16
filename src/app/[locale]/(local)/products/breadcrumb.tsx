@@ -18,10 +18,10 @@ const Breadscrumb = () => {
   const t = useTranslations("products.breadcrumb");
   const locale = useLocale();
   const pathname = usePathname();
-  const allPathnames = pathname.split("/").filter((item) => item);
 
-  // Skip locale (first segment) to get actual route segments
-  const pathnames = allPathnames.slice(1);
+  // usePathname from next-intl already returns path WITHOUT locale
+  // So /fr/products returns /products, /en/products/123 returns /products/123
+  const pathnames = pathname.split("/").filter((item) => item);
 
   // Récupérer l'ID du produit si nous sommes sur une page de produit
   const productId =
@@ -61,13 +61,12 @@ const Breadscrumb = () => {
           <BreadcrumbLink href="/">{t("home")}</BreadcrumbLink>
         </BreadcrumbItem>
         {pathnames.map((name, index) => {
-          const locale = allPathnames[0];
-          const href = `/${locale}/${pathnames.slice(0, index + 1).join("/")}`;
+          const href = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
           const displayName = getBreadcrumbName(name, index);
 
           return (
-            <React.Fragment key={name}>
+            <React.Fragment key={`${name}-${index}`}>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 {isLast ? (
