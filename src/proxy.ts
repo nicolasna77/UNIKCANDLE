@@ -21,7 +21,13 @@ const publicRoutes = [
   "/cgu",
   "/cart",
 ];
-const staticRoutes = ["/asset", "/models", "/logo", "/images"];
+const staticRoutes = [
+  "/asset",
+  "/models",
+  "/logo",
+  "/images",
+  "/payment-method",
+];
 
 export async function proxy(request: NextRequest) {
   // First, handle i18n routing
@@ -97,6 +103,6 @@ export const config = {
     "/profile/:path*",
     "/profil/:path*",
     "/forgot-password",
-    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt|asset|models|logo|images).*)",
+    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt|asset|models|logo|images|payment-method).*)",
   ],
 };
