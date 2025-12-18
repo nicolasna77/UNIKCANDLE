@@ -2,7 +2,7 @@
   "enabledMcpjsonServers": [
     "shadcn",
     "next-devtools",
-    "prisma-local",
-    "prisma-remote"
-  ]
+    "prisma-local"
+  ],
+  "enableAllProjectMcpServers": true
 }

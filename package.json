@@ -130,7 +130,7 @@
     "eslint-config-next": "15.2.3",
     "prisma": "^7.1.0",
     "react-email": "4.3.2",
-    "shadcn": "^3.5.0",
+    "shadcn": "^3.6.2",
     "tailwindcss": "^4",
     "tailwindcss-bg-patterns": "^0.3.0",
     "ts-node": "^10.9.2",

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { ShoppingCart, Package, MapPin, User, Printer } from "lucide-react";
+import { ShoppingCart, Package, MapPin, User, Printer, Download } from "lucide-react";
 import { QRCode } from "@/components/ui/shadcn-io/qr-code";
 
 import {
@@ -392,6 +392,23 @@ const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {
                               robustness="M"
                             />
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              // Download QR code as SVG
+                              const link = document.createElement("a");
+                              link.href = `/api/admin/orders/qr-code/${item.qrCode?.code}`;
+                              link.download = `qr-${item.product.name.replace(/\s+/g, "-").toLowerCase()}-${item.qrCode?.code}.svg`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                            className="gap-1 text-xs h-7"
+                          >
+                            <Download className="h-3 w-3" />
+                            SVG
+                          </Button>
                         </div>
                       ) : (
                         <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
