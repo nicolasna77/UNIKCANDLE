@@ -33,9 +33,9 @@ export async function GET(
     // Generate QR code URL
     const qrUrl = `${fullBaseUrl}/ar/${code}`;
 
-    // Generate SVG QR code
-    const svgString = await QRCode.toString(qrUrl, {
-      type: "svg",
+    // Generate PNG QR code
+    const pngBuffer = await QRCode.toBuffer(qrUrl, {
+      type: "png",
       color: {
         dark: "#000000",
         light: "#FFFFFF",
@@ -45,16 +45,16 @@ export async function GET(
       width: 300,
     });
 
-    // Return SVG with proper headers for download
-    return new Response(svgString, {
+    // Return PNG with proper headers for download
+    return new Response(new Uint8Array(pngBuffer), {
       headers: {
-        "Content-Type": "image/svg+xml",
-        "Content-Disposition": `attachment; filename="qr-code-${code}.svg"`,
+        "Content-Type": "image/png",
+        "Content-Disposition": `attachment; filename="qr-code-${code}.png"`,
         "Cache-Control": "no-cache",
       },
     });
   } catch (error) {
-    console.error("Erreur lors de la génération du QR code SVG:", error);
+    console.error("Erreur lors de la génération du QR code PNG:", error);
     return NextResponse.json(
       { error: "Erreur lors de la génération du QR code" },
       { status: 500 }
