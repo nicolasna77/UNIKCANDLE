@@ -17,7 +17,11 @@ export type ContactFormValues = z.infer<typeof contactFormSchema>;
 // Schéma pour les reviews/avis produits
 export const reviewSchema = z.object({
   productId: z.string().min(1, "Le produit est requis"),
-  rating: z.coerce.number().int().min(1, "La note minimum est 1").max(5, "La note maximum est 5"),
+  rating: z
+    .number({ invalid_type_error: "La note doit être un nombre" })
+    .int("La note doit être un nombre entier")
+    .min(1, "La note minimum est 1")
+    .max(5, "La note maximum est 5"),
   comment: z.string().min(10, "Le commentaire doit contenir au moins 10 caractères"),
 });
 
