@@ -17,7 +17,11 @@
 /.next/
 /out/
 
-claude.md
+
+CLAUDE.md
+/.claude
+/.cursor
+/.github
 
 # production
 /build
@@ -37,6 +41,16 @@ yarn-error.log*
 
 # vercel
 .vercel
+.claude
+
+.mcp.
+
+
+.agent
+.agents
+
+claude.md
+CLAUDE.md
 
 # typescript
 *.tsbuildinfo
