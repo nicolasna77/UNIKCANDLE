@@ -76,7 +76,8 @@
         "title": "Bring your phone close to the candle and let the magic happen",
         "emoji": "🔮"
       }
-    }
+    },
+    "videoAlt": "Demonstration of how a UNIKCANDLE candle works"
   },
   "whyChoose": {
     "title": "Why choose",
@@ -412,7 +413,8 @@
       "vegetalWax": "Vegetal Wax",
       "privilegedClients": "Privileged clients",
       "madeInFrance": "Made in France"
-    }
+    },
+    "videoAlt": "UNIKCANDLE candle presentation video"
   },
   "newsletter": {
     "title": "Join the adventure",
@@ -456,7 +458,38 @@
     "legal": "Legal notice",
     "privacy": "Privacy policy",
     "terms": "Terms and conditions",
-    "copyright": "© 2025 UNIKCANDLE. All rights reserved."
+    "copyright": "© 2025 UNIKCANDLE. All rights reserved.",
+    "socialLinks": {
+      "facebook": "Follow UNIKCANDLE on Facebook",
+      "tiktok": "Follow UNIKCANDLE on TikTok",
+      "instagram": "Follow UNIKCANDLE on Instagram"
+    }
+  },
+  "testimonials": {
+    "title": "What they think",
+    "cta": "Join the UNIKCANDLE community",
+    "items": {
+      "marie": {
+        "name": "Marie",
+        "role": "future customer",
+        "content": "My friend loved listening to my message at the end of the burn!"
+      },
+      "jean": {
+        "name": "Jean",
+        "role": "future customer",
+        "content": "A great idea for a unique and moving gift. I can't wait for the launch!"
+      },
+      "sophie": {
+        "name": "Sophie",
+        "role": "future customer",
+        "content": "I can't wait to give this candle to my mother for Mother's Day. It's such a personal and touching gift!"
+      },
+      "lucas": {
+        "name": "Lucas",
+        "role": "future customer",
+        "content": "The concept is really innovative. I've already planned to give several for the year-end holidays!"
+      }
+    }
   },
   "admin": {
     "dashboard": "Dashboard",

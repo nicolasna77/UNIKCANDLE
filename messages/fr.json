@@ -76,7 +76,8 @@
         "title": "Approchez votre téléphone de la bougie et laissez la magie opérer",
         "emoji": "🔮"
       }
-    }
+    },
+    "videoAlt": "Démonstration du fonctionnement d'une bougie UNIKCANDLE"
   },
   "whyChoose": {
     "title": "Pourquoi choisir",
@@ -412,7 +413,8 @@
       "vegetalWax": "Cire Végétale",
       "privilegedClients": "Clients privilégiés",
       "madeInFrance": "Made in France"
-    }
+    },
+    "videoAlt": "Vidéo de présentation d'une bougie UNIKCANDLE"
   },
   "newsletter": {
     "title": "Rejoignez l'aventure",
@@ -456,7 +458,38 @@
     "legal": "Mentions légales",
     "privacy": "Politique de confidentialité",
     "terms": "Conditions générales",
-    "copyright": "© 2025 UNIKCANDLE. Tous droits réservés."
+    "copyright": "© 2025 UNIKCANDLE. Tous droits réservés.",
+    "socialLinks": {
+      "facebook": "Suivez UNIKCANDLE sur Facebook",
+      "tiktok": "Suivez UNIKCANDLE sur TikTok",
+      "instagram": "Suivez UNIKCANDLE sur Instagram"
+    }
+  },
+  "testimonials": {
+    "title": "Ce qu'ils en pensent",
+    "cta": "Rejoignez la communauté UNIKCANDLE",
+    "items": {
+      "marie": {
+        "name": "Marie",
+        "role": "future cliente",
+        "content": "Mon ami a adoré écouter mon message à la fin de la combustion !"
+      },
+      "jean": {
+        "name": "Jean",
+        "role": "futur client",
+        "content": "Une idée géniale pour un cadeau unique et émouvant. J'attends impatiemment le lancement !"
+      },
+      "sophie": {
+        "name": "Sophie",
+        "role": "future cliente",
+        "content": "J'ai hâte d'offrir cette bougie à ma mère pour la fête des mères. C'est un cadeau si personnel et touchant !"
+      },
+      "lucas": {
+        "name": "Lucas",
+        "role": "futur client",
+        "content": "Le concept est vraiment innovant. J'ai déjà prévu d'en offrir plusieurs pour les fêtes de fin d'année !"
+      }
+    }
   },
   "admin": {
     "dashboard": "Tableau de bord",
