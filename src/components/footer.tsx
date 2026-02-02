@@ -24,27 +24,30 @@ const Footer = () => {
             <h5 className="text-lg mt-0 mb-2 text-secondary-foreground">
               {t("tagline")}
             </h5>
-            <div className="mt-6 lg:mb-0 mb-6">
-              <button
-                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button"
-              >
-                <SocialIcon url="https://www.facebook.com/share/19YoQmV9km/?mibextid=wwXIfr" />
-              </button>
+            <div className="mt-6 lg:mb-0 mb-6 flex items-center gap-2">
+              <SocialIcon
+                url="https://www.facebook.com/share/19YoQmV9km/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t("socialLinks.facebook")}
+                className="transition-transform hover:scale-110"
+              />
 
-              <button
-                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button"
-              >
-                <SocialIcon url="https://www.tiktok.com/@unikcandle1?_t=ZN-8vAiWKd4Sv8&_r=1" />
-              </button>
+              <SocialIcon
+                url="https://www.tiktok.com/@unikcandle1?_t=ZN-8vAiWKd4Sv8&_r=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t("socialLinks.tiktok")}
+                className="transition-transform hover:scale-110"
+              />
 
-              <button
-                className="  font-normal  items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button"
-              >
-                <SocialIcon url="https://www.instagram.com/unikcandle_labougiequiparle?igsh=anRqNDBzdjFhd3Ru&utm_source=qr" />
-              </button>
+              <SocialIcon
+                url="https://www.instagram.com/unikcandle_labougiequiparle?igsh=anRqNDBzdjFhd3Ru&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t("socialLinks.instagram")}
+                className="transition-transform hover:scale-110"
+              />
             </div>
           </div>
           <div className="w-full lg:w-6/12 px-4">
