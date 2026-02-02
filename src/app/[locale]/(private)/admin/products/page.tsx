@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Eye } from "lucide-react";
+import { TableActionsMenu } from "@/components/admin/table-actions-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -19,6 +19,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { Image as ProductImage, Scent, Category } from "@prisma/client";
 import CreateProductForm from "./CreateProductForm";
 import EditProductForm from "./EditProductForm";
+import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
 // Import du composant de pagination réutilisable
 // import { PaginationComponent } from "@/app/(private)/Pagination";
 
@@ -40,6 +41,8 @@ export default function ProductsPage() {
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const { data: products, isLoading, refetch } = useQuery<ProductWithDetails[]>({
     queryKey: ["admin-products"],
@@ -92,8 +95,13 @@ export default function ProductsPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-      deleteProductMutation.mutate(id, {
+    setProductToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (productToDelete) {
+      deleteProductMutation.mutate(productToDelete, {
         onSuccess: () => {
           toast.success("Produit supprimé avec succès");
           queryClient.invalidateQueries({ queryKey: ["admin-products"] });
@@ -104,6 +112,7 @@ export default function ProductsPage() {
         },
       });
     }
+    setProductToDelete(null);
   };
 
   const columns: ColumnDef<Product>[] = [
@@ -186,32 +195,33 @@ export default function ProductsPage() {
     },
     {
       id: "actions",
-      header: "Actions",
+      header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => {
         const product = row.original;
         return (
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(`/products/${product.id}`, "_blank")}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditingProduct(product)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => handleDelete(product.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+          <div className="flex justify-end">
+            <TableActionsMenu
+              actions={[
+                {
+                  label: "Voir",
+                  icon: <Eye className="h-4 w-4" />,
+                  onClick: () =>
+                    window.open(`/products/${product.id}`, "_blank"),
+                },
+                {
+                  label: "Modifier",
+                  icon: <Pencil className="h-4 w-4" />,
+                  onClick: () => setEditingProduct(product),
+                },
+                {
+                  label: "Supprimer",
+                  icon: <Trash2 className="h-4 w-4" />,
+                  onClick: () => handleDelete(product.id),
+                  variant: "destructive",
+                  separator: true,
+                },
+              ]}
+            />
           </div>
         );
       },
@@ -290,6 +300,16 @@ export default function ProductsPage() {
           onSuccess={() => setEditingProduct(null)}
         />
       )}
+
+      {/* Dialog de confirmation de suppression */}
+      <ConfirmDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title="Supprimer ce produit ?"
+        description="Cette action est irréversible. Le produit sera définitivement supprimé du catalogue."
+        isLoading={deleteProductMutation.isPending}
+      />
     </div>
   );
 }
