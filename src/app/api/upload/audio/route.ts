@@ -1,8 +1,23 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import {
+  validateAudioFile,
+  generateSecureFilename,
+} from "@/lib/upload-validation";
 
 export async function POST(request: Request) {
   try {
+    // Vérification de l'authentification
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Non autorisé" },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
@@ -13,20 +28,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Vérification du type de fichier audio
-    if (!file.type.startsWith("audio/")) {
-      return NextResponse.json(
-        { error: "Le fichier doit être un fichier audio" },
-        { status: 400 }
-      );
+    // Validation du fichier audio
+    const validation = validateAudioFile(file);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    // Génération d'un nom de fichier unique
-    const timestamp = Date.now();
-    const uniqueFilename = `audio/${timestamp}-${file.name}`;
+    // Génération d'un nom de fichier sécurisé
+    const secureFilename = generateSecureFilename(file.name);
 
     const token = process.env.BLOB_READ_WRITE_TOKEN;
-    const blob = await put(uniqueFilename, file, {
+    const blob = await put(`audio/${secureFilename}`, file, {
       access: "public",
       contentType: file.type,
       token: token,

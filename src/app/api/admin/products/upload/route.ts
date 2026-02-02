@@ -24,17 +24,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Vérification du type de fichier
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json(
-        { error: "Le fichier doit être une image" },
-        { status: 400 }
-      );
+    // Validation du fichier image
+    const { validateImageFile, generateSecureFilename } = await import(
+      "@/lib/upload-validation"
+    );
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    // Génération d'un nom de fichier unique
-    const timestamp = Date.now();
-    const uniqueFilename = `${timestamp}-${file.name}`;
+    // Génération d'un nom de fichier sécurisé
+    const uniqueFilename = generateSecureFilename(file.name);
 
     const blob = await put(`products/${uniqueFilename}`, file, {
       access: "public",
