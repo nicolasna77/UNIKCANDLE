@@ -135,7 +135,8 @@ const NewsletterSection = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  aria-label={t("form.ariaLabel")}
+                  autoComplete="email"
+                  spellCheck="false"
                   aria-describedby="newsletter-privacy"
                 />
                 <Button
@@ -143,7 +144,6 @@ const NewsletterSection = () => {
                   variant="default"
                   type="submit"
                   disabled={isPending}
-                  aria-label={t("form.ariaLabel")}
                 >
                   {isPending ? (
                     <div className="flex items-center gap-2">

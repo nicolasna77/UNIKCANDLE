@@ -1,13 +1,27 @@
 "use client";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { Montserrat } from "next/font/google";
 import { buttonVariants } from "../ui/button";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
+// Lazy load framer-motion to reduce initial bundle size
+// Hoisted outside component to avoid recreation on every render
+const MotionDiv = dynamic(
+  () => import("framer-motion").then((mod) => mod.motion.div),
+  { ssr: false }
+);
+
+const MotionH1 = dynamic(
+  () => import("framer-motion").then((mod) => mod.motion.h1),
+  { ssr: false }
+);
+
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["800"],
+  display: "swap",
+  variable: "--font-montserrat",
 });
 
 const HeroSection = () => {
@@ -20,14 +34,14 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-24 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 max-w-7xl mx-auto gap-8 lg:gap-12 items-center">
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-center lg:text-left space-y-8 relative"
           >
             {/* Badge élégant */}
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
@@ -35,24 +49,24 @@ const HeroSection = () => {
             >
               <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse" />
               {t("badge")}
-            </motion.div>
+            </MotionDiv>
 
-            <motion.h1
+            <MotionH1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               className={`${montserrat.className} scroll-m-20 text-5xl  font-extrabold tracking-tight mb-6 relative`}
             >
               <span>{t("brandName")}</span>
-              <motion.div
+              <MotionDiv
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 1, delay: 1.2 }}
                 className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full"
               />
-            </motion.h1>
+            </MotionH1>
 
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
@@ -69,15 +83,15 @@ const HeroSection = () => {
                   {t("tagline3")}
                 </li>
               </ul>
-            </motion.div>
+            </MotionDiv>
 
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7 }}
               className="flex flex-col sm:flex-row gap-2 justify-center lg:justify-start pt-4"
             >
-              <motion.div
+              <MotionDiv
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -90,9 +104,9 @@ const HeroSection = () => {
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
-              </motion.div>
+              </MotionDiv>
 
-              <motion.div
+              <MotionDiv
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -102,11 +116,11 @@ const HeroSection = () => {
                 >
                   {t("discoverUniverse")}
                 </Link>
-              </motion.div>
-            </motion.div>
+              </MotionDiv>
+            </MotionDiv>
 
             {/* Statistiques élégantes */}
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.9 }}
@@ -130,10 +144,10 @@ const HeroSection = () => {
                   {t("stats.madeInFrance")}
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </MotionDiv>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
@@ -150,6 +164,8 @@ const HeroSection = () => {
                 muted
                 playsInline
                 className="w-full h-full object-cover rounded-2xl"
+                aria-label={t("videoAlt")}
+                aria-hidden="true"
               >
                 <source src="/asset/hero.MOV" type="video/quicktime" />
                 <source src="/asset/hero.MOV" type="video/mp4" />
@@ -158,7 +174,7 @@ const HeroSection = () => {
               {/* Reflet élégant */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-2xl" />
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
       </div>
     </section>

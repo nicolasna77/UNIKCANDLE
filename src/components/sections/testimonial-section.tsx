@@ -4,52 +4,42 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 
 interface Testimonial {
-  name: string;
-  role: string;
+  id: string;
   avatarFallback: string;
-  content: string;
 }
 
-const testimonials: Testimonial[] = [
-  {
-    name: "Marie",
-    role: "future cliente",
-    avatarFallback: "M",
-    content: "Mon ami a adoré écouter mon message à la fin de la combustion !",
-  },
-  {
-    name: "Jean",
-    role: "futur client",
-    avatarFallback: "J",
-    content:
-      "Une idée géniale pour un cadeau unique et émouvant. J'attends impatiemment le lancement !",
-  },
-  {
-    name: "Sophie",
-    role: "future cliente",
-    avatarFallback: "S",
-    content:
-      "J'ai hâte d'offrir cette bougie à ma mère pour la fête des mères. C'est un cadeau si personnel et touchant !",
-  },
-  {
-    name: "Lucas",
-    role: "futur client",
-    avatarFallback: "L",
-    content:
-      "Le concept est vraiment innovant. J'ai déjà prévu d'en offrir plusieurs pour les fêtes de fin d'année !",
-  },
+const testimonialIds: Testimonial[] = [
+  { id: "marie", avatarFallback: "M" },
+  { id: "jean", avatarFallback: "J" },
+  { id: "sophie", avatarFallback: "S" },
+  { id: "lucas", avatarFallback: "L" },
 ];
 
 export default function TestimonialSection() {
+  const t = useTranslations("testimonials");
+
+  const testimonials = useMemo(
+    () =>
+      testimonialIds.map((item) => ({
+        name: t(`items.${item.id}.name`),
+        role: t(`items.${item.id}.role`),
+        content: t(`items.${item.id}.content`),
+        avatarFallback: item.avatarFallback,
+      })),
+    [t]
+  );
+
   return (
     <section className="py-24 lg:py-32 bg-primary-background overflow-hidden">
       <div className="container mx-auto px-4">
         <h2
           className={` text-4xl lg:text-5xl font-bold text-center mb-16 text-foreground tracking-tight`}
         >
-          Ce qu&apos;ils en pensent
+          {t("title")}
         </h2>
         <div className="relative">
           <motion.div
@@ -88,7 +78,7 @@ export default function TestimonialSection() {
             className={buttonVariants({ variant: "default", size: "lg" })}
             href="#newsletter"
           >
-            Rejoignez la communauté UNIKCANDLE
+            {t("cta")}
           </Link>
         </div>
       </div>

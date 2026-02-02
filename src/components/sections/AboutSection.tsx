@@ -127,8 +127,11 @@ export default function AboutSection() {
                 autoPlay
                 loop
                 muted
+                playsInline
                 width={600}
                 height={800}
+                aria-label={t("videoAlt")}
+                aria-hidden="true"
               />
             </div>
           </div>
