@@ -45,6 +45,13 @@ interface DataTableAdvancedProps<TData, TValue> {
   onExport?: (data: TData[]) => void;
   isLoading?: boolean;
   emptyMessage?: string;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+  onPageChange?: (page: number) => void;
 }
 
 export function DataTableAdvanced<TData, TValue>({
@@ -55,7 +62,10 @@ export function DataTableAdvanced<TData, TValue>({
   onExport,
   isLoading = false,
   emptyMessage = "Aucun résultat trouvé.",
+  pagination: serverPagination,
+  onPageChange,
 }: DataTableAdvancedProps<TData, TValue>) {
+  const isServerSidePagination = !!serverPagination && !!onPageChange;
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -129,31 +139,44 @@ export function DataTableAdvanced<TData, TValue>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: isServerSidePagination ? undefined : getPaginationRowModel(),
+    getSortedRowModel: isServerSidePagination ? undefined : getSortedRowModel(),
+    getFilteredRowModel: isServerSidePagination ? undefined : getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    manualPagination: isServerSidePagination,
+    pageCount: serverPagination?.pages ?? -1,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
       pagination: {
-        pageIndex: currentPage - 1,
-        pageSize: 10,
+        pageIndex: isServerSidePagination ? (serverPagination?.page ?? 1) - 1 : currentPage - 1,
+        pageSize: serverPagination?.limit ?? 10,
       },
     },
   });
 
-  // Synchroniser la page avec l'URL
+  // Synchroniser la page avec l'URL (seulement pour la pagination côté client)
   React.useEffect(() => {
-    const tablePageIndex = table.getState().pagination.pageIndex;
-    const urlPageIndex = currentPage - 1;
-    if (tablePageIndex !== urlPageIndex) {
-      table.setPageIndex(urlPageIndex);
+    if (!isServerSidePagination) {
+      const tablePageIndex = table.getState().pagination.pageIndex;
+      const urlPageIndex = currentPage - 1;
+      if (tablePageIndex !== urlPageIndex) {
+        table.setPageIndex(urlPageIndex);
+      }
     }
-  }, [currentPage, table]);
+  }, [currentPage, table, isServerSidePagination]);
+
+  // Gérer le changement de page pour la pagination côté serveur
+  const handlePageChange = React.useCallback((newPage: number) => {
+    if (isServerSidePagination && onPageChange) {
+      onPageChange(newPage);
+    } else {
+      updatePageInURL(newPage);
+    }
+  }, [isServerSidePagination, onPageChange, updatePageInURL]);
 
   return (
     <div className="w-full space-y-4">
@@ -169,21 +192,23 @@ export function DataTableAdvanced<TData, TValue>({
               onChange={(event) =>
                 table.getColumn(searchKey)?.setFilterValue(event.target.value)
               }
-              className="max-w-sm"
+              className="w-full sm:max-w-sm"
             />
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {onExport && (
             <Button variant="outline" size="sm" onClick={() => onExport(data)}>
-              <Download className="mr-2 h-4 w-4" />
-              Exporter
+              <Download className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Exporter</span>
             </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                Colonnes <ChevronDown className="ml-2 h-4 w-4" />
+                <span className="hidden sm:inline">Colonnes</span>
+                <span className="sm:hidden">Cols</span>
+                <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -210,7 +235,7 @@ export function DataTableAdvanced<TData, TValue>({
       </div>
 
       {/* Table */}
-      <div className=" ">
+      <div className="rounded-md border overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -273,8 +298,8 @@ export function DataTableAdvanced<TData, TValue>({
       {/* Pagination */}
       <PaginationComponent
         table={table}
-        currentPage={currentPage}
-        updatePageInURL={updatePageInURL}
+        currentPage={isServerSidePagination ? (serverPagination?.page ?? 1) : currentPage}
+        updatePageInURL={handlePageChange}
       />
     </div>
   );

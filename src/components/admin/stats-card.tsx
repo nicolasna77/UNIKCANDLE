@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, Minus, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,11 +35,11 @@ export function StatsCard({
     if (!trend) return null;
 
     if (trend.value > 0) {
-      return <TrendingUp className="h-4 w-4 text-green-600" />;
+      return <TrendingUp className="h-4 w-4 text-emerald-500" />;
     } else if (trend.value < 0) {
-      return <TrendingDown className="h-4 w-4 text-red-600" />;
+      return <TrendingDown className="h-4 w-4 text-destructive" />;
     } else {
-      return <Minus className="h-4 w-4 text-gray-500" />;
+      return <Minus className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -46,11 +47,11 @@ export function StatsCard({
     if (!trend) return "";
 
     if (trend.value > 0) {
-      return "text-green-600";
+      return "text-emerald-500";
     } else if (trend.value < 0) {
-      return "text-red-600";
+      return "text-destructive";
     } else {
-      return "text-gray-500";
+      return "text-muted-foreground";
     }
   };
 
@@ -58,14 +59,12 @@ export function StatsCard({
     return (
       <Card className={cn("relative", className)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            <div className="h-4 w-20 bg-gray-200 animate-pulse rounded" />
-          </CardTitle>
-          <div className="h-4 w-4 bg-gray-200 animate-pulse rounded" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded mb-2" />
-          <div className="h-3 w-24 bg-gray-200 animate-pulse rounded" />
+          <Skeleton className="h-8 w-16 mb-2" />
+          <Skeleton className="h-3 w-24" />
         </CardContent>
       </Card>
     );

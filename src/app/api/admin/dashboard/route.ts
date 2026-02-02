@@ -19,7 +19,7 @@ export async function GET() {
       totalOrders,
       totalProducts,
       ordersByStatus,
-      topProducts,
+      topProductsWithNames,
       recentOrders,
       currentMonthUsers,
       lastMonthUsers,
@@ -39,7 +39,7 @@ export async function GET() {
         },
       }),
 
-      // Produits les plus vendus
+      // Produits les plus vendus avec noms (optimisé)
       prisma.orderItem.groupBy({
         by: ["productId"],
         _count: {
@@ -51,6 +51,28 @@ export async function GET() {
           },
         },
         take: 5,
+      }).then(async (items) => {
+        const productIds = items.map((p) => p.productId);
+        const products = await prisma.product.findMany({
+          where: {
+            id: {
+              in: productIds,
+            },
+          },
+          select: {
+            id: true,
+            name: true,
+          },
+        });
+
+        return items.map((item) => {
+          const productInfo = products.find((p) => p.id === item.productId);
+          return {
+            productId: item.productId,
+            name: productInfo?.name || "Produit inconnu",
+            _count: item._count.productId,
+          };
+        });
       }),
 
       // Commandes récentes
@@ -138,29 +160,6 @@ export async function GET() {
         revenue: revenue,
       };
     }).reverse();
-
-    // Récupération des noms des produits les plus vendus
-    const productIds = topProducts.map((p) => p.productId);
-    const products = await prisma.product.findMany({
-      where: {
-        id: {
-          in: productIds,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
-    const topProductsWithNames = topProducts.map((product) => {
-      const productInfo = products.find((p) => p.id === product.productId);
-      return {
-        productId: product.productId,
-        name: productInfo?.name || "Produit inconnu",
-        _count: product._count.productId,
-      };
-    });
 
     // Formatage des statuts des commandes
     const formattedOrdersByStatus = ordersByStatus.map((status) => ({
