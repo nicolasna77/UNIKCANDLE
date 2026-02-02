@@ -1,10 +1,10 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project Overview
 
-UNIKCANDLE is a Next.js 15 e-commerce application for customizable candles with unique features like AR visualization, scent selection, audio recording, and QR code integration. The app uses React 19, TypeScript, Prisma with PostgreSQL, and deploys on Vercel.
-
-# Next.js 15 Server Actions + Form Handling Master
-
-You are a Senior Full-Stack Developer and expert in Next.js 15 App Router, Server Actions, and modern form handling patterns. You specialize in building production-ready forms with progressive enhancement, comprehensive validation (client & server), error handling, and seamless user experiences using React 19 and shadcn/ui integration.
+UNIKCANDLE is a Next.js 16 e-commerce application for customizable candles with AR visualization, scent selection, audio recording, and QR code integration. Built with React 19, TypeScript, Prisma with PostgreSQL, and deployed on Vercel.
 
 ## Development Commands
 
@@ -16,278 +16,413 @@ npm run start                  # Start production server
 npm run lint                   # Run ESLint
 
 # Database
-npm run db:generate           # Generate Prisma client
+npm run db:generate           # Generate Prisma client (also runs on postinstall)
 npm run db:seed              # Seed database with sample data
-npx prisma studio            # Open Prisma Studio
-npx prisma migrate dev       # Run database migrations
+npx prisma studio            # Open Prisma Studio GUI
+npx prisma migrate dev       # Create and apply new migration
+npx prisma db push          # Push schema changes without migration (dev only)
 
 # Deployment
-npm run vercel-build         # Production build with DB setup for Vercel
+npm run vercel-build         # Vercel build: generate Prisma client + push schema + build
 ```
 
-## Architecture Overview
+## Tech Stack
 
-### Tech Stack
+- **Framework**: Next.js 16.0.10 with App Router
+- **React**: 19.2.1 with Server Components
+- **Database**: PostgreSQL with Prisma 7.1.0 (adapter-pg for connection pooling)
+- **Authentication**: Better Auth 1.4.5 with Google OAuth + One Tap plugin
+- **UI**: shadcn/ui + Radix UI + Tailwind CSS 4
+- **Forms**: react-hook-form 7.55 + Zod 3.25 validation
+- **State**: TanStack Query 5.71.5 + React Context (cart)
+- **Payment**: Stripe 18.1.0
+- **File Storage**: Vercel Blob 0.27.3
+- **Email**: Resend 4.2.0 with React Email templates
+- **3D/AR**: Three.js 0.174 + React Three Fiber 9.1 + React Three Drei 10.0
+- **i18n**: next-intl 4.5.5 (French/English)
+- **TypeScript**: 5.8.2 with strict mode
 
-- **Framework**: Next.js 15 with App Router and React 19
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Better Auth with Google OAuth and One Tap
-- **UI**: shadcn/ui components with Radix UI and Tailwind CSS 4
-- **Payment**: Stripe integration
-- **File Storage**: Vercel Blob
-- **Email**: Resend
-- **3D Graphics**: Three.js with React Three Fiber
+## Critical Architecture Notes
 
-### Key Directories
+### Proxy Configuration (Next.js 16)
 
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── (local)/           # Public pages (products, auth, cart, etc.)
-│   ├── (private)/         # Admin-only pages with role-based access
-│   ├── api/               # API routes organized by feature
-│   └── actions/           # Server actions
-├── components/            # Reusable UI components
-│   ├── ui/               # shadcn/ui base components
-│   ├── admin/            # Admin-specific components
-│   └── sections/         # Page sections
-├── hooks/                # Custom React hooks
-├── lib/                  # Utilities and configurations
-├── context/              # React context providers
-├── emails/               # React Email templates
-└── types/                # TypeScript type definitions
-```
+**IMPORTANT**: Next.js 16 renamed `middleware.ts` → `proxy.ts`. This project is correctly configured.
 
-### Database Schema
+Current setup:
+- File location: `src/proxy.ts` with `proxy()` function
+- Automatic execution: Next.js 16 recognizes and runs proxy on matched routes
+- Protected routes: All non-public routes require authentication
+- Admin routes: `/admin/*` requires `role === "admin"`
+- Public routes: `/`, `/products`, `/about`, `/contact`, `/cart`, `/ar`
+- Auth routes: `/auth/signin`, `/auth/signup`, password reset routes
 
-The Prisma schema (`prisma/schema.prisma`) includes:
-
-- **Users**: Authentication with Better Auth, role-based access
-- **Products**: Candles with categories, scents, images, and AR animations
-- **Orders**: Complete order management with items, addresses, and status tracking
-- **Reviews**: Product ratings and comments
-- **Returns**: Full return management system with tracking and refunds
-- **QR Codes**: Generated for each order item for AR experiences
+The proxy handles:
+1. next-intl locale detection and routing (integrates createMiddleware from next-intl)
+2. Better Auth session validation via `auth.api.getSession()`
+3. Role-based access control for admin routes
+4. Redirect to signin for unauthenticated users
+5. Single source of truth for authentication - no duplicate checks in layouts
 
 ### Authentication & Authorization
 
-- **Better Auth** setup in `src/lib/auth.ts` with Google OAuth and One Tap
-- **Middleware** (`middleware.ts`) handles route protection:
-  - Public routes: `/`, `/products`, `/about`, `/contact`
-  - Auth routes: `/sign-in`, `/sign-up`
-  - Protected: All other routes require authentication
-  - Admin routes: `/admin/*` requires `role === "admin"`
+Better Auth configured in `src/lib/auth.ts`:
+- Email/password with email verification required
+- Google OAuth with One Tap plugin
+- Session expires: 7 days
+- Admin plugin with role-based access
+- Email flows: verification, password reset, welcome (via Resend)
 
-### API Architecture
+**Authentication Flow**: All auth checks happen in `src/proxy.ts` - layouts and pages trust that authentication has been validated by the proxy.
 
-RESTful API routes in `src/app/api/` organized by feature:
+### Database Models (Prisma)
 
-- **Admin routes** (`/api/admin/*`): Protected, require admin role
-- **Public routes**: Products, categories, scents, reviews
-- **User routes**: Cart, orders, returns
-- **Upload routes**: File handling for images, audio, avatars
-- **Stripe webhook**: Payment processing
+Core entities in `prisma/schema.prisma`:
 
-## Development Guidelines
+- **User**: Better Auth managed, with `role` ("admin" or null), `banned`, `banExpires`, orders, reviews
+- **Product**: Name (FR/EN), description, price, subtitle, slogan, `messageType` ("audio"/"text"), `arAnimation`, scent, category, images, soft-delete with `deletedAt`
+- **Category**: Name/description (i18n), icon, color, imageUrl, soft-delete
+- **Scent**: Name/description (i18n), icon, color, notes array
+- **Order**: User, status (PENDING/PROCESSING/SHIPPED/DELIVERED/CANCELLED), items, total, Stripe payment intent, refund data, shipping address
+- **OrderItem**: Product, quantity, price, scent, audioUrl OR textMessage, animationId, QRCode
+- **QRCode**: Unique code per order item for AR experience
+- **Return**: Linked to OrderItem, status flow (REQUESTED→APPROVED→RETURN_SHIPPING_SENT→RETURN_IN_TRANSIT→RETURN_DELIVERED→PROCESSING→COMPLETED), tracking, refund via Stripe
+- **Review**: User rating and comment on product
+- **Address**: Shipping address linked to order
+- **TemporaryOrder**: Holds incomplete orders with expiration
 
-### Database Workflow
+Key patterns:
+- Soft deletes on Product and Category via `deletedAt`
+- i18n fields: `name`/`nameEN`, `description`/`descriptionEN`
+- Stripe integration: `stripePaymentIntentId`, `stripeRefundId` fields
+- Cascade deletes: OrderItem → Order, Address → Order, QRCode → OrderItem
 
-1. Modify `prisma/schema.prisma`
-2. Run `npx prisma migrate dev` to create migration
-3. Run `npm run db:generate` to update Prisma client
-4. Update TypeScript types in `src/types/` if needed
+### Route Structure
 
-### File Upload
+```
+src/app/[locale]/
+├── (local)/              # Public pages (RSC)
+│   ├── page.tsx         # Homepage
+│   ├── products/        # Product catalog and detail pages
+│   ├── about/
+│   ├── contact/
+│   ├── cart/
+│   ├── ar/              # AR viewer pages
+│   └── auth/            # Sign in/up, password reset
+│
+├── (private)/           # Protected routes (requires auth)
+│   ├── admin/           # Admin dashboard (requires role="admin")
+│   │   ├── page.tsx    # Analytics dashboard
+│   │   ├── products/   # Product management CRUD
+│   │   ├── orders/     # Order tracking and status updates
+│   │   ├── returns/    # Return request handling
+│   │   ├── users/      # User management and banning
+│   │   └── scents/     # Scent management
+│   └── profil/          # User profile pages
+│
+├── layout.tsx           # Root layout with providers
+├── error.tsx            # Error boundary
+├── not-found.tsx        # 404 page
+└── unauthorized.tsx     # 403 page
 
-- Images: Uploaded to Vercel Blob via `/api/upload/image`
-- Audio: Custom voice recordings for candles via `/api/upload/audio`
-- Avatars: User profile pictures via `/api/upload/avatar`
+api/
+├── auth/[...all]/       # Better Auth endpoints
+├── products/            # Product listing, detail, reviews
+├── categories/          # Category CRUD
+├── scents/              # Scent listing
+├── orders/              # Order creation, listing, invoice, cancel
+├── returns/             # Return request creation
+├── cart/                # Cart operations
+├── qr/                  # QR code data retrieval
+├── upload/              # Image, audio, avatar uploads to Vercel Blob
+├── admin/               # Admin-protected API routes
+│   ├── products/       # Admin product CRUD + upload
+│   ├── orders/         # Admin order management
+│   ├── returns/        # Return approval, tracking, refunds
+│   ├── scents/         # Admin scent CRUD + upload
+│   ├── users/          # User ban/unban
+│   └── dashboard/      # Analytics data
+├── create-checkout-session/  # Stripe checkout
+└── webhooks/stripe/     # Stripe payment webhooks
+```
 
-### Component Conventions
+### Component Organization
 
-- Use shadcn/ui components from `@/components/ui`
-- Custom hooks in `@/hooks` for data fetching (useProducts, useOrders, etc.)
-- Admin components separated in `@/components/admin`
-- Form validation using react-hook-form with Zod schemas
+```
+src/components/
+├── ui/                  # shadcn/ui base components (40+ components)
+├── admin/               # Admin-specific components
+│   ├── forms/          # Admin forms (product, category, scent, order status)
+│   ├── stats-card.tsx
+│   ├── recent-orders.tsx
+│   └── admin-sidebar.tsx
+├── forms/               # Public forms organized by feature
+│   ├── auth/           # Sign in/up forms
+│   ├── products/       # Product selection, scent picker
+│   ├── order/          # Checkout, address forms
+│   └── returns/        # Return request form
+├── sections/            # Page sections (hero, features, FAQ, etc.)
+├── skeleton/            # Loading skeletons
+├── magicui/             # Animation/visual effects (particles, borders, etc.)
+├── product-card.tsx
+├── category-card.tsx
+├── scent-card.tsx
+├── order-card.tsx
+├── review-section.tsx
+├── qr-code.tsx
+├── audio-recorder.tsx
+└── three/               # Three.js components for AR
+```
+
+### Server Actions vs API Routes
+
+**Server Actions** (`src/app/actions/`):
+- For form submissions with progressive enhancement
+- Used by: products, categories, scents, reviews, returns, newsletter, contact
+- Pattern: Accept FormData, validate with Zod, return ActionResponse<T>
+- Always include server-side auth check and role validation
+- Use revalidatePath() or revalidateTag() for cache invalidation
+
+**API Routes** (`src/app/api/`):
+- For data fetching (GET), complex operations, webhooks
+- Used by: product listing/detail, order management, file uploads, Stripe
+- Pattern: Standard Next.js route handlers with Response
+
+**Service Layer** (`src/services/`):
+- Client-side API fetch wrappers for React Query
+- Currently only: categories, products, returns, scents
+- Pattern: fetch() calls to API routes with typed responses
+
+**Missing Service Layer**: No service wrappers for orders, users, or payments. These features use API routes directly or Server Actions.
 
 ### State Management
 
-- React Query (TanStack Query) for server state
-- React Context for cart state (`src/context/CartContext.tsx`)
-- Local state with useState/useReducer for UI state
+1. **Server State**: TanStack Query (`src/providers/QueryProvider.tsx`)
+   - React Query wraps the app for data fetching and caching
+   - Service layer functions used with `useQuery` hooks
+   - No custom hooks like `useProducts()` exist yet
 
-### Styling
+2. **Cart State**: React Context (`src/context/CartContext.tsx`)
+   - Global cart with add/remove/update/clear operations
+   - Persisted to localStorage
+   - No auth context despite Better Auth integration
 
-- Tailwind CSS 4 configuration
-- CSS variables for theming in `src/app/globals.css`
-- Component variants using class-variance-authority
+3. **Form State**: react-hook-form with Zod validation
+   - Schemas in `src/lib/admin-schemas.ts` and inline in components
+   - useActionState pattern for Server Action integration
 
-### Testing
+### i18n (Internationalization)
 
-- No specific test framework configured - check with user before assuming testing approach
+- **Library**: next-intl 4.5.5
+- **Locales**: French (fr) and English (en)
+- **Messages**: `messages/fr.json` and `messages/en.json`
+- **Routing**: `src/i18n/routing.ts` defines locale prefix and default
+- **Request**: `src/i18n/request.ts` configures locale detection
+- **Middleware**: next-intl middleware integrated in `src/proxy.ts`
+- **Database**: i18n fields like `name`/`nameEN`, `description`/`descriptionEN`
 
-## Key Features
+## Development Patterns
 
-### E-commerce Core
+### Form Handling with Server Actions
 
-- Product catalog with categories and scent selection
-- Shopping cart with persistent state
-- Stripe checkout and payment processing
-- Order management and tracking
-- Return system with admin approval workflow
-
-### Unique Candle Features
-
-- **AR Integration**: 3D candle models with custom animations
-- **Audio Recording**: Customers can add voice messages to candles
-- **QR Code Generation**: Each order item gets a unique QR code for AR experience
-- **Scent Customization**: Multiple scent options with visual color coding
-
-### Admin Dashboard
-
-- User management with banning capabilities
-- Product, category, and scent CRUD operations
-- Order tracking and status management
-- Return request handling with refund processing
-- Analytics dashboard
-
-## Environment Setup
-
-Required environment variables:
-
-- `DATABASE_URL`: PostgreSQL connection string
-- `BETTER_AUTH_URL`: Base URL for authentication
-- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: OAuth credentials
-- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`: Payment processing
-- `BLOB_READ_WRITE_TOKEN`: Vercel Blob storage
-- `RESEND_API_KEY`: Email service
-
-## Common Patterns
-
-### Data Fetching
+Standard pattern for forms with progressive enhancement:
 
 ```typescript
-// Use custom hooks for consistent data fetching
-const { data: products, isLoading } = useProducts();
-const { data: categories } = useCategories();
+"use server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { mySchema } from "@/lib/schemas";
+
+type ActionResponse<T = unknown> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+};
+
+export async function myAction(formData: FormData): Promise<ActionResponse> {
+  // 1. Auth check
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) return { success: false, error: "Not authenticated" };
+
+  // 2. Role check (for admin actions)
+  if (session.user.role !== "admin") return { success: false, error: "Forbidden" };
+
+  // 3. Extract FormData
+  const rawData = {
+    field1: formData.get("field1"),
+    field2: formData.get("field2"),
+  };
+
+  // 4. Validate with Zod
+  const parsed = mySchema.safeParse(rawData);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Validation failed",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  // 5. Database operation
+  try {
+    const result = await prisma.model.create({ data: parsed.data });
+
+    // 6. Revalidate cache
+    revalidatePath("/path");
+
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: "Database error" };
+  }
+}
 ```
 
-### Error Handling
+### File Upload Flow
 
-- API routes return standardized error responses
-- Client-side error boundaries for UI error handling
-- Form validation with detailed error messages
+All uploads go to Vercel Blob via dedicated API routes:
 
-### Type Safety
+1. **Images** (`/api/upload/image` or `/api/admin/products/upload`):
+   - Accept multipart form data
+   - Upload to Vercel Blob with `put()`
+   - Return blob URL
+   - Used for: product images, category images, scent icons
 
-- Strict TypeScript configuration
-- Prisma-generated types for database models
-- Zod schemas for runtime validation
-- Better Auth type inference for sessions
+2. **Audio** (`/api/upload/audio`):
+   - Accept audio file (for custom candle voice messages)
+   - Upload to Blob
+   - Return URL stored in OrderItem.audioUrl
 
-## Next.js 15 Server Actions & Form Handling Best Practices
+3. **Avatars** (`/api/upload/avatar`):
+   - Upload user profile pictures
+   - Return URL stored in User.image
 
-This project follows production-ready patterns for Server Actions, progressive enhancement, and modern form handling with React 19 and Next.js 15.
+### QR Code & AR Flow
 
-### Server Actions Architecture
+1. Order completed → QRCode generated for each OrderItem
+2. Customer scans QR → redirects to `/ar/{code}`
+3. AR page loads OrderItem data via `/api/qr` (code lookup)
+4. Three.js scene renders 3D candle with custom:
+   - Scent color
+   - AR animation from Product.arAnimation
+   - Audio playback if OrderItem.audioUrl exists
+   - Text display if OrderItem.textMessage exists
 
-- Use "use server" directive for inline or module-level Server Actions
-- Implement proper FormData extraction and validation
-- Handle both success and error states with proper return objects
-- Use revalidatePath and revalidateTag for cache invalidation
-- Support redirect after successful form submission
-- Ensure Server Actions work with progressive enhancement
+### Return & Refund Flow
 
-### Form Validation Patterns
+1. Customer requests return via `/api/returns` (POST)
+   - Status: REQUESTED
+2. Admin reviews in dashboard (`/admin/returns`)
+3. Admin approves/rejects via `/api/admin/returns/{id}` (PATCH)
+   - If approved → status: APPROVED → Admin sends return label → RETURN_SHIPPING_SENT
+4. Admin updates tracking via `/api/admin/returns/{id}/tracking` (POST)
+   - Status: RETURN_IN_TRANSIT → RETURN_DELIVERED → PROCESSING
+5. Admin processes refund via `/api/admin/returns/{id}/refund` (POST)
+   - Stripe refund created
+   - Status: COMPLETED
+   - Order.stripeRefundId and refundedAt updated
 
-- Create shared Zod schemas for client and server validation
-- Implement server-side validation as primary security layer
-- Add client-side validation for improved user experience
-- Use useActionState for form state management and error display
-- Handle field-level and form-level error messages
-- Support both synchronous and asynchronous validation
+### Stripe Integration
 
-### Progressive Enhancement
+- **Checkout**: `/api/create-checkout-session` creates Stripe Checkout session
+- **Webhook**: `/api/webhooks/stripe` handles payment events:
+  - `checkout.session.completed`: Create Order with items, address, QR codes
+  - `payment_intent.succeeded`: Update Order status to PROCESSING
+  - `charge.refunded`: Update Return status
+- **Products**: Stripe not used for product catalog (local Prisma DB)
+- **Refunds**: Admin triggers refund in return flow
 
-- Ensure forms work without JavaScript enabled
-- Use next/form for enhanced form behavior (prefetching, client-side navigation)
-- Implement proper loading states with pending indicators
-- Support keyboard navigation and screen reader accessibility
-- Handle form submission with and without client-side hydration
-- Create fallback experiences for JavaScript failures
+### Email Templates
 
-### useActionState Integration
+React Email templates in `src/emails/`:
+- `reset-password.tsx`: Password reset link
+- `email-verification.tsx`: Email verification link
+- `newsletter-welcome.tsx`: Welcome email after verification
+- Sent via Resend API in Better Auth callbacks
 
-- Replace deprecated useFormStatus with useActionState
-- Manage form state, errors, and pending states effectively
-- Handle initial state and state updates from Server Actions
-- Display validation errors and success messages appropriately
-- Support optimistic updates where beneficial
-- Implement proper form reset after successful submission
+## Database Workflow
 
-### Error Handling & User Experience
+1. Edit `prisma/schema.prisma`
+2. Run `npx prisma migrate dev --name descriptive_name`
+3. Prisma Client auto-generates (postinstall hook)
+4. Update TypeScript types in `src/types/` if needed for custom shapes
+5. Update Server Actions and API routes using new schema
 
-- Provide clear, actionable error messages for validation failures
-- Handle server errors gracefully with user-friendly messages
-- Implement proper try/catch blocks in Server Actions
-- Use error boundaries for unexpected failures
-- Support field-level error display with proper ARIA attributes
-- Create consistent error message patterns across forms
+For schema push without migration (dev only):
+```bash
+npx prisma db push
+```
 
-### shadcn/ui Form Integration
+## Environment Variables
 
-- Use shadcn Form components with react-hook-form integration
-- Implement proper FormField, FormItem, FormLabel patterns
-- Support controlled and uncontrolled input components
-- Use FormMessage for validation error display
-- Create reusable form patterns and custom form components
-- Support dark mode and theme customization
+Required in `.env.local`:
 
-### Advanced Form Patterns
+```bash
+# Database
+DATABASE_URL="postgresql://..."
 
-- Handle multi-step forms with state preservation
-- Implement file upload with progress tracking and validation
-- Support dynamic form fields and conditional rendering
-- Create nested object and array field handling
-- Implement form auto-save and draft functionality
-- Handle complex form relationships and dependencies
+# Better Auth
+BETTER_AUTH_URL="http://localhost:3000"  # or production URL
+BETTER_AUTH_SECRET="..."
 
-### Security Best Practices
+# Google OAuth
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
 
-- Always validate data server-side regardless of client validation
-- Sanitize and escape form inputs appropriately
-- Implement CSRF protection (automatic with Server Actions)
-- Use proper input validation and type checking
-- Handle sensitive data with appropriate encryption
-- Implement rate limiting for form submissions
+# Stripe
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
 
-### Performance Optimization
+# Vercel Blob
+BLOB_READ_WRITE_TOKEN="..."
 
-- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
-- Wrap client components in Suspense with fallback.
-- Use dynamic loading for non-critical components.
-- Optimize images: use WebP format, include size data, implement lazy loading.
-- Use useOptimistic for immediate UI feedback
-- Implement proper form field debouncing
-- Optimize revalidation strategies for different data types
-- Use Suspense boundaries for loading states
-- Minimize bundle size with code splitting
-- Cache validation schemas and reuse across components
+# Resend
+RESEND_API_KEY="re_..."
+```
 
-### Accessibility Standards
+## Common Issues
 
-- Implement proper ARIA labels and descriptions
-- Support keyboard navigation throughout forms
-- Provide clear focus indicators and management
-- Use semantic HTML form elements
-- Support screen readers with proper announcements
-- Follow WCAG 2.1 AA guidelines for form accessibility
+### Middleware Not Working
+- Ensure `middleware.ts` exists at project root and exports the proxy function from `src/proxy.ts`
+- Check that matcher in config includes the route you're testing
 
-### Next.js 15 Specific Features
+### Prisma Client Out of Sync
+```bash
+npm run db:generate
+```
 
-- Leverage Enhanced Forms (next/form) for navigation forms
-- Use unstable_after for post-submission processing
-- Implement proper static/dynamic rendering strategies
-- Support both client and server components appropriately
-- Use proper route segment configuration
-- Handle streaming and Suspense boundaries effectively
+### Type Errors After Schema Change
+1. Run `npx prisma migrate dev`
+2. Restart TypeScript server in IDE
+3. Check `src/generated/` was regenerated
+
+### i18n Route Not Found
+- All routes must be nested under `[locale]` dynamic segment
+- Use `Link` from `@/i18n/routing` not `next/link`
+- Translations in `messages/{locale}.json` must match translation keys
+
+### Server Actions Not Called
+- Ensure "use server" directive at top of file
+- FormData field names must match schema exactly
+- Check ActionResponse type for errors
+
+## Code Style
+
+- **TypeScript**: Strict mode, no implicit any
+- **Components**: Prefer RSC, use "use client" only when necessary (hooks, events)
+- **Imports**: Use `@/` alias for all imports from `src/`
+- **Forms**: react-hook-form + Zod + Server Actions pattern
+- **Error Handling**: Try/catch with user-friendly messages, log server errors
+- **Validation**: Always validate server-side with Zod, client validation is optional UX enhancement
+- **Tailwind**: Use utility classes, CSS variables for theming in `globals.css`
+- **shadcn/ui**: Import from `@/components/ui`, customize as needed
+
+## Next.js 16 & React 19 Features
+
+- **Server Components**: Default, faster initial loads
+- **Server Actions**: "use server" for form mutations
+- **Streaming**: Suspense boundaries with loading.tsx
+- **Async Request APIs**: `await params`, `await headers()`, `await cookies()`
+- **Enhanced Forms**: Progressive enhancement with next/form
+- **authInterrupts**: Experimental flag enabled for auth redirects
+- **Turbopack**: Used in dev mode (faster HMR)
