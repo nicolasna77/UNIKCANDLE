@@ -85,6 +85,20 @@ export async function POST(req: Request) {
           throw new Error("orderId manquant dans les métadonnées");
         }
 
+        // Vérification d'idempotence: vérifier si la commande existe déjà
+        const existingOrder = await prisma.order.findFirst({
+          where: {
+            id: session.metadata.orderId,
+          },
+        });
+
+        if (existingOrder) {
+          logger.info(
+            `Webhook Stripe: Commande ${session.metadata.orderId} déjà créée, ignorée (idempotence)`
+          );
+          return new NextResponse(null, { status: 200 });
+        }
+
         // Récupérer les données de commande depuis la table temporaire
         const temporaryOrder = await prisma.temporaryOrder.findUnique({
           where: { orderId: session.metadata.orderId },

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getUser } from "@/lib/auth-session";
-import { nanoid } from "nanoid";
 import prisma from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { generateSecureQRCode } from "@/lib/qr-code";
 
 interface CheckoutItem {
   id: string;
@@ -29,10 +29,10 @@ export async function POST(req: Request) {
       return new NextResponse("Le panier est vide", { status: 400 });
     }
 
-    // Générer des codes uniques pour chaque article
+    // Générer des codes uniques et cryptographiquement sécurisés pour chaque article
     const cartItemsWithCodes = cartItems.map((item: CheckoutItem) => ({
       ...item,
-      qrCodeId: nanoid(10), // Générer un code unique de 10 caractères
+      qrCodeId: generateSecureQRCode(),
     }));
 
     const lineItems = cartItemsWithCodes.map(
