@@ -3,8 +3,8 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { type CategoryWithProducts } from "@/services/categories";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
+import { TableActionsMenu } from "@/components/admin/table-actions-menu";
 
 interface ColumnActions {
   onEdit: (category: CategoryWithProducts) => void;
@@ -12,11 +12,12 @@ interface ColumnActions {
   isDeleting: boolean;
 }
 
-export const createColumns = ({
-  onEdit,
-  onDelete,
-  isDeleting,
-}: ColumnActions): ColumnDef<CategoryWithProducts>[] => [
+export const createColumns = (
+  actions: ColumnActions
+): ColumnDef<CategoryWithProducts>[] => {
+  const { onEdit, onDelete } = actions;
+  // Note: isDeleting est disponible via actions.isDeleting pour désactiver les boutons si nécessaire
+  return [
   {
     accessorKey: "name",
     header: "Nom",
@@ -61,28 +62,30 @@ export const createColumns = ({
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => {
       const category = row.original;
       return (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(category)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(category.id)}
-            disabled={isDeleting}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        <div className="flex justify-end">
+          <TableActionsMenu
+            actions={[
+              {
+                label: "Modifier",
+                icon: <Pencil className="h-4 w-4" />,
+                onClick: () => onEdit(category),
+              },
+              {
+                label: "Supprimer",
+                icon: <Trash2 className="h-4 w-4" />,
+                onClick: () => onDelete(category.id),
+                variant: "destructive",
+                separator: true,
+              },
+            ]}
+          />
         </div>
       );
     },
   },
 ];
+};
