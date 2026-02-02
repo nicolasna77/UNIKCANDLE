@@ -20,6 +20,7 @@ import { Link } from "@/i18n/routing";
 import { StarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations, useLocale } from "next-intl";
+import { useMemo } from "react";
 import {
   getProductTranslation,
   getCategoryTranslation,
@@ -39,18 +40,27 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
   const t = useTranslations("products");
   const locale = useLocale();
 
-  // Get translated fields based on current locale
-  const translatedName = getProductTranslation(product, "name", locale);
-
-  const translatedSubTitle = getProductTranslation(product, "subTitle", locale);
-  const translatedCategoryName = getCategoryTranslation(
-    product.category,
-    "name",
-    locale
+  // Memoize translations to avoid recalculating on every render
+  const translatedName = useMemo(
+    () => getProductTranslation(product, "name", locale),
+    [product, locale]
   );
-  const translatedScentName = product.scent
-    ? getScentTranslation(product.scent, "name", locale)
-    : "";
+
+  const translatedSubTitle = useMemo(
+    () => getProductTranslation(product, "subTitle", locale),
+    [product, locale]
+  );
+
+  const translatedCategoryName = useMemo(
+    () => getCategoryTranslation(product.category, "name", locale),
+    [product.category, locale]
+  );
+
+  const translatedScentName = useMemo(
+    () =>
+      product.scent ? getScentTranslation(product.scent, "name", locale) : "",
+    [product.scent, locale]
+  );
 
   return (
     <article itemScope itemType="https://schema.org/Product">

@@ -142,6 +142,8 @@ export default function SignIn() {
                     <Input
                       type="email"
                       placeholder={t("emailPlaceholder")}
+                      autoComplete="email"
+                      spellCheck="false"
                       {...field}
                     />
                   </FormControl>
@@ -172,7 +174,7 @@ export default function SignIn() {
                     <Input
                       type="password"
                       placeholder={t("passwordPlaceholder")}
-                      autoComplete="password"
+                      autoComplete="current-password"
                       {...field}
                     />
                   </FormControl>
@@ -232,6 +234,7 @@ export default function SignIn() {
                   width="0.98em"
                   height="1em"
                   viewBox="0 0 256 262"
+                  aria-hidden="true"
                 >
                   <path
                     fill="#4285F4"
