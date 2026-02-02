@@ -1,25 +1,36 @@
 "use client";
 
-import { Scent, Category } from "@prisma/client";
 import { createContext, useContext, useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import { migrateCartFromLocalStorage } from "@/lib/migrate-cart";
 
-interface CartItem {
+// Types sérialisables pour le localStorage (évite les problèmes de types Prisma)
+interface CartScent {
+  id: string;
+  name: string;
+  nameEN: string | null;
+  color: string | null;
+  icon: string | null;
+}
+
+interface CartCategory {
+  id: string;
+  name: string;
+  nameEN: string | null;
+  icon: string | null;
+  color: string | null;
+}
+
+export interface CartItem {
   id: string;
   name: string;
   imageUrl: string;
   price: number;
-  selectedScent: Scent;
-  category: Category;
+  selectedScent: CartScent;
+  category: CartCategory;
   quantity: number;
   description: string;
   subTitle: string;
   audioUrl?: string; // URL de l'audio enregistré
   textMessage?: string; // Message texte personnalisé
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
 }
 
 // Cart context interface
@@ -40,47 +51,44 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // CartProvider component
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  // Lazy initialization: read localStorage only once on mount, not on every render
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
 
-  // Charger le panier depuis les cookies au démarrage
-  useEffect(() => {
-    // Migrer automatiquement depuis localStorage si nécessaire
-    migrateCartFromLocalStorage();
-
-    const savedCart = Cookies.get("cart");
+    const savedCart = localStorage.getItem("cart");
     if (savedCart) {
       try {
-        const parsedCart = JSON.parse(savedCart);
-        setCart(parsedCart);
+        return JSON.parse(savedCart);
       } catch (error) {
         console.error(
-          "Erreur lors du parsing du panier depuis les cookies:",
+          "Erreur lors du parsing du panier depuis localStorage:",
           error
         );
-        // Cookie corrompu, on le supprime
-        Cookies.remove("cart");
-        setCart([]);
+        // localStorage corrompu, on le supprime
+        localStorage.removeItem("cart");
       }
     }
+    return [];
+  });
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Marquer comme initialisé après le premier render
+  useEffect(() => {
     setIsInitialized(true);
   }, []);
 
-  // Sauvegarder le panier dans les cookies à chaque modification
+  // Sauvegarder le panier dans localStorage à chaque modification
   useEffect(() => {
     // Ne pas sauvegarder pendant l'initialisation pour éviter d'écraser avec un panier vide
     if (!isInitialized) return;
 
     if (cart.length === 0) {
-      // Supprimer le cookie si le panier est vide
-      Cookies.remove("cart");
+      // Supprimer le localStorage si le panier est vide
+      localStorage.removeItem("cart");
     } else {
-      // Sauvegarder dans un cookie avec 7 jours d'expiration
-      Cookies.set("cart", JSON.stringify(cart), {
-        expires: 7, // 7 jours
-        path: "/",
-        sameSite: "lax",
-      });
+      // Sauvegarder dans localStorage (pas de limite de 4KB comme les cookies)
+      localStorage.setItem("cart", JSON.stringify(cart));
     }
   }, [cart, isInitialized]);
 

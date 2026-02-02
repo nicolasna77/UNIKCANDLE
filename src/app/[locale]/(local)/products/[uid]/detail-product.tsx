@@ -185,9 +185,6 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       category: product.category,
       audioUrl: currentAudioUrl,
       textMessage: currentTextMessage,
-      createdAt: new Date(product.createdAt),
-      updatedAt: new Date(product.updatedAt),
-      deletedAt: product.deletedAt ? new Date(product.deletedAt) : null,
       quantity: 1,
     });
     toast.success(t("card.addedToCart"));

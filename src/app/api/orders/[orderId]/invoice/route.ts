@@ -90,7 +90,7 @@ export async function GET(
     // Générer le PDF de la facture
     const pdfBuffer = generateInvoicePDF(order as InvoiceOrder);
 
-    return new Response(pdfBuffer, {
+    return new Response(Buffer.from(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="facture-${orderId}.pdf"`,
