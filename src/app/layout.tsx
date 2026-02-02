@@ -62,22 +62,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+
   return (
-    <html lang={params.locale} className="smooth-scroll">
+    <html lang={locale} className="smooth-scroll">
       <head>
+        <meta />
         <StructuredData data={getOrganizationSchema()} />
         <StructuredData data={getWebsiteSchema()} />
       </head>
       <Analytics />
       <body className={`${montserrat.variable} antialiased `}>
-        <CartProvider>
+        <CartProvider>  
           <QueryProvider>
             {children}
             <Toaster theme="system" position="top-center" />

@@ -8,6 +8,7 @@ import {
   IconUsers,
   IconRefresh,
   IconCategory,
+  IconDroplet,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -24,40 +25,41 @@ import { Link } from "@/i18n/routing";
 import { NavUser } from "./admin/nav-user";
 import { authClient } from "@/lib/auth-client";
 import { User } from "better-auth";
+
 const data = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Tableau de bord",
       url: "/admin",
       icon: IconDashboard,
     },
     {
-      title: "Users",
+      title: "Utilisateurs",
       url: "/admin/users",
       icon: IconUsers,
     },
     {
-      title: "Orders",
+      title: "Commandes",
       url: "/admin/orders",
       icon: IconListDetails,
     },
     {
-      title: "Returns",
+      title: "Retours",
       url: "/admin/returns",
       icon: IconRefresh,
     },
     {
-      title: "Products",
+      title: "Produits",
       url: "/admin/products",
       icon: IconPackage,
     },
     {
-      title: "Scents",
+      title: "Parfums",
       url: "/admin/scents",
-      icon: IconPackage,
+      icon: IconDroplet,
     },
     {
-      title: "Categories",
+      title: "Catégories",
       url: "/admin/categories",
       icon: IconCategory,
     },
