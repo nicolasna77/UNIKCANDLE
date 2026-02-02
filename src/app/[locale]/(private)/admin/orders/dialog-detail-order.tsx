@@ -14,31 +14,47 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
-import type {
-  Address,
-  Image as ImageType,
-  Order,
-  Product,
-  QRCode as QRCodeType,
-  Scent,
-  User as UserType,
-} from "@prisma/client";
+import type { Order } from "@prisma/client";
 
 interface OrderItem {
   id: string;
   quantity: number;
   price: number;
-  product: Product & {
-    images: ImageType[];
+  product: {
+    id: string;
+    name: string;
+    images: { url: string }[];
   };
-  scent: Scent;
-  qrCode: QRCodeType | null;
+  scent: {
+    id: string;
+    name: string;
+  };
+  qrCode: {
+    id: string;
+    code: string;
+  } | null;
 }
 
-interface ExtendedOrder extends Order {
-  user: UserType;
+interface ExtendedOrder {
+  id: string;
+  total: number;
+  status: Order["status"];
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
   items: OrderItem[];
-  shippingAddress: Address;
+  shippingAddress: {
+    id: string;
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  } | null;
 }
 
 const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {

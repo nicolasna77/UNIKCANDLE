@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -29,21 +30,62 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-import {
-  Address,
-  Order,
-  OrderItem,
-  Product,
-  QRCode,
-  Scent,
-  User,
-  Image,
-} from "@prisma/client";
+import type { Order } from "@prisma/client";
 
 import Loading from "@/components/loading";
 import DialogDetailOrder from "./dialog-detail-order";
 import DialogCreateOrder from "./dialog-create-order";
 import { PaginationComponent } from "@/app/[locale]/(private)/Pagination";
+
+// Types for paginated API response
+type OrderListItem = {
+  id: string;
+  total: number;
+  status: Order["status"];
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  items: {
+    id: string;
+    quantity: number;
+    price: number;
+    product: {
+      id: string;
+      name: string;
+      images: { url: string }[];
+    };
+    scent: {
+      id: string;
+      name: string;
+    };
+    qrCode: {
+      id: string;
+      code: string;
+    } | null;
+  }[];
+  shippingAddress: {
+    id: string;
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  } | null;
+};
+
+type PaginatedOrdersResponse = {
+  orders: OrderListItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
 
 export default function OrdersPage() {
   const queryClient = useQueryClient();
@@ -51,22 +93,18 @@ export default function OrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data: orders, isLoading } = useQuery<
-    (Order & {
-      user: User;
-      items: (OrderItem & {
-        product: Product & {
-          images: Image[];
-        };
-        scent: Scent;
-        qrCode: QRCode | null;
-      })[];
-      shippingAddress: Address;
-    })[]
-  >({
-    queryKey: ["orders"],
+  // Debounce search to avoid excessive API calls
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  const { data, isLoading } = useQuery<PaginatedOrdersResponse>({
+    queryKey: ["orders", currentPage, debouncedSearch],
     queryFn: async () => {
-      const response = await fetch("/api/admin/orders");
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        ...(debouncedSearch && { search: debouncedSearch }),
+      });
+      const response = await fetch(`/api/admin/orders?${params}`);
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération des commandes");
       }
@@ -141,19 +179,14 @@ export default function OrdersPage() {
     updateStatusMutation.mutate({ orderId, status });
   };
 
-  const filteredOrders = orders?.filter((order) =>
-    order.user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Pagination
-  const totalPages = Math.ceil((filteredOrders?.length || 0) / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedOrders = filteredOrders?.slice(startIndex, endIndex);
-
-  const updatePageInURL = (page: number) => {
-    setCurrentPage(page);
+  // Reset to page 1 when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
   };
+
+  const orders = data?.orders;
+  const totalPages = data?.pagination.totalPages || 1;
 
   if (isLoading) {
     return <Loading />;
@@ -168,9 +201,9 @@ export default function OrdersPage() {
 
       <div className="flex items-center gap-4">
         <Input
-          placeholder="Rechercher une commande..."
+          placeholder="Rechercher par nom ou email..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="max-w-sm"
         />
       </div>
@@ -190,7 +223,7 @@ export default function OrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedOrders?.map((order) => (
+            {orders?.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">#{order.id}</TableCell>
                 <TableCell>
@@ -287,7 +320,7 @@ export default function OrdersPage() {
               getCanNextPage: () => currentPage < totalPages,
             }}
             currentPage={currentPage}
-            updatePageInURL={updatePageInURL}
+            updatePageInURL={setCurrentPage}
           />
         </div>
       )}
