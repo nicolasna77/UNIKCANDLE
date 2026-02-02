@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,11 +77,12 @@ export default function DialogCreateOrder() {
   const { data: users } = useQuery<User[]>({
     queryKey: ["users-all"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/users");
+      const response = await fetch("/api/admin/users?limit=1000");
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération des utilisateurs");
       }
-      return response.json();
+      const data = await response.json();
+      return data.users || [];
     },
   });
 
@@ -239,16 +240,20 @@ export default function DialogCreateOrder() {
     createOrderMutation.mutate(formData);
   };
 
-  const getTotalAmount = () => {
+  const getTotalAmount = useCallback(() => {
     return formData.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-  };
+  }, [formData.items]);
 
-  const getProductById = (productId: string) => {
-    return products?.find((p) => p.id === productId);
-  };
+  // Memoize getProductById to avoid recreation on every render
+  const getProductById = useCallback(
+    (productId: string) => {
+      return products?.find((p) => p.id === productId);
+    },
+    [products]
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

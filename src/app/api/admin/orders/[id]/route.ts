@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { z } from "zod";
+
+// Schéma de validation pour le status
+const orderStatusSchema = z.object({
+  status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"], {
+    errorMap: () => ({
+      message:
+        "Statut invalide. Valeurs autorisées: PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED",
+    }),
+  }),
+});
 
 export async function PATCH(
   request: Request,
@@ -16,15 +27,24 @@ export async function PATCH(
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const { status } = await request.json();
+    const body = await request.json();
     const id = (await params).id;
+
+    // Validation du status
+    const parsed = orderStatusSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message || "Données invalides" },
+        { status: 400 }
+      );
+    }
 
     const order = await prisma.order.update({
       where: {
         id,
       },
       data: {
-        status,
+        status: parsed.data.status,
       },
     });
 

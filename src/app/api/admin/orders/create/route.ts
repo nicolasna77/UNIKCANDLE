@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { generateSecureQRCode } from "@/lib/qr-code";
 
 interface OrderItem {
   productId: string;
@@ -121,11 +122,11 @@ export async function POST(request: Request) {
       },
     });
 
-    // Générer les QR codes pour chaque item
+    // Générer les QR codes pour chaque item (utilisant génération sécurisée)
     const qrCodes = await Promise.all(
       order.items.map(async (item) => {
-        // Générer un code unique
-        const code = Math.random().toString(36).substring(2, 15);
+        // Générer un code unique et cryptographiquement sécurisé
+        const code = generateSecureQRCode();
 
         return prisma.qRCode.create({
           data: {

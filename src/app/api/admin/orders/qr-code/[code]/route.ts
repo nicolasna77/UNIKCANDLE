@@ -8,7 +8,6 @@ export async function GET(
   { params }: { params: Promise<{ code: string }> }
 ) {
   try {
-    // Verify admin authentication
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -23,17 +22,14 @@ export async function GET(
       return NextResponse.json({ error: "Code QR manquant" }, { status: 400 });
     }
 
-    // Get base URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "localhost:3000";
     const fullBaseUrl =
       baseUrl.startsWith("http://") || baseUrl.startsWith("https://")
         ? baseUrl
         : `https://${baseUrl}`;
 
-    // Generate QR code URL
     const qrUrl = `${fullBaseUrl}/ar/${code}`;
 
-    // Generate PNG QR code
     const pngBuffer = await QRCode.toBuffer(qrUrl, {
       type: "png",
       color: {
