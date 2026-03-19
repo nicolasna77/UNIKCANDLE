@@ -14,8 +14,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, Download } from "lucide-react";
-import { useRouter } from "@/i18n/routing";
-import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,8 +64,6 @@ export function DataTableAdvanced<TData, TValue>({
   onPageChange,
 }: DataTableAdvancedProps<TData, TValue>) {
   const isServerSidePagination = !!serverPagination && !!onPageChange;
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -76,26 +72,12 @@ export function DataTableAdvanced<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [currentPage, setCurrentPage] = React.useState(1);
 
-  // Récupérer la page depuis l'URL, par défaut 1
-  const currentPage = React.useMemo(() => {
-    const page = searchParams.get("page");
-    return page ? Math.max(1, parseInt(page, 10)) : 1;
-  }, [searchParams]);
-
-  // Fonction pour mettre à jour l'URL avec la nouvelle page
-  const updatePageInURL = React.useCallback(
-    (newPage: number) => {
-      const params = new URLSearchParams(searchParams);
-      if (newPage === 1) {
-        params.delete("page");
-      } else {
-        params.set("page", newPage.toString());
-      }
-      router.push(`?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
+  // Réinitialiser la page quand les données changent (ex: après recherche)
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [columnFilters]);
 
   // Ajouter une colonne de sélection si elle n'existe pas déjà
   const columnsWithSelection: ColumnDef<TData, TValue>[] = React.useMemo(() => {
@@ -133,6 +115,11 @@ export function DataTableAdvanced<TData, TValue>({
     ];
   }, [columns]);
 
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: serverPagination?.limit ?? 10,
+  });
+
   const table = useReactTable({
     data,
     columns: columnsWithSelection,
@@ -144,6 +131,7 @@ export function DataTableAdvanced<TData, TValue>({
     getFilteredRowModel: isServerSidePagination ? undefined : getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
     manualPagination: isServerSidePagination,
     pageCount: serverPagination?.pages ?? -1,
     state: {
@@ -151,32 +139,27 @@ export function DataTableAdvanced<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
-      pagination: {
-        pageIndex: isServerSidePagination ? (serverPagination?.page ?? 1) - 1 : currentPage - 1,
-        pageSize: serverPagination?.limit ?? 10,
-      },
+      pagination: isServerSidePagination
+        ? { pageIndex: (serverPagination?.page ?? 1) - 1, pageSize: serverPagination?.limit ?? 10 }
+        : pagination,
     },
   });
 
-  // Synchroniser la page avec l'URL (seulement pour la pagination côté client)
+  // Synchroniser currentPage avec l'état interne de la table
   React.useEffect(() => {
     if (!isServerSidePagination) {
-      const tablePageIndex = table.getState().pagination.pageIndex;
-      const urlPageIndex = currentPage - 1;
-      if (tablePageIndex !== urlPageIndex) {
-        table.setPageIndex(urlPageIndex);
-      }
+      setCurrentPage(pagination.pageIndex + 1);
     }
-  }, [currentPage, table, isServerSidePagination]);
+  }, [pagination.pageIndex, isServerSidePagination]);
 
-  // Gérer le changement de page pour la pagination côté serveur
+  // Gérer le changement de page
   const handlePageChange = React.useCallback((newPage: number) => {
     if (isServerSidePagination && onPageChange) {
       onPageChange(newPage);
     } else {
-      updatePageInURL(newPage);
+      table.setPageIndex(newPage - 1);
     }
-  }, [isServerSidePagination, onPageChange, updatePageInURL]);
+  }, [isServerSidePagination, onPageChange, table]);
 
   return (
     <div className="w-full space-y-4">
