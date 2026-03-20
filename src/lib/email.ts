@@ -1,6 +1,7 @@
 "use server";
 
 import OrderConfirmationEmail from "@/emails/confirm-orders";
+import ShippingNotificationEmail from "@/emails/shipping-notification";
 import { Order } from "@/types/order";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
@@ -44,4 +45,28 @@ export const sendConfirmationEmail = async (order: Order) => {
     console.error("Erreur lors de l'envoi de l'email:", error);
     throw error;
   }
+};
+
+export const sendShippingNotificationEmail = async (params: {
+  userName: string;
+  userEmail: string;
+  orderId: string;
+  trackingNumber: string;
+  trackingUrl: string;
+  statusMessage: string;
+  isDelivered: boolean;
+}) => {
+  if (!process.env.RESEND_API_KEY) return;
+
+  const html = await render(ShippingNotificationEmail(params));
+  const subject = params.isDelivered
+    ? "Votre colis UNIKCANDLE a été livré !"
+    : "Votre colis UNIKCANDLE est en route !";
+
+  await resend.emails.send({
+    from: "UnikCandle <noreply@unikcandle.com>",
+    to: params.userEmail,
+    subject,
+    html,
+  });
 };
