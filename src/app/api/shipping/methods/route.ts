@@ -19,9 +19,22 @@ export async function GET(request: NextRequest) {
 
     // Normaliser les prix : chaque méthode renvoie un prix en centimes ou euros selon la config
     const normalized = methods.map((m) => {
-      // Chercher le prix spécifique au pays destinataire
-      const countryPrice = m.countries?.find((c) => c.iso_2 === country);
-      const price = countryPrice?.price ?? m.price ?? 0;
+      // Chercher le prix et délai spécifiques au pays destinataire
+      const countryData = m.countries?.find((c) => c.iso_2 === country);
+      const price = countryData?.price ?? m.price ?? 0;
+      const leadTimeHours =
+        countryData?.lead_time_hours ?? m.lead_time_hours ?? null;
+      const leadTimeDays =
+        countryData?.lead_time_days ?? m.lead_time_days ?? null;
+
+      // Calcul du délai affiché : on préfère lead_time_days, sinon on convertit depuis hours
+      let deliveryDays: { min: number; max: number } | null = null;
+      if (leadTimeDays != null && leadTimeDays > 0) {
+        deliveryDays = { min: leadTimeDays, max: leadTimeDays };
+      } else if (leadTimeHours != null && leadTimeHours > 0) {
+        const days = Math.ceil(leadTimeHours / 24);
+        deliveryDays = { min: days, max: days + 1 };
+      }
 
       return {
         id: m.id,
@@ -30,6 +43,7 @@ export async function GET(request: NextRequest) {
         price: typeof price === "number" ? price : parseFloat(String(price)),
         min_weight: m.min_weight,
         max_weight: m.max_weight,
+        deliveryDays,
       };
     });
 

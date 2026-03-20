@@ -32,6 +32,7 @@ interface ShippingMethod {
   name: string;
   carrier: string;
   price: number;
+  deliveryDays: { min: number; max: number } | null;
 }
 
 interface CartSummaryProps {
@@ -51,6 +52,10 @@ export function CartSummary({
   const [loadingMethods, setLoadingMethods] = useState(true);
   const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState(0);
+  const [selectedDeliveryDays, setSelectedDeliveryDays] = useState<{
+    min: number;
+    max: number;
+  } | null>(null);
 
   useEffect(() => {
     fetch("/api/shipping/methods?country=FR")
@@ -60,6 +65,7 @@ export function CartSummary({
           setMethods(data);
           setSelectedMethodId(data[0].id);
           setShippingCost(data[0].price);
+          setSelectedDeliveryDays(data[0].deliveryDays);
         }
       })
       .catch(() => {
@@ -74,6 +80,7 @@ export function CartSummary({
     if (method) {
       setSelectedMethodId(id);
       setShippingCost(method.price);
+      setSelectedDeliveryDays(method.deliveryDays);
     }
   };
 
@@ -113,14 +120,24 @@ export function CartSummary({
                     value={method.id.toString()}
                     className="!h-auto"
                   >
-                    <div className="flex flex-col justify-between text-start py-1">
-                      <div className="font-medium">{method.name}</div>
-                      <div className="text-muted-foreground text-sm">
-                        {method.carrier}
+                    <div className="flex items-center justify-between gap-4 py-1 w-full">
+                      <div className="flex flex-col text-start">
+                        <div className="font-medium">{method.name}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {method.carrier}
+                          {method.deliveryDays && (
+                            <span className="ml-2">
+                              &bull;{" "}
+                              {method.deliveryDays.min === method.deliveryDays.max
+                                ? `${method.deliveryDays.min} jour${method.deliveryDays.min > 1 ? "s" : ""} ouvré${method.deliveryDays.min > 1 ? "s" : ""}`
+                                : `${method.deliveryDays.min}–${method.deliveryDays.max} jours ouvrés`}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="font-medium text-primary">
+                      <div className="font-semibold text-sm shrink-0">
                         {method.price === 0
-                          ? t("shippingFree")
+                          ? <span className="text-green-600">{t("shippingFree")}</span>
                           : `${method.price.toFixed(2)} €`}
                       </div>
                     </div>
@@ -138,7 +155,16 @@ export function CartSummary({
             <span>{subtotal.toFixed(2)} €</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>{t("shipping")}</span>
+            <span className="flex flex-col">
+              {t("shipping")}
+              {selectedDeliveryDays && (
+                <span className="text-xs text-muted-foreground">
+                  {selectedDeliveryDays.min === selectedDeliveryDays.max
+                    ? `${selectedDeliveryDays.min} jour${selectedDeliveryDays.min > 1 ? "s" : ""} ouvré${selectedDeliveryDays.min > 1 ? "s" : ""}`
+                    : `${selectedDeliveryDays.min}–${selectedDeliveryDays.max} jours ouvrés`}
+                </span>
+              )}
+            </span>
             <span className={shippingCost === 0 ? "text-green-600" : ""}>
               {shippingCost === 0
                 ? t("shippingFree")

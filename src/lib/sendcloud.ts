@@ -41,9 +41,16 @@ export interface SendCloudMethod {
   min_weight: number;
   max_weight: number;
   price: number;
-  countries: { iso_2: string; price: number | null }[];
+  countries: {
+    iso_2: string;
+    price: number | null;
+    lead_time_hours: number | null;
+    lead_time_days: number | null;
+  }[];
   carrier: string;
   service_point_input?: string;
+  lead_time_hours?: number | null;
+  lead_time_days?: number | null;
 }
 
 export interface SendCloudParcel {
