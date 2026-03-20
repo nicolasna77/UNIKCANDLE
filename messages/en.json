@@ -259,7 +259,10 @@
     "mustBeLoggedIn": "You must be logged in to proceed with payment.",
     "serverError": "Server error. Please try again in a few moments.",
     "cannotInitializePayment": "Unable to initialize payment system",
-    "redirectionError": "Error redirecting to payment"
+    "redirectionError": "Error redirecting to payment",
+    "loadingShippingMethods": "Loading shipping methods...",
+    "selectShippingMethod": "Choose a shipping method",
+    "noShippingMethods": "No shipping methods available"
   },
   "checkout": {
     "title": "Checkout",

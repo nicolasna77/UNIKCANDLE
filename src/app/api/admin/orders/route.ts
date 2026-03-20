@@ -38,6 +38,11 @@ export async function GET(request: NextRequest) {
           total: true,
           status: true,
           createdAt: true,
+          shippingCost: true,
+          shippingMethodId: true,
+          sendcloudParcelId: true,
+          trackingNumber: true,
+          trackingUrl: true,
           user: {
             select: {
               id: true,

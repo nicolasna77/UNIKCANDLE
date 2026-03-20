@@ -5,6 +5,10 @@ import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 import { sendConfirmationEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
+import {
+  createParcel,
+  calculateTotalWeight,
+} from "@/lib/sendcloud";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -110,6 +114,8 @@ export async function POST(req: Request) {
 
         const orderData = JSON.parse(temporaryOrder.orderData);
         const cartItems: CartItem[] = orderData.items;
+        const selectedMethodId: number | undefined = orderData.selectedMethodId;
+        const shippingCost: number = orderData.shippingCost ?? 0;
 
         // Vérifier la connexion à la base de données
         try {
@@ -141,6 +147,8 @@ export async function POST(req: Request) {
             data: {
               userId,
               total: orderTotal,
+              shippingCost,
+              shippingMethodId: selectedMethodId,
               items: {
                 create: cartItems.map((item: CartItem) => ({
                   productId: item.id,
@@ -198,6 +206,7 @@ export async function POST(req: Request) {
                 },
               },
               user: true,
+              shippingAddress: true,
             },
           });
 
@@ -256,6 +265,47 @@ export async function POST(req: Request) {
             emailError
           );
           // Ne pas faire échouer la commande si l'email échoue
+        }
+
+        // Créer le colis SendCloud (hors transaction)
+        if (selectedMethodId && order.shippingAddress) {
+          try {
+            const totalQuantity = order.items.reduce(
+              (sum, i) => sum + i.quantity,
+              0
+            );
+            const parcel = await createParcel({
+              name: order.shippingAddress.name || order.user.name,
+              address: order.shippingAddress.street,
+              city: order.shippingAddress.city,
+              postal_code: order.shippingAddress.zipCode,
+              country: order.shippingAddress.country,
+              email: order.user.email,
+              weight: calculateTotalWeight(totalQuantity),
+              shipment: { id: selectedMethodId },
+              order_number: order.id,
+              request_label: true,
+            });
+
+            await prisma.order.update({
+              where: { id: order.id },
+              data: {
+                sendcloudParcelId: String(parcel.id),
+                trackingNumber: parcel.tracking_number,
+                trackingUrl: parcel.tracking_url,
+              },
+            });
+
+            logger.info(
+              `Webhook Stripe: Colis SendCloud créé (parcel #${parcel.id}) pour la commande ${order.id}`
+            );
+          } catch (sendcloudError) {
+            logger.error(
+              "Webhook Stripe: Erreur lors de la création du colis SendCloud",
+              sendcloudError
+            );
+            // Ne pas faire échouer la commande si SendCloud échoue
+          }
         }
 
         // Nettoyer la table temporaire après succès

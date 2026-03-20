@@ -23,10 +23,14 @@ export async function POST(req: Request) {
     const session = await getUser();
 
     const body = await req.json();
-    const { cartItems } = body;
+    const { cartItems, selectedMethodId, shippingCost } = body;
 
     if (!cartItems || cartItems.length === 0) {
       return new NextResponse("Le panier est vide", { status: 400 });
+    }
+
+    if (typeof selectedMethodId !== "number" || typeof shippingCost !== "number") {
+      return new NextResponse("Méthode de livraison manquante", { status: 400 });
     }
 
     // Générer des codes uniques et cryptographiquement sécurisés pour chaque article
@@ -64,6 +68,8 @@ export async function POST(req: Request) {
     const orderData = {
       orderId,
       userId: session?.id || "guest",
+      selectedMethodId,
+      shippingCost,
       items: cartItemsWithCodes.map(
         (item: CheckoutItem & { qrCodeId: string }) => ({
           id: item.id,
@@ -101,20 +107,10 @@ export async function POST(req: Request) {
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: {
-              amount: 0,
+              amount: Math.round(shippingCost * 100),
               currency: "eur",
             },
-            display_name: "Livraison standard",
-            delivery_estimate: {
-              minimum: {
-                unit: "business_day",
-                value: 5,
-              },
-              maximum: {
-                unit: "business_day",
-                value: 20,
-              },
-            },
+            display_name: "Livraison SendCloud",
           },
         },
       ],

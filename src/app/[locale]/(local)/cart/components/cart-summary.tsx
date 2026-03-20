@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,10 +27,17 @@ import {
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+interface ShippingMethod {
+  id: number;
+  name: string;
+  carrier: string;
+  price: number;
+}
+
 interface CartSummaryProps {
   subtotal: number;
   isLoading: boolean;
-  onCheckout: () => void;
+  onCheckout: (methodId: number, shippingCost: number) => void;
 }
 
 export function CartSummary({
@@ -38,6 +46,38 @@ export function CartSummary({
   onCheckout,
 }: CartSummaryProps) {
   const t = useTranslations("cart");
+
+  const [methods, setMethods] = useState<ShippingMethod[]>([]);
+  const [loadingMethods, setLoadingMethods] = useState(true);
+  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
+  const [shippingCost, setShippingCost] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/shipping/methods?country=FR")
+      .then((r) => r.json())
+      .then((data: ShippingMethod[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setMethods(data);
+          setSelectedMethodId(data[0].id);
+          setShippingCost(data[0].price);
+        }
+      })
+      .catch(() => {
+        // Fallback silencieux
+      })
+      .finally(() => setLoadingMethods(false));
+  }, []);
+
+  const handleMethodChange = (value: string) => {
+    const id = parseInt(value, 10);
+    const method = methods.find((m) => m.id === id);
+    if (method) {
+      setSelectedMethodId(id);
+      setShippingCost(method.price);
+    }
+  };
+
+  const total = subtotal + shippingCost;
 
   return (
     <Card className="border-border">
@@ -49,24 +89,46 @@ export function CartSummary({
         {/* Méthode de livraison */}
         <div className="space-y-2">
           <Label>{t("shippingMethod")}</Label>
-          <Select value="standard" disabled>
-            <SelectTrigger className="w-full max-w-none data-[size=default]:h-auto">
-              <SelectValue placeholder={t("standardShippingPlaceholder")} />
-            </SelectTrigger>
-            <SelectContent className="!h-auto">
-              <SelectItem value="standard" className="!h-auto">
-                <div className="flex flex-col justify-between text-start">
-                  <div className="font-medium">{t("standardShipping")}</div>
-                  <div className="text-muted-foreground text-sm">
-                    {t("deliveryTime")}
-                  </div>
-                  <div className="font-medium text-green-600">
-                    {t("shippingFree")}
-                  </div>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          {loadingMethods ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground h-10">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t("loadingShippingMethods")}
+            </div>
+          ) : methods.length === 0 ? (
+            <div className="text-sm text-muted-foreground h-10 flex items-center">
+              {t("noShippingMethods")}
+            </div>
+          ) : (
+            <Select
+              value={selectedMethodId?.toString()}
+              onValueChange={handleMethodChange}
+            >
+              <SelectTrigger className="w-full max-w-none data-[size=default]:h-auto">
+                <SelectValue placeholder={t("selectShippingMethod")} />
+              </SelectTrigger>
+              <SelectContent className="!h-auto">
+                {methods.map((method) => (
+                  <SelectItem
+                    key={method.id}
+                    value={method.id.toString()}
+                    className="!h-auto"
+                  >
+                    <div className="flex flex-col justify-between text-start py-1">
+                      <div className="font-medium">{method.name}</div>
+                      <div className="text-muted-foreground text-sm">
+                        {method.carrier}
+                      </div>
+                      <div className="font-medium text-primary">
+                        {method.price === 0
+                          ? t("shippingFree")
+                          : `${method.price.toFixed(2)} €`}
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Résumé */}
@@ -77,11 +139,15 @@ export function CartSummary({
           </div>
           <div className="flex justify-between text-sm">
             <span>{t("shipping")}</span>
-            <span className="text-green-600">{t("shippingFree")}</span>
+            <span className={shippingCost === 0 ? "text-green-600" : ""}>
+              {shippingCost === 0
+                ? t("shippingFree")
+                : `${shippingCost.toFixed(2)} €`}
+            </span>
           </div>
           <div className="flex justify-between font-medium">
             <span>{t("total")}</span>
-            <span>{subtotal.toFixed(2)} €</span>
+            <span>{total.toFixed(2)} €</span>
           </div>
         </div>
 
@@ -102,7 +168,15 @@ export function CartSummary({
         </div>
 
         {/* Bouton paiement */}
-        <Button className="w-full" onClick={onCheckout} disabled={isLoading}>
+        <Button
+          className="w-full"
+          onClick={() => {
+            if (selectedMethodId !== null) {
+              onCheckout(selectedMethodId, shippingCost);
+            }
+          }}
+          disabled={isLoading || loadingMethods || selectedMethodId === null}
+        >
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

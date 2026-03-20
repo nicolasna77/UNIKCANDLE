@@ -160,6 +160,15 @@ model Order {
   refundedAt     DateTime?
   refundAmount   Float?
 
+  // Frais de port
+  shippingCost     Float?  @default(0)
+  shippingMethodId Int?
+
+  // SendCloud
+  sendcloudParcelId String?
+  trackingNumber    String?
+  trackingUrl       String?
+
   shippingAddress Address?
   user            User        @relation(fields: [userId], references: [id])
   items           OrderItem[]

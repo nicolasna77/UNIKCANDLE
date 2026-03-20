@@ -1,6 +1,17 @@
 "use client";
 import Image from "next/image";
-import { ShoppingCart, Package, MapPin, User, Printer, Download } from "lucide-react";
+import { useState } from "react";
+import {
+  ShoppingCart,
+  Package,
+  MapPin,
+  User,
+  Printer,
+  Download,
+  Truck,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { QRCode } from "@/components/ui/shadcn-io/qr-code";
 
 import {
@@ -40,6 +51,11 @@ interface ExtendedOrder {
   total: number;
   status: Order["status"];
   createdAt: string;
+  shippingCost?: number | null;
+  shippingMethodId?: number | null;
+  sendcloudParcelId?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
   user: {
     id: string;
     name: string;
@@ -57,7 +73,10 @@ interface ExtendedOrder {
   } | null;
 }
 
-const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {
+const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) => {
+  const [order, setOrder] = useState<ExtendedOrder>(initialOrder);
+  const [sendcloudLoading, setSendcloudLoading] = useState(false);
+  const [sendcloudError, setSendcloudError] = useState<string | null>(null);
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = order.items.reduce(
     (acc, item) => acc + item.quantity * item.price,
@@ -73,6 +92,35 @@ const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {
     }
     // Otherwise, add https:// protocol
     return `https://${url}`;
+  };
+
+  const handleSendcloudAction = async (action: "create_parcel" | "get_label") => {
+    setSendcloudLoading(true);
+    setSendcloudError(null);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/sendcloud`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Erreur");
+
+      if (action === "create_parcel") {
+        setOrder((prev) => ({
+          ...prev,
+          sendcloudParcelId: String(data.parcelId),
+          trackingNumber: data.trackingNumber,
+          trackingUrl: data.trackingUrl,
+        }));
+      } else if (action === "get_label" && data.labelUrl) {
+        window.open(data.labelUrl, "_blank");
+      }
+    } catch (err) {
+      setSendcloudError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSendcloudLoading(false);
+    }
   };
 
   const handlePrint = () => {
@@ -457,6 +505,95 @@ const DialogDetailOrder = ({ order }: { order: ExtendedOrder }) => {
                 <span>Total de la commande</span>
                 <span className="text-primary">{totalAmount.toFixed(2)}€</span>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* SendCloud */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                Livraison SendCloud
+              </h3>
+
+              {sendcloudError && (
+                <p className="text-sm text-destructive mb-3">{sendcloudError}</p>
+              )}
+
+              {order.shippingCost != null && order.shippingCost > 0 && (
+                <p className="text-sm text-muted-foreground mb-3">
+                  Frais de port : <span className="font-medium text-foreground">{order.shippingCost.toFixed(2)} €</span>
+                </p>
+              )}
+
+              {order.sendcloudParcelId ? (
+                <div className="space-y-3">
+                  <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
+                    <p>
+                      <span className="text-muted-foreground">Colis n° </span>
+                      <span className="font-mono font-medium">{order.sendcloudParcelId}</span>
+                    </p>
+                    {order.trackingNumber && (
+                      <p>
+                        <span className="text-muted-foreground">Suivi : </span>
+                        <span className="font-mono font-medium">{order.trackingNumber}</span>
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    {order.trackingUrl && (
+                      <a
+                        href={order.trackingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Suivre le colis
+                      </a>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSendcloudAction("get_label")}
+                      disabled={sendcloudLoading}
+                      className="gap-2 ml-auto"
+                    >
+                      {sendcloudLoading ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Download className="h-3 w-3" />
+                      )}
+                      Télécharger l&apos;étiquette
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground italic">
+                    Aucun colis créé.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSendcloudAction("create_parcel")}
+                    disabled={sendcloudLoading || !order.shippingAddress || !order.shippingMethodId}
+                    className="gap-2"
+                  >
+                    {sendcloudLoading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Package className="h-3 w-3" />
+                    )}
+                    Créer le colis SendCloud
+                  </Button>
+                  {!order.shippingMethodId && (
+                    <p className="text-xs text-muted-foreground">
+                      Méthode de livraison manquante (commande ancienne)
+                    </p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 

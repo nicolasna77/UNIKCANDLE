@@ -17,6 +17,13 @@ export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const { isLoading, handleCheckout } = useCheckout(cart);
 
+  const handleCheckoutWithShipping = (
+    methodId: number,
+    shippingCost: number
+  ) => {
+    handleCheckout(methodId, shippingCost);
+  };
+
   // Helper function to generate unique key for cart items (must match CartContext)
   const getItemKey = (item: (typeof cart)[0]) => {
     return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}`;
@@ -113,7 +120,7 @@ export default function CartPage() {
           <CartSummary
             subtotal={subtotal}
             isLoading={isLoading}
-            onCheckout={handleCheckout}
+            onCheckout={handleCheckoutWithShipping}
           />
         </div>
       </div>

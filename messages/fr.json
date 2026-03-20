@@ -259,7 +259,10 @@
     "mustBeLoggedIn": "Vous devez être connecté pour procéder au paiement.",
     "serverError": "Erreur du serveur. Veuillez réessayer dans quelques instants.",
     "cannotInitializePayment": "Impossible d'initialiser le système de paiement",
-    "redirectionError": "Erreur lors de la redirection vers le paiement"
+    "redirectionError": "Erreur lors de la redirection vers le paiement",
+    "loadingShippingMethods": "Chargement des méthodes de livraison...",
+    "selectShippingMethod": "Choisissez une méthode de livraison",
+    "noShippingMethods": "Aucune méthode de livraison disponible"
   },
   "checkout": {
     "title": "Paiement",

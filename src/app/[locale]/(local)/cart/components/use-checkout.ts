@@ -16,6 +16,7 @@ export function useCheckout(cart: CartItem[]) {
 
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shippingRef = useRef<{ methodId: number; cost: number } | null>(null);
 
   // Vérifier si l'utilisateur revient après annulation
   useEffect(() => {
@@ -41,7 +42,8 @@ export function useCheckout(cart: CartItem[]) {
     };
   }, [isLoading]);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (methodId: number, shippingCost: number) => {
+    shippingRef.current = { methodId, cost: shippingCost };
     try {
       setIsLoading(true);
 
@@ -88,6 +90,8 @@ export function useCheckout(cart: CartItem[]) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartItems: cart,
+          selectedMethodId: shippingRef.current?.methodId,
+          shippingCost: shippingRef.current?.cost ?? 0,
           returnUrl: `${window.location.origin}/cart`,
         }),
       });
