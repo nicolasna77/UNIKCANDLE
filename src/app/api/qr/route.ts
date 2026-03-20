@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { routing } from "@/i18n/routing";
 
 export async function POST(request: Request) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 
     // Générer le QR code
     const qrCodeData = await QRCode.toDataURL(
-      `${process.env.NEXT_PUBLIC_APP_URL}/ar/${code}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/${routing.defaultLocale}/ar/${code}`
     );
 
     // Sauvegarder dans la base de données

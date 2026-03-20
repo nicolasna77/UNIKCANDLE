@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import QRCode from "qrcode";
+import { routing } from "@/i18n/routing";
 
 export async function GET(
   request: Request,
@@ -28,7 +29,7 @@ export async function GET(
         ? baseUrl
         : `https://${baseUrl}`;
 
-    const qrUrl = `${fullBaseUrl}/ar/${code}`;
+    const qrUrl = `${fullBaseUrl}/${routing.defaultLocale}/ar/${code}`;
 
     const pngBuffer = await QRCode.toBuffer(qrUrl, {
       type: "png",

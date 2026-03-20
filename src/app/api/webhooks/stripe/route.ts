@@ -131,82 +131,98 @@ export async function POST(req: Request) {
           throw new Error("Utilisateur non trouvé");
         }
 
-        // Créer la commande dans la base de données
-        const order = await prisma.order.create({
-          data: {
-            userId: session.metadata.userId,
-            total: session.amount_total ? session.amount_total / 100 : 0,
-            items: {
-              create: cartItems.map((item: CartItem) => ({
-                productId: item.id,
-                quantity: item.quantity,
-                price: item.price,
-                scentId: item.scentId,
-                audioUrl: item.audioUrl,
-              })),
-            },
-            shippingAddress: {
-              create: {
-                name: session.customer_details?.name || "",
-                street:
-                  session.shipping_details?.address?.line1 ||
-                  session.collected_information?.shipping_details?.address
-                    ?.line1 ||
-                  session.customer_details?.address?.line1 ||
-                  "",
-                city:
-                  session.shipping_details?.address?.city ||
-                  session.collected_information?.shipping_details?.address
-                    ?.city ||
-                  session.customer_details?.address?.city ||
-                  "",
-                state:
-                  session.shipping_details?.address?.state ||
-                  session.collected_information?.shipping_details?.address
-                    ?.state ||
-                  session.customer_details?.address?.state ||
-                  "",
-                zipCode:
-                  session.shipping_details?.address?.postal_code ||
-                  session.collected_information?.shipping_details?.address
-                    ?.postal_code ||
-                  session.customer_details?.address?.postal_code ||
-                  "",
-                country:
-                  session.shipping_details?.address?.country ||
-                  session.collected_information?.shipping_details?.address
-                    ?.country ||
-                  session.customer_details?.address?.country ||
-                  "",
-              },
-            },
-          },
-          include: {
-            items: {
-              include: {
-                product: {
-                  include: {
-                    images: true,
-                  },
-                },
-                scent: true,
-              },
-            },
-            user: true,
-          },
-        });
+        // Extraire les métadonnées avant la transaction (évite l'erreur TS null)
+        const userId = session.metadata!.userId;
+        const orderTotal = session.amount_total ? session.amount_total / 100 : 0;
 
-        // Créer les QR codes pour chaque item de la commande
-        await Promise.all(
-          order.items.map((item, index) =>
-            prisma.qRCode.create({
-              data: {
-                code: cartItems[index].qrCodeId,
-                orderItemId: item.id,
+        // Créer la commande et les QR codes dans une transaction atomique
+        const order = await prisma.$transaction(async (tx) => {
+          const createdOrder = await tx.order.create({
+            data: {
+              userId,
+              total: orderTotal,
+              items: {
+                create: cartItems.map((item: CartItem) => ({
+                  productId: item.id,
+                  quantity: item.quantity,
+                  price: item.price,
+                  scentId: item.scentId,
+                  audioUrl: item.audioUrl,
+                })),
               },
+              shippingAddress: {
+                create: {
+                  name: session.customer_details?.name || "",
+                  street:
+                    session.shipping_details?.address?.line1 ||
+                    session.collected_information?.shipping_details?.address
+                      ?.line1 ||
+                    session.customer_details?.address?.line1 ||
+                    "",
+                  city:
+                    session.shipping_details?.address?.city ||
+                    session.collected_information?.shipping_details?.address
+                      ?.city ||
+                    session.customer_details?.address?.city ||
+                    "",
+                  state:
+                    session.shipping_details?.address?.state ||
+                    session.collected_information?.shipping_details?.address
+                      ?.state ||
+                    session.customer_details?.address?.state ||
+                    "",
+                  zipCode:
+                    session.shipping_details?.address?.postal_code ||
+                    session.collected_information?.shipping_details?.address
+                      ?.postal_code ||
+                    session.customer_details?.address?.postal_code ||
+                    "",
+                  country:
+                    session.shipping_details?.address?.country ||
+                    session.collected_information?.shipping_details?.address
+                      ?.country ||
+                    session.customer_details?.address?.country ||
+                    "",
+                },
+              },
+            },
+            include: {
+              items: {
+                include: {
+                  product: {
+                    include: {
+                      images: true,
+                    },
+                  },
+                  scent: true,
+                },
+              },
+              user: true,
+            },
+          });
+
+          // Créer les QR codes en mappant par productId (pas par index)
+          await Promise.all(
+            createdOrder.items.map((item) => {
+              const cartItem = cartItems.find(
+                (c: CartItem) => c.id === item.productId
+              );
+              if (!cartItem) {
+                throw new Error(
+                  `Cart item introuvable pour le produit ${item.productId}`
+                );
+              }
+              return tx.qRCode.create({
+                data: {
+                  code: cartItem.qrCodeId,
+                  orderItemId: item.id,
+                },
+              });
             })
-          )
-        );
+          );
+
+          return createdOrder;
+        });
 
         // Préparer les données pour l'email de confirmation
         const emailOrderData = {
