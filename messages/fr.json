@@ -38,11 +38,11 @@
   },
   "concept": {
     "badge": "Le Concept",
-    "title": "Et si ta bougie pouvait parler ?",
+    "title": "Et si votre bougie pouvait parler ?",
     "intro1": "Chez UNIKCANDLE, nous pensons qu'une bougie peut être bien plus qu'un simple objet décoratif.",
     "intro2": "C'est un véritable vecteur d'émotions, capable de transmettre un message, d'évoquer un souvenir, ou tout simplement de faire naître un sourire.",
     "imagine": {
-      "title": "Imagine une élégante bougie parfumée…",
+      "title": "Imaginez une élégante bougie parfumée…",
       "subtitle": "qui renferme un trésor invisible ...",
       "reveal": "En laissant fondre la cire, un médaillon gravé se révèle.",
       "message": "Ce médaillon contient un message audio unique: votre voix, votre mot doux, votre message, ...",
@@ -51,11 +51,11 @@
     "features": {
       "personalize": {
         "title": "Personnalise ta création",
-        "description": "Enregistre ton audio directement sur notre site, nous nous chargerons de l'insérer dans la cire pour garder la surprise jusqu'à ce que la bougie soit allumée."
+        "description": "Enregistrez votre audio directement sur notre site, nous nous chargerons de l'insérer dans la cire pour garder la surprise jusqu'à ce que la bougie soit allumée."
       },
       "moment": {
         "title": "Moment unique",
-        "description": "Une expérience sensorielle unique. Offre la bougie et laisse la magie opérer. Une fois allumée, ta bougie laisse échapper son doux parfum et ton message se dévoile à mesure que la cire fond. Prépare-toi à vivre et à faire vivre un moment suspendu."
+        "description": "Une expérience sensorielle unique. Offrez la bougie et laissez la magie opérer. Une fois allumée, votre bougie laisse échapper son doux parfum et ton message se dévoile à mesure que la cire fond. Préparez-vous à vivre et à faire vivre un moment suspendu."
       }
     },
     "cta": "Découvrir nos bougies"
@@ -65,7 +65,7 @@
     "subtitle": "Allumez la magie de vos souvenirs",
     "steps": {
       "1": {
-        "title": "Choisissez le théme de votre bougie à offrir",
+        "title": "Choisissez le thème de votre bougie à offrir",
         "emoji": "🌸"
       },
       "2": {
@@ -404,14 +404,13 @@
   "hero": {
     "badge": "Nouvelle collection disponible",
     "brandName": "UNIKCANDLE",
-    "tagline1": "Une bougie d'exception.",
-    "tagline2": "Un message.",
-    "tagline3": "Une émotion.",
+    "tagline1": "La seule bougie qui parle avec votre voix",
+    "tagline2": "Créer la suprise la plus inattendue",
     "exploreCollection": "Explorez notre collection",
     "discoverUniverse": "L'univers UNIKCANDLE",
     "stats": {
       "vegetalWax": "Cire Végétale",
-      "privilegedClients": "Clients privilégiés",
+      "privilegedClients": "Parfums de grasse ",
       "madeInFrance": "Made in France"
     },
     "videoAlt": "Vidéo de présentation d'une bougie UNIKCANDLE"

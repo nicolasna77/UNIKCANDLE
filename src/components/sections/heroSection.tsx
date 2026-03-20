@@ -9,12 +9,12 @@ import { useTranslations } from "next-intl";
 // Hoisted outside component to avoid recreation on every render
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false }
+  { ssr: false },
 );
 
 const MotionH1 = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.h1),
-  { ssr: false }
+  { ssr: false },
 );
 
 const montserrat = Montserrat({
@@ -27,7 +27,7 @@ const montserrat = Montserrat({
 const HeroSection = () => {
   const t = useTranslations("hero");
   return (
-    <section className="relative bg-accent  isolate min-h-[100vh] flex items-center justify-center overflow-hidden">
+    <section className="relative bg-accent  isolate min-h-screen flex items-center justify-center overflow-hidden">
       {/* Arrière-plan sophistiqué */}
 
       {/* Éléments décoratifs flottants */}
@@ -62,7 +62,7 @@ const HeroSection = () => {
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 1, delay: 1.2 }}
-                className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full"
+                className="absolute -bottom-2 left-0 h-1 bg-linear-to-r from-primary to-primary/30 rounded-full"
               />
             </MotionH1>
 
@@ -78,9 +78,6 @@ const HeroSection = () => {
                 </li>
                 <li className=" text-muted-foreground leading-relaxed">
                   {t("tagline2")}
-                </li>
-                <li className=" text-muted-foreground leading-relaxed">
-                  {t("tagline3")}
                 </li>
               </ul>
             </MotionDiv>
@@ -102,7 +99,7 @@ const HeroSection = () => {
                   <span className="relative z-10">
                     {t("exploreCollection")}
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-linear-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </MotionDiv>
 

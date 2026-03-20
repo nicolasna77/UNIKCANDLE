@@ -404,14 +404,13 @@
   "hero": {
     "badge": "New collection available",
     "brandName": "UNIKCANDLE",
-    "tagline1": "An exceptional candle.",
-    "tagline2": "A message.",
-    "tagline3": "An emotion.",
+    "tagline1": "The only candle that speaks with your voice",
+    "tagline2": "Create the most unexpected surprise",
     "exploreCollection": "Explore our collection",
     "discoverUniverse": "The UNIKCANDLE universe",
     "stats": {
       "vegetalWax": "Vegetal Wax",
-      "privilegedClients": "Privileged clients",
+      "privilegedClients": "Grasse Perfumes",
       "madeInFrance": "Made in France"
     },
     "videoAlt": "UNIKCANDLE candle presentation video"
