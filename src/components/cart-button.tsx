@@ -21,7 +21,7 @@ const CartButton = () => {
 
   return (
     <div className="relative">
-      <Link href="/cart" className=" hover:text-primary" aria-label={`Shopping cart${totalItems > 0 ? ` (${totalItems} items)` : ''}`}>
+      <Link href="/cart" className=" hover:text-primary" aria-label={mounted && totalItems > 0 ? `Shopping cart (${totalItems} items)` : "Shopping cart"}>
         <ShoppingCartIcon className="w-6 h-6" aria-hidden="true" />
         {mounted && totalItems > 0 && (
           <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
