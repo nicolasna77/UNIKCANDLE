@@ -2,6 +2,34 @@
 @import "tw-animate-css";
 
 :root {
+  /* hex fallbacks for browsers without oklch() support (iOS < 15.4) */
+  --base-50: #faf8f6;
+  --base-100: #f5f2ef;
+  --base-200: #e8e3dd;
+  --base-300: #d8d0c8;
+  --base-400: #aba39a;
+  --base-500: #7e776f;
+  --base-600: #635d56;
+  --base-700: #524e48;
+  --base-800: #3a3530;
+  --base-900: #2e2a26;
+  --base-950: #1e1b18;
+  --base-1000: #141210;
+
+  --primary-50: #faf6f2;
+  --primary-100: #f3ebe0;
+  --primary-200: #e6d5bf;
+  --primary-300: #d8be9d;
+  --primary-400: #c8a47c;
+  --primary-500: #bc9164;
+  --primary-600: #a57a52;
+  --primary-700: #8a6243;
+  --primary-800: #725135;
+  --primary-900: #60432c;
+  --primary-950: #3e2b1c;
+  --primary-1000: #281c12;
+
+  /* oklch values override fallbacks in supporting browsers */
   --base-50: oklch(0.9888 0.0045 78.3);
   --base-100: oklch(0.9698 0.005 79.31);
   --base-200: oklch(0.9237 0.0063 79.64);
