@@ -120,7 +120,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ sessionId: stripeSession.id });
+    return NextResponse.json({ sessionId: stripeSession.id, url: stripeSession.url });
   } catch (error) {
     logger.error("Erreur lors de la création de la session Stripe", error);
     return new NextResponse("Erreur interne du serveur", { status: 500 });

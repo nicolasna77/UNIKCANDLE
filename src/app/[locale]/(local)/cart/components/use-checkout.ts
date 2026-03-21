@@ -5,7 +5,6 @@ import { useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { loadStripe } from "@stripe/stripe-js";
 import { useTranslations } from "next-intl";
 import type { CartItem } from "@/context/CartContext";
 
@@ -47,19 +46,10 @@ export function useCheckout(cart: CartItem[]) {
     try {
       setIsLoading(true);
 
-      const stripePublishableKey =
-        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-      if (!stripePublishableKey) {
-        toast.error(t("stripeConfigMissing"));
-        console.error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY manquante");
-        return;
-      }
-
       // Timeout de sécurité pour réinitialiser le loading après 5 minutes
       timeoutRef.current = setTimeout(
         () => {
           setIsLoading(false);
-          console.log("Timeout atteint, réinitialisation du loading");
         },
         5 * 60 * 1000
       );
@@ -130,35 +120,12 @@ export function useCheckout(cart: CartItem[]) {
 
       const data = JSON.parse(responseText);
 
-      if (!data.sessionId) {
-        throw new Error("Session ID manquant");
+      if (!data.url) {
+        throw new Error("URL de paiement manquante");
       }
 
-      const stripe = await loadStripe(stripePublishableKey);
-      if (!stripe) {
-        toast.error(t("cannotInitializePayment"));
-        throw new Error("Stripe n'a pas pu être initialisé");
-      }
-
-      if (
-        !data.sessionId.startsWith("cs_test_") &&
-        !data.sessionId.startsWith("cs_live_")
-      ) {
-        throw new Error("Session ID invalide - format incorrect");
-      }
-
-      const result = await stripe.redirectToCheckout({
-        sessionId: data.sessionId,
-      });
-
-      if (result.error) {
-        const errorMessage =
-          result.error.message ||
-          `Erreur Stripe (${result.error.type || "unknown"})`;
-
-        toast.error(`${t("redirectionError")}: ${errorMessage}`);
-        throw new Error(errorMessage);
-      }
+      // Redirection directe vers l'URL Stripe Checkout (API moderne)
+      window.location.href = data.url;
     } catch (error) {
       console.error("Erreur lors du paiement:", error);
 
