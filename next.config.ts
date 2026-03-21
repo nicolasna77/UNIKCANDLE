@@ -7,16 +7,6 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
-  async redirects() {
-    return [
-      {
-        // Redirige /ar/:code → /fr/ar/:code pour les QR codes sans locale
-        source: "/ar/:code",
-        destination: "/fr/ar/:code",
-        permanent: true, // 308 — le navigateur met en cache, plus de round-trip
-      },
-    ];
-  },
   images: {
     qualities: [25, 50, 75, 100],
     remotePatterns: [

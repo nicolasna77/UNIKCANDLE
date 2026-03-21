@@ -23,13 +23,16 @@ export async function GET(
       return NextResponse.json({ error: "Code QR manquant" }, { status: 400 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const locale = searchParams.get("locale") ?? routing.defaultLocale;
+
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "localhost:3000";
     const fullBaseUrl =
       baseUrl.startsWith("http://") || baseUrl.startsWith("https://")
         ? baseUrl
         : `https://${baseUrl}`;
 
-    const qrUrl = `${fullBaseUrl}/${routing.defaultLocale}/ar/${code}`;
+    const qrUrl = `${fullBaseUrl}/${locale}/ar/${code}`;
 
     const pngBuffer = await QRCode.toBuffer(qrUrl, {
       type: "png",

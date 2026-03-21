@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import {
   ShoppingCart,
   Package,
@@ -75,6 +76,7 @@ interface ExtendedOrder {
 
 const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) => {
   const [order, setOrder] = useState<ExtendedOrder>(initialOrder);
+  const locale = useLocale();
   const [sendcloudLoading, setSendcloudLoading] = useState(false);
   const [sendcloudError, setSendcloudError] = useState<string | null>(null);
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
@@ -83,13 +85,13 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
     0
   );
 
-  // Génère l'URL complète d'un QR code avec locale (toujours /fr/ar/code)
+  // Génère l'URL complète d'un QR code avec la locale courante
   const getArUrl = (code: string) => {
     const url = process.env.NEXT_PUBLIC_APP_URL || "https://unikcandle.com";
     const base = url.startsWith("http://") || url.startsWith("https://")
       ? url
       : `https://${url}`;
-    return `${base}/fr/ar/${code}`;
+    return `${base}/${locale}/ar/${code}`;
   };
 
   const handleSendcloudAction = async (action: "create_parcel" | "get_label") => {
@@ -460,7 +462,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                             onClick={() => {
                               // Download QR code as SVG
                               const link = document.createElement("a");
-                              link.href = `/api/admin/orders/qr-code/${item.qrCode?.code}`;
+                              link.href = `/api/admin/orders/qr-code/${item.qrCode?.code}?locale=${locale}`;
                               link.download = `qr-${item.product.name.replace(/\s+/g, "-").toLowerCase()}-${item.qrCode?.code}.svg`;
                               document.body.appendChild(link);
                               link.click();
