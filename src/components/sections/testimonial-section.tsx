@@ -30,7 +30,7 @@ export default function TestimonialSection() {
         content: t(`items.${item.id}.content`),
         avatarFallback: item.avatarFallback,
       })),
-    [t]
+    [t],
   );
 
   return (
@@ -54,7 +54,7 @@ export default function TestimonialSection() {
             }}
           >
             {[...testimonials, ...testimonials].map((testimonial, index) => (
-              <Card key={index} className="min-w-[350px] border-primary/10">
+              <Card key={index} className="min-w-87.5 border-primary/10">
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src="https://github.com/shadcn.png" />

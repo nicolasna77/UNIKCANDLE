@@ -148,10 +148,10 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="relative w-full max-w-lg sm:max-w-md md:max-w-lg lg:max-w-xl py-12 aspect-[3/4] mx-auto order-first lg:order-last"
+            className="relative w-full max-w-lg sm:max-w-md md:max-w-lg lg:max-w-xl py-12 aspect-3/4 mx-auto order-first lg:order-last"
           >
             {/* Halo lumineux autour de la vidéo */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-full blur-3xl scale-150 animate-pulse" />
+            <div className="absolute inset-0 bg-linear-to-r from-primary/20 via-primary/10 to-primary/20 rounded-full blur-3xl scale-150 animate-pulse" />
 
             {/* Container de la vidéo */}
             <div className="relative w-full h-full overflow-hidden rounded-2xl">
@@ -169,7 +169,7 @@ const HeroSection = () => {
               </video>
 
               {/* Reflet élégant */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-2xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-white/10 via-transparent to-transparent rounded-2xl" />
             </div>
           </MotionDiv>
         </div>

@@ -45,14 +45,14 @@ const NewsletterSection = () => {
   return (
     <section
       id="newsletter"
-      className="py-24 lg:py-32 bg-gradient-to-br from-card via-card to-primary/5 relative overflow-hidden"
+      className="py-24 lg:py-32 bg-linear-to-br from-card via-card to-primary/5 relative overflow-hidden"
     >
       {/* Éléments décoratifs */}
       <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-b from-primary/5 to-transparent rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-linear-to-b from-primary/10 via-primary/5 to-transparent rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-linear-to-b from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-linear-to-b from-primary/5 to-transparent rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -63,7 +63,7 @@ const NewsletterSection = () => {
           >
             {t("title")}{" "}
             <span
-              className={` ${montserrat.className} text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text `}
+              className={` ${montserrat.className} text-primary bg-linear-to-r from-primary to-primary/80 bg-clip-text `}
             >
               {t("brandName")}
             </span>
