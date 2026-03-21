@@ -83,15 +83,13 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
     0
   );
 
-  // Helper function to normalize URL (ensure protocol is present)
-  const getBaseUrl = () => {
-    const url = process.env.NEXT_PUBLIC_APP_URL || "localhost:3000";
-    // If URL already has protocol, use it as is
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-    // Otherwise, add https:// protocol
-    return `https://${url}`;
+  // Génère l'URL complète d'un QR code avec locale (toujours /fr/ar/code)
+  const getArUrl = (code: string) => {
+    const url = process.env.NEXT_PUBLIC_APP_URL || "https://unikcandle.com";
+    const base = url.startsWith("http://") || url.startsWith("https://")
+      ? url
+      : `https://${url}`;
+    return `${base}/fr/ar/${code}`;
   };
 
   const handleSendcloudAction = async (action: "create_parcel" | "get_label") => {
@@ -298,7 +296,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                   ${
                     item.qrCode
                       ? `<div style="background: #fff; padding: 5px; border-radius: 4px; text-align: center;">
-                      <img src="${generateQRCode(`${getBaseUrl()}/ar/${item.qrCode.code}`)}"
+                      <img src="${generateQRCode(getArUrl(item.qrCode.code))}"
                            alt="QR Code"
                            style="width: 70px; height: 70px; border: 1px solid #d1d5db; border-radius: 4px;" />
                     </div>`
@@ -450,7 +448,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                         <div className="flex flex-col items-center space-y-2">
                           <div className="p-3 bg-white rounded-lg border border-border shadow-sm w-[100px] h-[100px]">
                             <QRCode
-                              data={`${getBaseUrl()}/ar/${item.qrCode.code}`}
+                              data={getArUrl(item.qrCode.code)}
                               foreground="oklch(0 0 0)"
                               background="oklch(1 0 0)"
                               robustness="M"
