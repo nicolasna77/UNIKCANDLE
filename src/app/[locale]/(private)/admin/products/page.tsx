@@ -276,6 +276,7 @@ export default function ProductsPage() {
         <DataTableAdvanced
           columns={columns}
           data={products || []}
+          searchKey="name"
           searchPlaceholder="Rechercher par nom..."
           onExport={handleExport}
           isLoading={isLoading}

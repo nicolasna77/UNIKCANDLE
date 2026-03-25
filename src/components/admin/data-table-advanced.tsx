@@ -133,7 +133,7 @@ export function DataTableAdvanced<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
     manualPagination: isServerSidePagination,
-    pageCount: serverPagination?.pages ?? -1,
+    ...(isServerSidePagination && serverPagination ? { pageCount: serverPagination.pages } : {}),
     state: {
       sorting,
       columnFilters,
@@ -157,9 +157,10 @@ export function DataTableAdvanced<TData, TValue>({
     if (isServerSidePagination && onPageChange) {
       onPageChange(newPage);
     } else {
-      table.setPageIndex(newPage - 1);
+      setPagination((prev) => ({ ...prev, pageIndex: newPage - 1 }));
+      setCurrentPage(newPage);
     }
-  }, [isServerSidePagination, onPageChange, table]);
+  }, [isServerSidePagination, onPageChange]);
 
   return (
     <div className="w-full space-y-4">
