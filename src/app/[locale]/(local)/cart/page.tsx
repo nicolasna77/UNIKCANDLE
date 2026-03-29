@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -16,6 +17,13 @@ export default function CartPage() {
   const t = useTranslations("cart");
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const { isLoading, handleCheckout } = useCheckout(cart);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   const handleCheckoutWithShipping = (
     methodId: number,
