@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const session = await getUser();
 
     const body = await req.json();
-    const { cartItems, selectedMethodId, shippingCost } = body;
+    const { cartItems, selectedMethodId, shippingCost, shippingName } = body;
 
     if (!cartItems || cartItems.length === 0) {
       return new NextResponse("Le panier est vide", { status: 400 });
@@ -93,7 +93,9 @@ export async function POST(req: Request) {
     });
 
     const shippingDisplayName =
-      selectedMethodId === 1 ? "Mondial Relay" : "Chronopost";
+      typeof shippingName === "string" && shippingName.trim()
+        ? shippingName.trim()
+        : "Livraison";
 
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

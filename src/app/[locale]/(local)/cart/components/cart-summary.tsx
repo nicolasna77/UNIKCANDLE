@@ -17,13 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  CreditCard,
-  Truck,
-  Shield,
-  Package,
-  Loader2,
-} from "lucide-react";
+import { CreditCard, Truck, Shield, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -38,7 +32,7 @@ interface ShippingMethod {
 interface CartSummaryProps {
   subtotal: number;
   isLoading: boolean;
-  onCheckout: (methodId: number, shippingCost: number) => void;
+  onCheckout: (methodId: number, shippingCost: number, shippingName: string) => void;
 }
 
 export function CartSummary({
@@ -113,12 +107,12 @@ export function CartSummary({
               <SelectTrigger className="w-full max-w-none data-[size=default]:h-auto">
                 <SelectValue placeholder={t("selectShippingMethod")} />
               </SelectTrigger>
-              <SelectContent className="!h-auto">
+              <SelectContent className="h-auto!">
                 {methods.map((method) => (
                   <SelectItem
                     key={method.id}
                     value={method.id.toString()}
-                    className="!h-auto"
+                    className="h-auto!"
                   >
                     <div className="flex items-center justify-between gap-4 py-1 w-full">
                       <div className="flex flex-col text-start">
@@ -128,7 +122,8 @@ export function CartSummary({
                           {method.deliveryDays && (
                             <span className="ml-2">
                               &bull;{" "}
-                              {method.deliveryDays.min === method.deliveryDays.max
+                              {method.deliveryDays.min ===
+                              method.deliveryDays.max
                                 ? `${method.deliveryDays.min} jour${method.deliveryDays.min > 1 ? "s" : ""} ouvré${method.deliveryDays.min > 1 ? "s" : ""}`
                                 : `${method.deliveryDays.min}–${method.deliveryDays.max} jours ouvrés`}
                             </span>
@@ -136,9 +131,13 @@ export function CartSummary({
                         </div>
                       </div>
                       <div className="font-semibold text-sm shrink-0">
-                        {method.price === 0
-                          ? <span className="text-green-600">{t("shippingFree")}</span>
-                          : `${method.price.toFixed(2)} €`}
+                        {method.price === 0 ? (
+                          <span className="text-green-600">
+                            {t("shippingFree")}
+                          </span>
+                        ) : (
+                          `${method.price.toFixed(2)} €`
+                        )}
                       </div>
                     </div>
                   </SelectItem>
@@ -180,10 +179,6 @@ export function CartSummary({
         {/* Avantages */}
         <div className="space-y-4 border-t border-border pt-4">
           <div className="flex items-center gap-2 text-sm">
-            <Package className="text-primary h-4 w-4" />
-            <span>{t("freeReturns")}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
             <Shield className="text-primary h-4 w-4" />
             <span>{t("securePayment")}</span>
           </div>
@@ -198,7 +193,8 @@ export function CartSummary({
           className="w-full"
           onClick={() => {
             if (selectedMethodId !== null) {
-              onCheckout(selectedMethodId, shippingCost);
+              const method = methods.find((m) => m.id === selectedMethodId);
+              onCheckout(selectedMethodId, shippingCost, method?.name ?? "Livraison");
             }
           }}
           disabled={isLoading || loadingMethods || selectedMethodId === null}

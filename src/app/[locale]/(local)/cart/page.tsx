@@ -19,9 +19,10 @@ export default function CartPage() {
 
   const handleCheckoutWithShipping = (
     methodId: number,
-    shippingCost: number
+    shippingCost: number,
+    shippingName: string
   ) => {
-    handleCheckout(methodId, shippingCost);
+    handleCheckout(methodId, shippingCost, shippingName);
   };
 
   // Helper function to generate unique key for cart items (must match CartContext)
