@@ -43,7 +43,7 @@ yarn-error.log*
 .vercel
 .claude
 
-.mcp.
+.mcp.json
 
 
 .agent

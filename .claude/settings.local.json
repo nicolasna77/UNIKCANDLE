@@ -1,8 +1,0 @@
-{
-  "enabledMcpjsonServers": [
-    "shadcn",
-    "next-devtools",
-    "prisma-local"
-  ],
-  "enableAllProjectMcpServers": true
-}
