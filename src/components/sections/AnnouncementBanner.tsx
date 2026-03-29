@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-export default function AnnouncementBanner() {
-  const t = useTranslations("banner");
-  const [visible, setVisible] = useState(true);
+interface AnnouncementBannerProps {
+  onDismiss: () => void;
+}
 
-  if (!visible) return null;
+export default function AnnouncementBanner({ onDismiss }: AnnouncementBannerProps) {
+  const t = useTranslations("banner");
 
   return (
-    <div className="fixed top-0 inset-x-0 z-[60] h-10 flex items-center justify-center bg-primary text-primary-foreground px-4 text-sm">
+    <div className="relative h-10 flex items-center justify-center bg-primary text-primary-foreground px-4 text-sm">
       <a
         href="#newsletter"
         className="inline-flex items-center gap-2 flex-wrap justify-center hover:underline underline-offset-2"
@@ -21,10 +21,7 @@ export default function AnnouncementBanner() {
         <span className="font-medium opacity-80">{t("cta")}</span>
       </a>
       <button
-        onClick={() => {
-          setVisible(false);
-          document.dispatchEvent(new CustomEvent("banner:dismiss"));
-        }}
+        onClick={onDismiss}
         aria-label="Fermer"
         className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
       >
