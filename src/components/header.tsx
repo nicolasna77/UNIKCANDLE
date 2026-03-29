@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import AuthButton from "./auth-button";
@@ -18,12 +18,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import AnnouncementBanner from "./sections/AnnouncementBanner";
 
 export default function Header() {
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
-  const [bannerVisible, setBannerVisible] = useState(true);
+  const [top, setTop] = useState("top-10");
+
+  useEffect(() => {
+    const handler = () => setTop("top-0");
+    document.addEventListener("banner:dismiss", handler);
+    return () => document.removeEventListener("banner:dismiss", handler);
+  }, []);
 
   const links = [
     { href: "/", label: t("home") },
@@ -32,15 +37,9 @@ export default function Header() {
     { href: "/about", label: t("about") },
   ];
 
-  const handleDismiss = () => {
-    setBannerVisible(false);
-    document.dispatchEvent(new CustomEvent("banner:dismiss"));
-  };
-
   return (
-    <header className="fixed top-0 inset-x-0 z-50">
-      {bannerVisible && <AnnouncementBanner onDismiss={handleDismiss} />}
-      <nav className="bg-background border-b border-border mx-auto max-w-screen-3xl px-4 flex items-center justify-between h-16">
+    <header className={`fixed ${top} inset-x-0 z-50 bg-background border-b border-border transition-[top] duration-200`}>
+      <nav className="mx-auto max-w-screen-3xl px-4 flex items-center justify-between h-16">
         <Link href="/" className="text-xl font-bold">
           <Image
             src="/favicon.ico"
