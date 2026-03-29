@@ -388,19 +388,29 @@
     },
     "mission": {
       "title": "Notre Mission",
-      "description": "Nous avons imaginé des bougies d'exception, sur-mesure, alliant émotion, élégance et sophistication. Avec UNIKCANDLE, illuminez vos instants les plus précieux grâce à des créations exclusives qui marient savoir-faire, luxe et innovation. Une bougie, un message, une expérience inoubliable.",
+      "description1": "Nous avons imaginé bien plus qu'une bougie parfumée : une expérience émotionnelle unique et inoubliable.",
+      "description2": "Avec UNIKCANDLE, chaque création devient un cadeau personnalisé capable de transmettre un message vocal, une intention, une émotion.",
+      "description3": "Offrir une bougie, c'est adorable.",
+      "description4": "Offrir votre voix, c'est inoubliable.",
+      "description5": "Une bougie, un message et une émotion qui reste pour toujours.",
       "cta": "Découvrir nos produits",
       "imageAlt": "Notre mission"
     },
     "process": {
       "title": "Notre Processus",
-      "description1": "Chaque bougie UNIKCANDLE est façonnée comme une œuvre d'art : nos contenants sont sélectionnés parmi des matériaux nobles et travaillés avec la plus grande précision, pour révéler un design élégant et intemporel. Ce processus d'excellence garantit que chaque création est une pièce rare et exclusive, pensée pour sublimer vos espaces.",
-      "description2": "Ce processus artisanal nous permet de réduire les déchets tout en apportant une touche d'authenticité à nos créations.",
+      "description1": "Chaque bougie UNIKCANDLE est pensée comme une expérience.",
+      "description2": "Nous sélectionnons des matériaux de qualité et une cire végétale de soja pour garantir une combustion élégante et sensorielle.",
+      "description3": "Au cœur de la bougie, un médaillon gravé renferme votre message audio, soigneusement intégré dans la cire.",
+      "description4": "Au moment de l'allumage, la magie opère : le message se révèle progressivement, créant un effet de surprise unique.",
+      "description5": "Un savoir-faire artisanal au service de l'émotion.",
       "imageAlt": "Notre processus"
     },
     "commitment": {
       "title": "Notre Engagement",
-      "description": "Nos bougies sont imaginées et réalisées en France, avec des matériaux nobles et des fragrances rares, soigneusement sélectionnées parmi les plus belles maisons de parfum. Chaque création incarne l'excellence artisanale et offre une expérience olfactive, visuelle et émotionnelle inégalée.",
+      "description1": "Nos bougies sont conçues et préparées en France, avec exigence et attention.",
+      "description2": "Nous utilisons des parfums de Grasse sans CMR, sans phtalates et sans maltraitance animale, pour une expérience saine et qualitative.",
+      "description3": "Chaque création est pensée pour marquer un moment de vie : naissance, amour, remerciement, déclaration…",
+      "description4": "Parce que certaines choses méritent d'être dites autrement.",
       "imageAlt": "Notre engagement"
     }
   },

@@ -388,19 +388,29 @@
     },
     "mission": {
       "title": "Our Mission",
-      "description": "We have created exceptional, custom candles that combine emotion, elegance, and sophistication. With UNIKCANDLE, illuminate your most precious moments with exclusive creations that blend craftsmanship, luxury, and innovation. One candle, one message, one unforgettable experience.",
+      "description1": "We imagined much more than a scented candle: a unique and unforgettable emotional experience.",
+      "description2": "With UNIKCANDLE, each creation becomes a personalised gift capable of conveying a voice message, an intention, an emotion.",
+      "description3": "Giving a candle is lovely.",
+      "description4": "Giving your voice is unforgettable.",
+      "description5": "One candle, one message and an emotion that lasts forever.",
       "cta": "Discover our products",
       "imageAlt": "Our mission"
     },
     "process": {
       "title": "Our Process",
-      "description1": "Each UNIKCANDLE candle is crafted like a work of art: our containers are selected from noble materials and worked with the greatest precision to reveal an elegant and timeless design. This process of excellence ensures that each creation is a rare and exclusive piece, designed to enhance your spaces.",
-      "description2": "This artisanal process allows us to reduce waste while bringing a touch of authenticity to our creations.",
+      "description1": "Each UNIKCANDLE candle is designed as an experience.",
+      "description2": "We select quality materials and soy vegetable wax to ensure an elegant and sensory burn.",
+      "description3": "At the heart of the candle, an engraved medallion holds your audio message, carefully embedded in the wax.",
+      "description4": "At the moment of lighting, the magic happens: the message is gradually revealed, creating a unique surprise effect.",
+      "description5": "Artisanal know-how at the service of emotion.",
       "imageAlt": "Our process"
     },
     "commitment": {
       "title": "Our Commitment",
-      "description": "Our candles are designed and made in France, with noble materials and rare fragrances, carefully selected from the finest perfume houses. Each creation embodies artisanal excellence and offers an unparalleled olfactory, visual, and emotional experience.",
+      "description1": "Our candles are designed and prepared in France, with care and attention.",
+      "description2": "We use Grasse fragrances free from CMR substances, phthalates and animal cruelty, for a healthy and high-quality experience.",
+      "description3": "Each creation is designed to mark a life moment: birth, love, gratitude, declaration…",
+      "description4": "Because some things deserve to be said differently.",
       "imageAlt": "Our commitment"
     }
   },
