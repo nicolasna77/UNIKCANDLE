@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <AnnouncementBanner />
       <Header />
-      <div className="bg-background">{children}</div>
+      <div className="bg-background pt-10">{children}</div>
       <Footer />
     </>
   );
