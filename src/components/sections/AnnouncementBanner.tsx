@@ -11,14 +11,14 @@ export default function AnnouncementBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed top-0 inset-x-0 z-[60] h-10 flex items-center justify-center bg-primary text-primary-foreground px-4 text-sm">
+    <div className="fixed top-0 inset-x-0 z-[60] h-10 flex items-center justify-center bg-primary text-primary-foreground px-10 text-xs sm:text-sm">
       <a
         href="#newsletter"
-        className="inline-flex items-center gap-2 flex-wrap justify-center hover:underline underline-offset-2"
+        className="flex items-center gap-1.5 sm:gap-2 truncate hover:underline underline-offset-2"
       >
-        <span>{t("text")}</span>
+        <span className="hidden sm:inline">{t("text")}</span>
         <span className="font-semibold">{t("highlight")}</span>
-        <span className="font-medium opacity-80">{t("cta")}</span>
+        <span className="hidden xs:inline font-medium opacity-80">{t("cta")}</span>
       </a>
       <button
         onClick={() => {
@@ -28,7 +28,7 @@ export default function AnnouncementBanner() {
         aria-label="Fermer"
         className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
       >
-        <X className="h-4 w-4" />
+        <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </button>
     </div>
   );
