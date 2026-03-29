@@ -62,9 +62,7 @@ export default function TestimonialSection() {
                       {testimonial.avatarFallback}
                     </AvatarFallback>
                   </Avatar>
-                  <CardTitle className="text-lg">
-                    {testimonial.name}, {testimonial.role}
-                  </CardTitle>
+                  <CardTitle className="text-lg">{testimonial.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 text-muted-foreground italic">
                   &quot;{testimonial.content}&quot;

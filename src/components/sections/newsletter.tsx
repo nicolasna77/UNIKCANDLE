@@ -73,7 +73,6 @@ const NewsletterSection = () => {
           <p className="text-xl lg:text-2xl text-center text-balance mb-8 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
             {t("description")}
             <span className="text-primary font-semibold">
-              {" "}
               {t("specialDiscounts")}
             </span>{" "}
             {t("subscribers")}
@@ -89,9 +88,6 @@ const NewsletterSection = () => {
                 <h3 className="font-semibold text-card-foreground">
                   {t("benefits.exclusive.title")}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("benefits.exclusive.description")}
-                </p>
               </div>
             </div>
 

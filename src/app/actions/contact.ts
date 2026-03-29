@@ -35,7 +35,7 @@ export async function sendContactMessage(formData: FormData) {
     // Envoyer l'email
     await resend.emails.send({
       from: "UNIKCANDLE Contact <contact@unikcandle.com>",
-      to: "support@unikcandle.com", // Votre adresse email de support
+      to: "support@unikcandle.com",
       replyTo: email,
       subject: `[Contact] ${subject}`,
       react: ContactEmail({

@@ -50,12 +50,12 @@
     },
     "features": {
       "personalize": {
-        "title": "Personnalise ta création",
+        "title": "Personnalisez votre création",
         "description": "Enregistrez votre audio directement sur notre site, nous nous chargerons de l'insérer dans la cire pour garder la surprise jusqu'à ce que la bougie soit allumée."
       },
       "moment": {
         "title": "Moment unique",
-        "description": "Une expérience sensorielle unique. Offrez la bougie et laissez la magie opérer. Une fois allumée, votre bougie laisse échapper son doux parfum et ton message se dévoile à mesure que la cire fond. Préparez-vous à vivre et à faire vivre un moment suspendu."
+        "description": "Une expérience sensorielle unique. Offrez la bougie et laissez la magie opérer. Une fois allumée, votre bougie laisse échapper son doux parfum et votre message se dévoile à mesure que la cire fond. Préparez-vous à vivre et à faire vivre un moment suspendu."
       }
     },
     "cta": "Découvrir nos bougies"
@@ -94,11 +94,11 @@
       "title": "Émotionnelle",
       "description": "Un cadeau raffiné, porteur d'émotions intimes, pour des souvenirs gravés avec élégance."
     },
-    "cta": "Offrez ou offrez-vous une émotion unique"
+    "cta": "Offrez une émotion unique"
   },
   "categoriesSection": {
     "title": "Découvrez notre collection",
-    "description": "Explorez nos différentes univers et enregistrez votre message audio directement sur notre site.",
+    "description": "Explorez nos différents univers et enregistrez votre message audio directement sur notre site.",
     "viewAll": "Voir toutes nos bougies",
     "product": "produit",
     "products": "produits",
@@ -408,12 +408,12 @@
     "badge": "Nouvelle collection disponible",
     "brandName": "UNIKCANDLE",
     "tagline1": "La seule bougie qui parle avec votre voix",
-    "tagline2": "Créer la suprise la plus inattendue",
+    "tagline2": "Créez la suprise la plus inattendue",
     "exploreCollection": "Explorez notre collection",
     "discoverUniverse": "L'univers UNIKCANDLE",
     "stats": {
       "vegetalWax": "Cire Végétale",
-      "privilegedClients": "Parfums de grasse ",
+      "privilegedClients": "de parfums de grasse",
       "madeInFrance": "Made in France"
     },
     "videoAlt": "Vidéo de présentation d'une bougie UNIKCANDLE"
@@ -454,7 +454,7 @@
   },
   "footer": {
     "brandName": "UNIKCANDLE",
-    "tagline": "La bougie qui parle, qui éclaire, qui émeut.",
+    "tagline": "La bougie qui parle",
     "aboutUs": "À propos de nous",
     "followUs": "Suivez-nous",
     "legal": "Mentions légales",

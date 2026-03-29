@@ -94,7 +94,7 @@
       "title": "Emotional",
       "description": "A refined gift, carrying intimate emotions, for memories engraved with elegance."
     },
-    "cta": "Give or treat yourself to a unique emotion"
+    "cta": "Give a unique emotion"
   },
   "categoriesSection": {
     "title": "Discover our collection",
@@ -413,7 +413,7 @@
     "discoverUniverse": "The UNIKCANDLE universe",
     "stats": {
       "vegetalWax": "Vegetal Wax",
-      "privilegedClients": "Grasse Perfumes",
+      "privilegedClients": "Grasse perfumes",
       "madeInFrance": "Made in France"
     },
     "videoAlt": "UNIKCANDLE candle presentation video"
@@ -454,7 +454,7 @@
   },
   "footer": {
     "brandName": "UNIKCANDLE",
-    "tagline": "The candle that speaks, that lights, that moves.",
+    "tagline": "The candle that speaks",
     "aboutUs": "About us",
     "followUs": "Follow us",
     "legal": "Legal notice",

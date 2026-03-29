@@ -130,7 +130,7 @@ const HeroSection = () => {
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-primary">100%</div>
+                <div className="text-2xl font-bold text-primary">10%</div>
                 <div className="text-sm text-muted-foreground">
                   {t("stats.privilegedClients")}
                 </div>
