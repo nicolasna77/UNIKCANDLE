@@ -92,6 +92,9 @@ export async function POST(req: Request) {
       },
     });
 
+    const shippingDisplayName =
+      selectedMethodId === 1 ? "Mondial Relay" : "Chronopost";
+
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -110,7 +113,7 @@ export async function POST(req: Request) {
               amount: Math.round(shippingCost * 100),
               currency: "eur",
             },
-            display_name: "Livraison SendCloud",
+            display_name: shippingDisplayName,
           },
         },
       ],
