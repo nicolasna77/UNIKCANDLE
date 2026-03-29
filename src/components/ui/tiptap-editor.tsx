@@ -22,6 +22,7 @@ import {
   Undo,
   Redo,
   ImageIcon,
+  CornerDownLeft,
 } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
@@ -175,6 +176,14 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           isActive={editor.isActive("heading", { level: 3 })}
           icon={<Heading3 className="h-4 w-4" />}
           tooltip="Titre 3"
+        />
+
+        <Separator orientation="vertical" className="h-8 mx-1" />
+
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setHardBreak().run()}
+          icon={<CornerDownLeft className="h-4 w-4" />}
+          tooltip="Retour à la ligne (Shift+Enter)"
         />
 
         <Separator orientation="vertical" className="h-8 mx-1" />
