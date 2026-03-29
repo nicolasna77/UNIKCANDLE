@@ -1,4 +1,9 @@
 {
+  "banner": {
+    "text": "Inscrivez-vous à notre newsletter et recevez",
+    "highlight": "-20% sur votre première commande",
+    "cta": "En profiter →"
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue",

@@ -1,4 +1,9 @@
 {
+  "banner": {
+    "text": "Subscribe to our newsletter and receive",
+    "highlight": "-20% off your first order",
+    "cta": "Get it →"
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
