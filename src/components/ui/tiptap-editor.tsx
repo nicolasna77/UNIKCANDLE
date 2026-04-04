@@ -282,6 +282,16 @@ export function TipTapEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
+        paragraph: {
+          HTMLAttributes: {
+            class: "my-3",
+          },
+        },
+        heading: {
+          HTMLAttributes: {
+            class: "font-bold my-3",
+          },
+        },
         bulletList: {
           HTMLAttributes: {
             class: "list-disc pl-6 my-2",

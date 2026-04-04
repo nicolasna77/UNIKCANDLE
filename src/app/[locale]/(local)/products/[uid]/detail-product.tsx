@@ -253,10 +253,10 @@ const DetailProduct = ({ productId }: { productId: string }) => {
         <div className="mt-16 space-y-8">
           <div className=" py-6">
             <h2 className="text-2xl font-bold mb-4">{t("detail.description")}</h2>
-            <p
-              className=" leading-relaxed"
+            <div
+              className="prose prose-sm dark:prose-invert max-w-none leading-relaxed"
               dangerouslySetInnerHTML={{ __html: translatedDescription }}
-            ></p>
+            />
           </div>
 
           <ReviewProduct product={product} />
