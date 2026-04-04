@@ -254,7 +254,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
           <div className=" py-6">
             <h2 className="text-2xl font-bold mb-4">{t("detail.description")}</h2>
             <div
-              className="prose prose-sm dark:prose-invert max-w-none leading-relaxed"
+              className="prose prose-sm dark:prose-invert max-w-none leading-relaxed [&_p]:my-3 [&_p:empty]:h-[1.2em]"
               dangerouslySetInnerHTML={{ __html: translatedDescription }}
             />
           </div>

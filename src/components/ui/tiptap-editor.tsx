@@ -360,7 +360,11 @@ export function TipTapEditor({
           "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-2",
           "[&_.ProseMirror_li]:my-1",
           "[&_.ProseMirror_ul_li]:marker:text-foreground",
-          "[&_.ProseMirror_ol_li]:marker:text-foreground"
+          "[&_.ProseMirror_ol_li]:marker:text-foreground",
+          // Paragraphes vides (double Enter) : forcer une hauteur visible
+          "[&_.ProseMirror_p]:my-3",
+          "[&_.ProseMirror_p:empty]:h-[1.2em]",
+          "[&_.ProseMirror_p.is-empty]:h-[1.2em]"
         )}
       />
     </div>
