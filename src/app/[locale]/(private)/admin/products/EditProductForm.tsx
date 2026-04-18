@@ -33,7 +33,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, Info, Package, Tag, Sparkles } from "lucide-react";
+import { Loader2, Upload, Info, Package, Tag, Sparkles, Medal } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -135,6 +136,8 @@ export default function EditProductForm({
       categoryId: initialData.category?.id || "",
       scentId: initialData.scent?.id || "",
       messageType: initialData.messageType || "audio",
+      hasEngraving: initialData.hasEngraving ?? false,
+      engravingPrice: initialData.engravingPrice ?? null,
     },
   });
 
@@ -637,6 +640,74 @@ export default function EditProductForm({
                   )}
                 />
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Gravure médaillon */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Medal className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="text-lg font-semibold">Gravure médaillon</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Option de gravure personnalisée sur le médaillon
+                  </p>
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="hasEngraving"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Activer la gravure</FormLabel>
+                      <FormDescription>
+                        Propose aux clients de graver un texte sur le médaillon
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value ?? false}
+                        onCheckedChange={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("hasEngraving") && (
+                <FormField
+                  control={form.control}
+                  name="engravingPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prix de la gravure (€)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00 (gratuit)"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? null : parseFloat(e.target.value)
+                            )
+                          }
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Laisser vide ou 0 pour une gravure gratuite
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             {/* Actions */}

@@ -31,6 +31,8 @@ interface Product {
   subTitle: string;
   slogan: string;
   messageType: "audio" | "text";
+  hasEngraving: boolean;
+  engravingPrice?: number | null;
   category: Category;
   arAnimation: string;
   scent: Scent;

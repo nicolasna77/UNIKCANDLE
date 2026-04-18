@@ -18,6 +18,8 @@ export const productSchema = z.object({
   categoryId: z.string().min(1, "La catégorie est requise"),
   arAnimation: z.string().optional(),
   messageType: z.enum(["audio", "text"]).default("audio"),
+  hasEngraving: z.boolean().default(false),
+  engravingPrice: z.coerce.number().min(0).optional().nullable(),
   scentId: z.string().min(1, "Le parfum est requis"),
   imageUrl: z.string().url("L'URL de l'image doit être valide").optional().or(z.literal("")),
   images: z
@@ -127,6 +129,8 @@ export interface ProductWithRelations {
   slogan: string;
   sloganEN?: string | null;
   messageType: "audio" | "text";
+  hasEngraving: boolean;
+  engravingPrice?: number | null;
   category: {
     id: string;
     name: string;

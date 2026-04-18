@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Plus, Minus, MessageSquare } from "lucide-react";
+import { Trash2, Plus, Minus, MessageSquare, Medal } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { AudioPlayer } from "@/components/AudioPlayer";
@@ -91,8 +91,37 @@ export function CartItemCard({
                   </div>
                 )}
 
+                {/* Affichage de la gravure médaillon */}
+                {item.engravingText && (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Medal className="h-3 w-3 text-primary" />
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                        {t("engravingCustomized")}
+                      </span>
+                      {item.engravingPrice && item.engravingPrice > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          +{(item.engravingPrice * (item.quantity || 1)).toFixed(2)} €
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {item.engravingText.split(",").map((text, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-center px-3 py-1.5 bg-primary/5 rounded-lg border border-primary/20"
+                        >
+                          <p className="font-serif italic text-primary tracking-widest text-xs">
+                            ✦ {text.trim()} ✦
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Affichage si pas de personnalisation */}
-                {!item.audioUrl && !item.textMessage && (
+                {!item.audioUrl && !item.textMessage && !item.engravingText && (
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
                       {t("noAudio")}
@@ -137,8 +166,20 @@ export function CartItemCard({
 
               <div className="text-right">
                 <div className="font-medium text-foreground">
-                  {(item.price * (item.quantity || 1)).toFixed(2)} €
+                  {(
+                    (item.price +
+                      (item.engravingText && item.engravingPrice
+                        ? item.engravingPrice
+                        : 0)) *
+                    (item.quantity || 1)
+                  ).toFixed(2)}{" "}
+                  €
                 </div>
+                {item.engravingText && item.engravingPrice && item.engravingPrice > 0 && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("engravingIncluded")}
+                  </div>
+                )}
               </div>
             </div>
           </div>

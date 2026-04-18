@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, Minus, Plus } from "lucide-react";
 import ReviewProduct from "./review-product";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProductById, type ProductWithDetails } from "@/services/products";
@@ -8,6 +8,7 @@ import LoadingPage from "./loading";
 import { useCart } from "@/context/CartContext";
 import AudioRecord from "./audio-record";
 import TextMessage from "./text-message";
+import MedallionEngraving from "./medallion-engraving";
 import { toast } from "sonner";
 import ProductImageCarousel from "@/components/ProductImageCarousel";
 import { Badge } from "@/components/ui/badge";
@@ -129,9 +130,9 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   };
   const { addToCart } = useCart();
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>();
-  const [currentTextMessage, setCurrentTextMessage] = useState<
-    string | undefined
-  >();
+  const [currentTextMessage, setCurrentTextMessage] = useState<string | undefined>();
+  const [currentEngravingText, setCurrentEngravingText] = useState<string | undefined>();
+  const [quantity, setQuantity] = useState(1);
 
   // Get translated fields based on current locale
   const translatedName = product ? getProductTranslation(product, "name", locale) : "";
@@ -185,7 +186,9 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       category: product.category,
       audioUrl: currentAudioUrl,
       textMessage: currentTextMessage,
-      quantity: 1,
+      engravingText: currentEngravingText,
+      engravingPrice: product.hasEngraving ? (product.engravingPrice ?? 0) : undefined,
+      quantity,
     });
     toast.success(t("card.addedToCart"));
   };
@@ -239,8 +242,40 @@ const DetailProduct = ({ productId }: { productId: string }) => {
               />
             )}
 
-            {/* Boutons d'action */}
-            <div className="flex gap-4">
+            {/* Gravure médaillon */}
+            {product.hasEngraving && (
+              <MedallionEngraving
+                productId={product.id}
+                engravingPrice={product.engravingPrice ?? null}
+                quantity={quantity}
+                onEngravingChange={setCurrentEngravingText}
+              />
+            )}
+
+            {/* Sélecteur de quantité + Bouton panier */}
+            <div className="flex gap-3 items-center">
+              <div className="flex items-center border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  className="px-3 py-2 hover:bg-muted transition-colors disabled:opacity-40"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
+                  aria-label="Diminuer la quantité"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="px-4 py-2 font-semibold text-sm min-w-[3rem] text-center">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  className="px-3 py-2 hover:bg-muted transition-colors"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  aria-label="Augmenter la quantité"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
               <Button onClick={handleAddToCart} size="lg" className="flex-1">
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 {t("addToCart")}

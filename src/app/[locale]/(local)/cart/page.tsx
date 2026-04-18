@@ -33,26 +33,26 @@ export default function CartPage() {
     handleCheckout(methodId, shippingCost, shippingName);
   };
 
-  // Helper function to generate unique key for cart items (must match CartContext)
   const getItemKey = (item: (typeof cart)[0]) => {
-    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}`;
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}-${item.engravingText || "no-engraving"}`;
   };
 
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * (item.quantity || 1),
-    0
-  );
+  const subtotal = cart.reduce((sum, item) => {
+    const qty = item.quantity || 1;
+    const engravingCost =
+      item.engravingText && item.engravingPrice ? item.engravingPrice : 0;
+    return sum + (item.price + engravingCost) * qty;
+  }, 0);
 
   if (cart.length === 0) {
     return <EmptyCart />;
   }
 
-  // Grouper les produits par type (avec/sans personnalisation)
   const productsWithCustomization = cart.filter(
-    (item) => item.audioUrl || item.textMessage
+    (item) => item.audioUrl || item.textMessage || item.engravingText
   );
   const productsWithoutCustomization = cart.filter(
-    (item) => !item.audioUrl && !item.textMessage
+    (item) => !item.audioUrl && !item.textMessage && !item.engravingText
   );
 
   return (

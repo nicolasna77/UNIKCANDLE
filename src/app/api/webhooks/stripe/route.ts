@@ -19,6 +19,9 @@ interface CartItem {
   scentId: string;
   qrCodeId: string;
   audioUrl?: string;
+  textMessage?: string;
+  engravingText?: string;
+  engravingPrice?: number;
 }
 
 export async function POST(req: Request) {
@@ -156,6 +159,8 @@ export async function POST(req: Request) {
                   price: item.price,
                   scentId: item.scentId,
                   audioUrl: item.audioUrl,
+                  textMessage: item.textMessage,
+                  engravingText: item.engravingText,
                 })),
               },
               shippingAddress: {

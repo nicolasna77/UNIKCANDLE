@@ -106,9 +106,11 @@ model Product {
   arAnimation   String
   slogan        String
   sloganEN      String?
-  messageType   String      @default("audio") // "audio" ou "text"
-  scentId       String
-  categoryId    String
+  messageType    String      @default("audio") // "audio" ou "text"
+  hasEngraving   Boolean     @default(false)
+  engravingPrice Float?
+  scentId        String
+  categoryId     String
   images        Image[]
   orders        OrderItem[]
   category      Category    @relation(fields: [categoryId], references: [id])
@@ -184,9 +186,10 @@ model OrderItem {
   quantity    Int
   price       Float
   scentId     String
-  audioUrl    String?
-  textMessage String?
-  createdAt   DateTime @default(now())
+  audioUrl      String?
+  textMessage   String?
+  engravingText String?
+  createdAt     DateTime @default(now())
   updatedAt   DateTime @updatedAt
   animationId String?
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)

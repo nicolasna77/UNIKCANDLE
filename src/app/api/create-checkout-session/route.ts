@@ -15,7 +15,10 @@ interface CheckoutItem {
     name: string;
   };
   imageUrl: string;
-  audioUrl?: string; // URL de l'audio enregistré
+  audioUrl?: string;
+  textMessage?: string;
+  engravingText?: string;
+  engravingPrice?: number;
 }
 
 export async function POST(req: Request) {
@@ -46,15 +49,24 @@ export async function POST(req: Request) {
           ? item.imageUrl
           : `${process.env.NEXT_PUBLIC_APP_URL}${item.imageUrl}`;
 
+        const unitPrice =
+          item.price +
+          (item.engravingText && item.engravingPrice ? item.engravingPrice : 0);
+
+        const descriptionParts = [`Senteur : ${item.selectedScent.name}`];
+        if (item.engravingText) {
+          descriptionParts.push(`Gravure : ${item.engravingText}`);
+        }
+
         return {
           price_data: {
             currency: "eur",
             product_data: {
               name: item.name,
-              description: `Senteur : ${item.selectedScent.name}`,
+              description: descriptionParts.join(" | "),
               images: [imageUrl],
             },
-            unit_amount: Math.round(item.price * 100),
+            unit_amount: Math.round(unitPrice * 100),
           },
           quantity: item.quantity || 1,
         };
@@ -78,6 +90,9 @@ export async function POST(req: Request) {
           price: item.price,
           qrCodeId: item.qrCodeId,
           audioUrl: item.audioUrl,
+          textMessage: item.textMessage,
+          engravingText: item.engravingText,
+          engravingPrice: item.engravingPrice,
         })
       ),
     };

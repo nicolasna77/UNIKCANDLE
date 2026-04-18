@@ -31,6 +31,8 @@ export interface CartItem {
   subTitle: string;
   audioUrl?: string; // URL de l'audio enregistré
   textMessage?: string; // Message texte personnalisé
+  engravingText?: string; // Texte(s) de gravure médaillon, séparés par virgule
+  engravingPrice?: number; // Prix de la gravure (0 = gratuit)
 }
 
 // Cart context interface
@@ -44,6 +46,8 @@ interface CartContextType {
   removeItemAudio: (id: string) => void;
   updateItemTextMessage: (id: string, textMessage: string) => void;
   removeItemTextMessage: (id: string) => void;
+  updateItemEngraving: (id: string, engravingText: string) => void;
+  removeItemEngraving: (id: string) => void;
 }
 
 // Creating CartContext with default value
@@ -94,18 +98,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Helper function to generate unique key for cart items
   const getItemKey = (item: CartItem) => {
-    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}`;
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}-${item.engravingText || "no-engraving"}`;
   };
 
-  // Helper function to check if two items are the same (same product + scent + exact audio/text)
+  // Helper function to check if two items are the same (same product + scent + exact audio/text/engraving)
   const isSameItem = (item1: CartItem, item2: CartItem) => {
     return (
       item1.id === item2.id &&
       item1.selectedScent.id === item2.selectedScent.id &&
-      // Même audio exact (même URL ou les deux sans audio)
       item1.audioUrl === item2.audioUrl &&
-      // Même message texte exact
-      item1.textMessage === item2.textMessage
+      item1.textMessage === item2.textMessage &&
+      item1.engravingText === item2.engravingText
     );
   };
 
@@ -118,16 +121,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       );
 
       if (existingItem) {
-        console.log("Item already in cart, updating quantity");
         return prevCart.map((cartItem) =>
           isSameItem(cartItem, item)
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
             : cartItem
         );
       }
 
-      console.log("New item added to cart");
-      return [...prevCart, { ...item, quantity: 1 }];
+      return [...prevCart, { ...item, quantity: item.quantity || 1 }];
     });
   };
 
@@ -217,10 +218,37 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const item = prevCart[itemIndex];
       const updatedItem = { ...item, textMessage: undefined };
 
-      // Créer un nouvel élément sans message texte
       const newCart = [...prevCart];
       newCart[itemIndex] = updatedItem;
 
+      return newCart;
+    });
+  };
+
+  // Function to update engraving text for a specific item
+  const updateItemEngraving = (itemKey: string, engravingText: string) => {
+    setCart((prevCart) => {
+      const itemIndex = prevCart.findIndex(
+        (cartItem) => getItemKey(cartItem) === itemKey
+      );
+      if (itemIndex === -1) return prevCart;
+
+      const newCart = [...prevCart];
+      newCart[itemIndex] = { ...newCart[itemIndex], engravingText };
+      return newCart;
+    });
+  };
+
+  // Function to remove engraving from a specific item
+  const removeItemEngraving = (itemKey: string) => {
+    setCart((prevCart) => {
+      const itemIndex = prevCart.findIndex(
+        (cartItem) => getItemKey(cartItem) === itemKey
+      );
+      if (itemIndex === -1) return prevCart;
+
+      const newCart = [...prevCart];
+      newCart[itemIndex] = { ...newCart[itemIndex], engravingText: undefined };
       return newCart;
     });
   };
@@ -241,6 +269,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         removeItemAudio,
         updateItemTextMessage,
         removeItemTextMessage,
+        updateItemEngraving,
+        removeItemEngraving,
       }}
     >
       {children}

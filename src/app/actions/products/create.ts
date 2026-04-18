@@ -35,6 +35,8 @@ export async function createProduct(
       scentId: formData.get("scentId"),
       arAnimation: formData.get("arAnimation") || "default",
       messageType: formData.get("messageType") || "audio",
+      hasEngraving: formData.get("hasEngraving") === "true",
+      engravingPrice: formData.get("engravingPrice") ? Number(formData.get("engravingPrice")) : undefined,
       imageUrl: formData.get("imageUrl") || "",
       images: formData.get("images")
         ? JSON.parse(formData.get("images") as string)
@@ -81,6 +83,8 @@ export async function createProduct(
         slogan: data.slogan,
         sloganEN: data.sloganEN || undefined,
         arAnimation: data.arAnimation || "default",
+        hasEngraving: data.hasEngraving ?? false,
+        engravingPrice: data.engravingPrice ?? null,
         category: { connect: { id: data.categoryId } },
         scent: { connect: { id: data.scentId } },
         images: data.images?.length
@@ -158,6 +162,8 @@ export async function createProductFromJSON(
         slogan: validData.slogan,
         sloganEN: validData.sloganEN || undefined,
         arAnimation: validData.arAnimation || "default",
+        hasEngraving: validData.hasEngraving ?? false,
+        engravingPrice: validData.engravingPrice ?? null,
         category: { connect: { id: validData.categoryId } },
         scent: { connect: { id: validData.scentId } },
         images: validData.images?.length

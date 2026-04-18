@@ -117,6 +117,12 @@ export async function updateProduct(
         ...(data.arAnimation !== undefined && {
           arAnimation: data.arAnimation,
         }),
+        ...(data.hasEngraving !== undefined && {
+          hasEngraving: data.hasEngraving,
+        }),
+        ...(data.engravingPrice !== undefined && {
+          engravingPrice: data.engravingPrice ?? null,
+        }),
         ...(data.categoryId && {
           category: { connect: { id: data.categoryId } },
         }),
@@ -231,6 +237,12 @@ export async function updateProductFromJSON(
         }),
         ...(validData.arAnimation !== undefined && {
           arAnimation: validData.arAnimation,
+        }),
+        ...(validData.hasEngraving !== undefined && {
+          hasEngraving: validData.hasEngraving,
+        }),
+        ...(validData.engravingPrice !== undefined && {
+          engravingPrice: validData.engravingPrice ?? null,
         }),
         ...(validData.categoryId && {
           category: { connect: { id: validData.categoryId } },
