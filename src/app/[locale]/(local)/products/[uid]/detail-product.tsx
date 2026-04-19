@@ -64,7 +64,7 @@ const CategoryDisplay = ({
   );
 };
 
-// Composant pour l'affichage d'un parfum sélectionné
+// Composant pour l'affichage d'un parfum sélectionné (quand 1 seul parfum)
 const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; locale: string }) => {
   const t = useTranslations("products.detail");
   if (!scent) return null;
@@ -73,7 +73,10 @@ const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; loca
   const translatedDescription = getScentTranslation(scent, "description", locale);
 
   return (
-    <Card className="border-border/50 bg-card/50">
+    <Card className="border-border/50 bg-card/50 overflow-hidden">
+      {scent.color && (
+        <div className="h-1 w-full" style={{ backgroundColor: scent.color }} />
+      )}
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <span className="text-2xl">🌸</span>
@@ -83,12 +86,15 @@ const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; loca
       <CardContent className="space-y-4">
         <div className="flex items-start gap-4">
           {scent.icon && (
-            <div className="flex-shrink-0">
+            <div
+              className="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-xl"
+              style={{ backgroundColor: scent.color ? `${scent.color}20` : undefined }}
+            >
               <span className="text-4xl">{scent.icon}</span>
             </div>
           )}
           <div className="flex-1 space-y-2">
-            <h4 className="font-semibold text-card-foreground text-lg">
+            <h4 className="font-semibold text-foreground text-lg">
               {translatedName || t("noName")}
             </h4>
             {translatedDescription && (
@@ -97,9 +103,9 @@ const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; loca
               </p>
             )}
             {scent.notes && scent.notes.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-1">
                 {scent.notes.map((note: string, index: number) => (
-                  <Badge key={index} variant="outline">
+                  <Badge key={index} variant="secondary">
                     {note}
                   </Badge>
                 ))}
