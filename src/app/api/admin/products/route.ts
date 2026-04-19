@@ -19,7 +19,7 @@ export async function GET() {
         deletedAt: null,
       },
       include: {
-        scent: true,
+        scents: true,
         category: true,
         images: true,
       },

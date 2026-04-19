@@ -18,7 +18,7 @@ export async function GET(
       },
       include: {
         images: true,
-        scent: true,
+        scents: true,
         category: true,
         reviews: {
           include: {
@@ -51,11 +51,11 @@ export async function GET(
         : 0;
 
     // Vérification des données requises
-    if (!product.category || !product.scent || !product.images) {
+    if (!product.category || !product.scents || !product.images) {
       console.error("Données manquantes pour le produit:", {
         id: product.id,
         category: product.category,
-        scent: product.scent,
+        scents: product.scents,
         images: product.images,
       });
       return NextResponse.json(

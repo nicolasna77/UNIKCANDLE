@@ -35,7 +35,7 @@ interface Product {
   engravingPrice?: number | null;
   category: Category;
   arAnimation: string;
-  scent: Scent;
+  scents: Scent[];
   images: ProductImage[];
 }
 
@@ -80,7 +80,7 @@ export default function ProductsPage() {
         product.name,
         product.price.toString(),
         product.category.name,
-        product.scent.name,
+        product.scents.map(s => s.name).join("|"),
         product.description.replace(/,/g, ";"),
       ]),
     ]
@@ -174,14 +174,20 @@ export default function ProductsPage() {
       },
     },
     {
-      accessorKey: "scent.name",
-      header: "Parfum",
+      accessorKey: "scents",
+      header: "Parfums",
       cell: ({ row }) => {
-        const scent = row.original.scent;
-        if (!scent) {
+        const scents = row.original.scents;
+        if (!scents || scents.length === 0) {
           return <Badge variant="secondary">Aucun parfum</Badge>;
         }
-        return <Badge variant="secondary">{scent.name}</Badge>;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {scents.map((s) => (
+              <Badge key={s.id} variant="secondary">{s.name}</Badge>
+            ))}
+          </div>
+        );
       },
     },
     {

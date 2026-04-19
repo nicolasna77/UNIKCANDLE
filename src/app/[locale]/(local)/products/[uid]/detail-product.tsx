@@ -15,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Category, Scent } from "@prisma/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import SelectScentComponant from "./select-scent-componant";
 import { useTranslations, useLocale } from "next-intl";
 import { getProductTranslation, getCategoryTranslation, getScentTranslation } from "@/lib/product-translation";
 
@@ -63,7 +64,7 @@ const CategoryDisplay = ({
   );
 };
 
-// Composant pour l'affichage du parfum
+// Composant pour l'affichage d'un parfum sélectionné
 const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; locale: string }) => {
   const t = useTranslations("products.detail");
   if (!scent) return null;
@@ -133,6 +134,13 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   const [currentTextMessage, setCurrentTextMessage] = useState<string | undefined>();
   const [currentEngravingText, setCurrentEngravingText] = useState<string | undefined>();
   const [quantity, setQuantity] = useState(1);
+  const [selectedScent, setSelectedScent] = useState<Scent | undefined>();
+
+  useEffect(() => {
+    if (product?.scents && product.scents.length > 0 && !selectedScent) {
+      setSelectedScent(product.scents[0]);
+    }
+  }, [product, selectedScent]);
 
   // Get translated fields based on current locale
   const translatedName = product ? getProductTranslation(product, "name", locale) : "";
@@ -175,12 +183,17 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       return;
     }
 
+    if (!selectedScent) {
+      toast.error(t("detail.selectScent") || "Veuillez sélectionner un parfum");
+      return;
+    }
+
     addToCart({
       id: product.id,
       name: translatedName,
       price: product.price,
       imageUrl: product.images[0]?.url || "",
-      selectedScent: product.scent,
+      selectedScent,
       description: translatedDescription,
       subTitle: translatedSubTitle,
       category: product.category,
@@ -226,8 +239,16 @@ const DetailProduct = ({ productId }: { productId: string }) => {
 
             <Separator />
 
-            {/* Affichage du parfum */}
-            <ScentDisplay scent={product.scent} locale={locale} />
+            {/* Affichage/sélection du parfum */}
+            {product.scents.length > 1 ? (
+              <SelectScentComponant
+                product={{ ...product, scents: product.scents }}
+                selectedScent={selectedScent || product.scents[0]}
+                setSelectedScent={setSelectedScent}
+              />
+            ) : (
+              <ScentDisplay scent={selectedScent || product.scents[0]} locale={locale} />
+            )}
 
             {/* Message personnalisé - Audio ou Texte selon le type */}
             {product.messageType === "text" ? (

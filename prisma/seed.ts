@@ -379,7 +379,7 @@ async function main() {
         categoryId: product.categoryId,
         slogan: product.slogan,
         arAnimation: product.arAnimation,
-        scentId: product.scentId,
+        scents: { connect: [{ id: product.scentId }] },
         images: {
           create: {
             url: product.imageUrl,
@@ -388,6 +388,7 @@ async function main() {
       },
       include: {
         images: true,
+        scents: true,
       },
     });
     createdProducts.push(createdProduct);
@@ -449,7 +450,7 @@ async function main() {
         items: {
           create: {
             productId: randomProduct.id,
-            scentId: randomProduct.scentId,
+            scentId: randomProduct.scents[0]?.id || createdScents[0].id,
             quantity,
             price: randomProduct.price,
             qrCode: {

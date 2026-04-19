@@ -33,12 +33,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, Info, Package, Tag, Sparkles, Medal } from "lucide-react";
+import { Loader2, Upload, Info, Package, Tag, Sparkles, Medal, Check, ChevronsUpDown } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCategories, type CategoryWithProducts } from "@/services/categories";
 import { fetchScents } from "@/services/scents";
@@ -134,7 +136,7 @@ export default function EditProductForm({
       slogan: initialData.slogan || "",
       sloganEN: initialData.sloganEN || "",
       categoryId: initialData.category?.id || "",
-      scentId: initialData.scent?.id || "",
+      scentIds: initialData.scents?.map(s => s.id) || [],
       messageType: initialData.messageType || "audio",
       hasEngraving: initialData.hasEngraving ?? false,
       engravingPrice: initialData.engravingPrice ?? null,
@@ -577,30 +579,57 @@ export default function EditProductForm({
 
                 <FormField
                   control={form.control}
-                  name="scentId"
+                  name="scentIds"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Parfum *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isPending}
-                      >
-                        <FormControl>
-                          <SelectTrigger aria-required="true">
-                            <SelectValue placeholder="Sélectionner un parfum" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {scents.map((scent) => (
-                            <SelectItem key={scent.id} value={scent.id}>
-                              {scent.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Parfums *</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <span className={field.value?.length ? "" : "text-muted-foreground"}>
+                                {field.value?.length
+                                  ? scents.filter(s => field.value?.includes(s.id)).map(s => s.name).join(", ")
+                                  : "Sélectionner des parfums"}
+                              </span>
+                              <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                            </button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 p-2">
+                          <div className="space-y-1">
+                            {scents.map((scent) => {
+                              const checked = field.value?.includes(scent.id);
+                              return (
+                                <label
+                                  key={scent.id}
+                                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 cursor-pointer hover:bg-accent"
+                                >
+                                  <Checkbox
+                                    checked={!!checked}
+                                    onCheckedChange={(val) => {
+                                      const current = field.value || [];
+                                      field.onChange(
+                                        val
+                                          ? [...current, scent.id]
+                                          : current.filter((id: string) => id !== scent.id)
+                                      );
+                                    }}
+                                  />
+                                  <span className="text-sm">{scent.icon} {scent.name}</span>
+                                  {checked && <Check className="ml-auto h-4 w-4 text-primary" />}
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                       <FormDescription>
-                        Fragrance de la bougie
+                        Fragrances disponibles pour cette bougie (une ou plusieurs)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

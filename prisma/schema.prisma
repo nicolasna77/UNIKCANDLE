@@ -109,16 +109,14 @@ model Product {
   messageType    String      @default("audio") // "audio" ou "text"
   hasEngraving   Boolean     @default(false)
   engravingPrice Float?
-  scentId        String
   categoryId     String
   images        Image[]
   orders        OrderItem[]
   category      Category    @relation(fields: [categoryId], references: [id])
-  scent         Scent       @relation(fields: [scentId], references: [id])
+  scents        Scent[]
   reviews       Review[]
 
   @@index([categoryId])
-  @@index([scentId])
   @@index([deletedAt])
 }
 

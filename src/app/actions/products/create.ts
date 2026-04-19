@@ -32,7 +32,9 @@ export async function createProduct(
       slogan: formData.get("slogan"),
       sloganEN: formData.get("sloganEN") || "",
       categoryId: formData.get("categoryId"),
-      scentId: formData.get("scentId"),
+      scentIds: formData.get("scentIds")
+        ? JSON.parse(formData.get("scentIds") as string)
+        : [],
       arAnimation: formData.get("arAnimation") || "default",
       messageType: formData.get("messageType") || "audio",
       hasEngraving: formData.get("hasEngraving") === "true",
@@ -52,15 +54,15 @@ export async function createProduct(
     const data = validatedFields.data;
 
     // Vérification des relations en parallèle
-    const [existingScent, existingCategory] = await Promise.all([
-      prisma.scent.findUnique({ where: { id: data.scentId } }),
+    const [existingScents, existingCategory] = await Promise.all([
+      prisma.scent.findMany({ where: { id: { in: data.scentIds } } }),
       prisma.category.findUnique({ where: { id: data.categoryId } }),
     ]);
 
-    if (!existingScent) {
+    if (existingScents.length !== data.scentIds.length) {
       return validationError(
-        { scentId: ["Parfum invalide"] },
-        "Le parfum sélectionné n'existe pas"
+        { scentIds: ["Un ou plusieurs parfums sont invalides"] },
+        "Parfum(s) sélectionné(s) introuvable(s)"
       );
     }
 
@@ -86,7 +88,7 @@ export async function createProduct(
         hasEngraving: data.hasEngraving ?? false,
         engravingPrice: data.engravingPrice ?? null,
         category: { connect: { id: data.categoryId } },
-        scent: { connect: { id: data.scentId } },
+        scents: { connect: data.scentIds.map((id: string) => ({ id })) },
         images: data.images?.length
           ? { create: data.images }
           : data.imageUrl
@@ -94,7 +96,7 @@ export async function createProduct(
             : undefined,
       },
       include: {
-        scent: true,
+        scents: true,
         category: true,
         images: true,
       },
@@ -131,15 +133,15 @@ export async function createProductFromJSON(
 
     const validData = validatedFields.data;
 
-    const [existingScent, existingCategory] = await Promise.all([
-      prisma.scent.findUnique({ where: { id: validData.scentId } }),
+    const [existingScents, existingCategory] = await Promise.all([
+      prisma.scent.findMany({ where: { id: { in: validData.scentIds } } }),
       prisma.category.findUnique({ where: { id: validData.categoryId } }),
     ]);
 
-    if (!existingScent) {
+    if (existingScents.length !== validData.scentIds.length) {
       return validationError(
-        { scentId: ["Parfum invalide"] },
-        "Le parfum sélectionné n'existe pas"
+        { scentIds: ["Un ou plusieurs parfums sont invalides"] },
+        "Parfum(s) sélectionné(s) introuvable(s)"
       );
     }
 
@@ -165,7 +167,7 @@ export async function createProductFromJSON(
         hasEngraving: validData.hasEngraving ?? false,
         engravingPrice: validData.engravingPrice ?? null,
         category: { connect: { id: validData.categoryId } },
-        scent: { connect: { id: validData.scentId } },
+        scents: { connect: validData.scentIds.map((id: string) => ({ id })) },
         images: validData.images?.length
           ? { create: validData.images }
           : validData.imageUrl
@@ -173,7 +175,7 @@ export async function createProductFromJSON(
             : undefined,
       },
       include: {
-        scent: true,
+        scents: true,
         category: true,
         images: true,
       },

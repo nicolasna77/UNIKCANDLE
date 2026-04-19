@@ -28,7 +28,7 @@ import {
 } from "@/lib/product-translation";
 
 type ProductWithDetails = Product & {
-  scent: Scent;
+  scents: Scent[];
   category: Category;
   images: PrismaImage[];
   reviews: Review[];
@@ -58,8 +58,8 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
 
   const translatedScentName = useMemo(
     () =>
-      product.scent ? getScentTranslation(product.scent, "name", locale) : "",
-    [product.scent, locale]
+      product.scents?.[0] ? getScentTranslation(product.scents[0], "name", locale) : "",
+    [product.scents, locale]
   );
 
   return (
@@ -135,10 +135,12 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
           <CardDescription itemProp="description">
             {translatedSubTitle}
           </CardDescription>
-          {product.scent && (
+          {product.scents?.length > 0 && (
             <div className="mt-4">
               <span className="font-semibold">{t("card.scentLabel")}</span>
-              {translatedScentName}
+              {product.scents.length === 1
+                ? translatedScentName
+                : `${product.scents.length} parfums disponibles`}
             </div>
           )}
         </CardContent>

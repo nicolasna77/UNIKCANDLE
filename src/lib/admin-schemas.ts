@@ -20,7 +20,7 @@ export const productSchema = z.object({
   messageType: z.enum(["audio", "text"]).default("audio"),
   hasEngraving: z.boolean().default(false),
   engravingPrice: z.coerce.number().min(0).optional().nullable(),
-  scentId: z.string().min(1, "Le parfum est requis"),
+  scentIds: z.array(z.string()).min(1, "Au moins un parfum est requis"),
   imageUrl: z.string().url("L'URL de l'image doit être valide").optional().or(z.literal("")),
   images: z
     .array(
@@ -138,13 +138,13 @@ export interface ProductWithRelations {
     icon: string;
     color: string;
   };
-  scent: {
+  scents: Array<{
     id: string;
     name: string;
     description: string;
     icon: string;
     color: string;
-  };
+  }>;
   images: Array<{
     id: string;
     url: string;

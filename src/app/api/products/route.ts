@@ -39,8 +39,8 @@ export async function GET(request: Request) {
     if (includeAll || includeParam.includes("category")) {
       include.category = true;
     }
-    if (includeAll || includeParam.includes("scent")) {
-      include.scent = true;
+    if (includeAll || includeParam.includes("scents")) {
+      include.scents = true;
     }
     if (includeAll || includeParam.includes("images")) {
       include.images = true;

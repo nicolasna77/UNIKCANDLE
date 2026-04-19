@@ -9,7 +9,7 @@ import { Product, Category, Scent, Image, Review } from "@prisma/client";
 export interface ProductWithDetails extends Omit<Product, 'messageType'> {
   messageType: "audio" | "text";
   category: Category;
-  scent: Scent;
+  scents: Scent[];
   images: Image[];
   reviews: Review[];
   averageRating: number;
@@ -76,7 +76,7 @@ export async function fetchProductById(
   const data = await response.json();
 
   // Vérification des données requises
-  if (!data.category || !data.scent || !data.images) {
+  if (!data.category || !data.scents || !data.images) {
     throw new Error("Données du produit incomplètes");
   }
 
