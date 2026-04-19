@@ -156,7 +156,11 @@ export async function POST(req: Request) {
                 create: cartItems.map((item: CartItem) => ({
                   productId: item.id,
                   quantity: item.quantity,
-                  price: item.price,
+                  price:
+                    item.price +
+                    (item.engravingText && item.engravingPrice
+                      ? item.engravingPrice
+                      : 0),
                   scentId: item.scentId,
                   audioUrl: item.audioUrl,
                   textMessage: item.textMessage,

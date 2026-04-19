@@ -12,6 +12,7 @@ import {
   Truck,
   ExternalLink,
   Loader2,
+  Medal,
 } from "lucide-react";
 import { QRCode } from "@/components/ui/shadcn-io/qr-code";
 
@@ -32,6 +33,7 @@ interface OrderItem {
   id: string;
   quantity: number;
   price: number;
+  engravingText?: string | null;
   product: {
     id: string;
     name: string;
@@ -80,10 +82,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
   const [sendcloudLoading, setSendcloudLoading] = useState(false);
   const [sendcloudError, setSendcloudError] = useState<string | null>(null);
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
-  const totalAmount = order.items.reduce(
-    (acc, item) => acc + item.quantity * item.price,
-    0
-  );
+  const totalAmount = order.total;
 
   // Génère l'URL complète d'un QR code avec la locale courante
   const getArUrl = (code: string) => {
@@ -293,6 +292,9 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                 <div class="print-item-details">
                   <div class="print-item-name">${item.product.name}</div>
                   <div class="print-item-scent">Senteur: ${item.scent.name}</div>
+                  ${item.engravingText ? `<div style="margin-top:4px; font-size:12px; color:#7c3aed;">
+                    🏅 Gravure : ${item.engravingText.split(",").map((t: string) => `✦ ${t.trim()} ✦`).join("  ")}
+                  </div>` : ""}
                 </div>
                 <div class="print-item-qr">
                   ${
@@ -316,8 +318,18 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
               )
               .join("")}
             
+            ${order.items.some((i) => i.engravingText) ? `
+            <div style="margin-top:16px; padding:12px; background:#f5f0ff; border-radius:8px; border:1px solid #c4b5fd;">
+              <div style="font-weight:bold; margin-bottom:8px;">🏅 Gravures à réaliser</div>
+              ${order.items
+                .filter((i) => i.engravingText)
+                .map((i) => `<div style="margin-bottom:6px; font-size:13px;">
+                  <strong>${i.product.name}</strong> :
+                  ${i.engravingText!.split(",").map((t: string) => `<span style="font-style:italic; letter-spacing:2px;"> ✦ ${t.trim()} ✦ </span>`).join("·")}
+                </div>`).join("")}
+            </div>` : ""}
             <div class="print-total">
-              <span>Total de la commande</span>
+              <span>Total payé</span>
               <span>${totalAmount.toFixed(2)}€</span>
             </div>
           </div>
@@ -442,13 +454,31 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
                         Senteur: {item.scent.name}
                       </p>
+                      {item.engravingText && (
+                        <div className="mt-1 space-y-1">
+                          <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                            <Medal className="h-3 w-3" />
+                            Gravure médaillon
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {item.engravingText.split(",").map((text, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 border border-primary/20 font-serif italic text-primary text-xs tracking-wider"
+                              >
+                                ✦ {text.trim()} ✦
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* QR Code */}
                     <div className="md:col-span-3 flex justify-center">
                       {item.qrCode ? (
                         <div className="flex flex-col items-center space-y-2">
-                          <div className="p-3 bg-white rounded-lg border border-border shadow-sm w-[100px] h-[100px]">
+                          <div className="p-3 bg-white rounded-lg border border-border shadow-sm w-25 h-25">
                             <QRCode
                               data={getArUrl(item.qrCode.code)}
                               foreground="oklch(0 0 0)"
@@ -501,12 +531,101 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
               <Separator className="my-4" />
 
               {/* Total */}
-              <div className="flex justify-between items-center text-lg font-semibold">
-                <span>Total de la commande</span>
-                <span className="text-primary">{totalAmount.toFixed(2)}€</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Sous-total articles</span>
+                  <span>
+                    {order.items
+                      .reduce((acc, item) => acc + item.quantity * item.price, 0)
+                      .toFixed(2)}€
+                  </span>
+                </div>
+                {order.shippingCost != null && order.shippingCost > 0 && (
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Frais de port</span>
+                    <span>{order.shippingCost.toFixed(2)}€</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-lg font-semibold pt-2 border-t border-border">
+                  <span>Total payé</span>
+                  <span className="text-primary">{totalAmount.toFixed(2)}€</span>
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Gravures à réaliser */}
+          {order.items.some((item) => item.engravingText) && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2 text-primary">
+                  <Medal className="h-5 w-5" />
+                  Gravures à réaliser
+                </h3>
+
+                <div className="space-y-3">
+                  {order.items
+                    .filter((item) => item.engravingText)
+                    .map((item) => {
+                      const texts = item.engravingText!
+                        .split(",")
+                        .map((t) => t.trim())
+                        .filter(Boolean);
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-xl border border-primary/20 bg-background p-4 space-y-3"
+                        >
+                          {/* En-tête produit */}
+                          <div className="flex items-center gap-3">
+                            {item.product.images?.[0] && (
+                              <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border shrink-0">
+                                <Image
+                                  src={item.product.images[0].url}
+                                  alt={item.product.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-semibold text-sm">
+                                {item.product.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {item.quantity} bougie{item.quantity > 1 ? "s" : ""} · {texts.length} médaillon{texts.length > 1 ? "s" : ""}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Liste des gravures */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {texts.map((text, i) => (
+                              <div
+                                key={i}
+                                className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">
+                                    #{i + 1}
+                                  </span>
+                                  <p className="font-serif italic text-primary tracking-widest text-base font-semibold">
+                                    ✦ {text} ✦
+                                  </p>
+                                </div>
+                                <span className="text-xs text-muted-foreground shrink-0">
+                                  {text.length} car.
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* SendCloud */}
           <Card>
@@ -577,7 +696,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                     variant="outline"
                     size="sm"
                     onClick={() => handleSendcloudAction("create_parcel")}
-                    disabled={sendcloudLoading || !order.shippingAddress || !order.shippingMethodId}
+                    disabled={sendcloudLoading || !order.shippingAddress || order.shippingMethodId == null}
                     className="gap-2"
                   >
                     {sendcloudLoading ? (
@@ -587,7 +706,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                     )}
                     Créer le colis SendCloud
                   </Button>
-                  {!order.shippingMethodId && (
+                  {order.shippingMethodId == null && (
                     <p className="text-xs text-muted-foreground">
                       Méthode de livraison manquante (commande ancienne)
                     </p>

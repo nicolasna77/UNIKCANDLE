@@ -48,10 +48,16 @@ type OrderListItem = {
     name: string;
     email: string;
   };
+  shippingCost?: number | null;
+  shippingMethodId?: number | null;
+  sendcloudParcelId?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
   items: {
     id: string;
     quantity: number;
     price: number;
+    engravingText?: string | null;
     product: {
       id: string;
       name: string;

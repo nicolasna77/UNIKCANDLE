@@ -22,13 +22,7 @@ import {
 export default function Header() {
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
-  const [top, setTop] = useState("top-10");
-
-  useEffect(() => {
-    const handler = () => setTop("top-0");
-    document.addEventListener("banner:dismiss", handler);
-    return () => document.removeEventListener("banner:dismiss", handler);
-  }, []);
+  const top = "top-0";
 
   const links = [
     { href: "/", label: t("home") },

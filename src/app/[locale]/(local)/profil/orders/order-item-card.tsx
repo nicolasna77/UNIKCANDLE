@@ -16,6 +16,7 @@ import {
   MapPin,
   Package,
   Loader2,
+  Medal,
 } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
@@ -286,6 +287,25 @@ const OrderItemCard = ({
                         {item.scent?.name}
                       </span>
                     </div>
+
+                    {item.engravingText && (
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                          <Medal className="h-3 w-3" />
+                          Gravure médaillon
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {item.engravingText.split(",").map((text, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 border border-primary/20 font-serif italic text-primary text-xs tracking-wider"
+                            >
+                              ✦ {text.trim()} ✦
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4 text-sm">

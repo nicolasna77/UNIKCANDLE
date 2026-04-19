@@ -52,6 +52,14 @@ export function CartSummary({
   } | null>(null);
 
   useEffect(() => {
+    const fallback: ShippingMethod = {
+      id: 0,
+      name: "Livraison standard",
+      carrier: "Transporteur",
+      price: 0,
+      deliveryDays: { min: 3, max: 5 },
+    };
+
     fetch("/api/shipping/methods?country=FR")
       .then((r) => r.json())
       .then((data: ShippingMethod[]) => {
@@ -60,10 +68,18 @@ export function CartSummary({
           setSelectedMethodId(data[0].id);
           setShippingCost(data[0].price);
           setSelectedDeliveryDays(data[0].deliveryDays);
+        } else {
+          setMethods([fallback]);
+          setSelectedMethodId(fallback.id);
+          setShippingCost(fallback.price);
+          setSelectedDeliveryDays(fallback.deliveryDays);
         }
       })
       .catch(() => {
-        // Fallback silencieux
+        setMethods([fallback]);
+        setSelectedMethodId(fallback.id);
+        setShippingCost(fallback.price);
+        setSelectedDeliveryDays(fallback.deliveryDays);
       })
       .finally(() => setLoadingMethods(false));
   }, []);

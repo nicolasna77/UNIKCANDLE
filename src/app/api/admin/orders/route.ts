@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
               id: true,
               quantity: true,
               price: true,
+              engravingText: true,
               product: {
                 select: {
                   id: true,
