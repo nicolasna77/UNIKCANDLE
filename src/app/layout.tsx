@@ -80,7 +80,7 @@ export default async function RootLayout({
       </head>
       <Analytics />
       <body className={`${montserrat.variable} antialiased `}>
-        <CartProvider>  
+        <CartProvider>
           <QueryProvider>
             {children}
             <Toaster theme="system" position="top-center" />

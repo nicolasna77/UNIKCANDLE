@@ -225,7 +225,7 @@ export default function OrdersPage() {
               <TableHead>Statut</TableHead>
               <TableHead>Articles</TableHead>
               <TableHead></TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-12.5"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

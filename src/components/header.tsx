@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import AuthButton from "./auth-button";
@@ -32,7 +31,9 @@ export default function Header() {
   ];
 
   return (
-    <header className={`fixed ${top} inset-x-0 z-50 bg-background border-b border-border transition-[top] duration-200`}>
+    <header
+      className={`fixed ${top} inset-x-0 z-50 bg-background border-b border-border transition-[top] duration-200`}
+    >
       <nav className="mx-auto max-w-screen-3xl px-4 flex items-center justify-between h-16">
         <Link href="/" className="text-xl font-bold">
           <Image
