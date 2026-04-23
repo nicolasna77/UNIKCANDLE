@@ -17,7 +17,7 @@ export const productSchema = z.object({
   sloganEN: z.string().min(2, "The slogan must contain at least 2 characters").optional().or(z.literal("")),
   categoryId: z.string().min(1, "La catégorie est requise"),
   arAnimation: z.string().optional(),
-  messageType: z.enum(["audio", "text"]).default("audio"),
+  messageType: z.enum(["video", "text"]).default("video"),
   hasEngraving: z.boolean().default(false),
   engravingPrice: z.coerce.number().min(0).optional().nullable(),
   scentIds: z.array(z.string()).min(1, "Au moins un parfum est requis"),
@@ -128,7 +128,7 @@ export interface ProductWithRelations {
   subTitleEN?: string | null;
   slogan: string;
   sloganEN?: string | null;
-  messageType: "audio" | "text";
+  messageType: "video" | "text";
   hasEngraving: boolean;
   engravingPrice?: number | null;
   category: {

@@ -93,7 +93,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       product: qrCode.orderItem?.product,
-      audioUrl: qrCode.orderItem?.audioUrl,
+      videoUrl: qrCode.orderItem?.videoUrl ?? null,
+      audioUrl: qrCode.orderItem?.audioUrl ?? null,
       animationId: qrCode.orderItem?.animationId,
       scent: qrCode.orderItem?.scent,
     });

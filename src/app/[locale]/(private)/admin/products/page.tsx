@@ -30,7 +30,7 @@ interface Product {
   price: number;
   subTitle: string;
   slogan: string;
-  messageType: "audio" | "text";
+  messageType: "video" | "text";
   hasEngraving: boolean;
   engravingPrice?: number | null;
   category: Category;

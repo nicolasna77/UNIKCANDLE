@@ -101,7 +101,8 @@ const OrderItemCard = ({
       document.body.removeChild(a);
 
       toast.success("Facture téléchargée avec succès", {
-        description: "Ouvrez le fichier et utilisez Imprimer pour l'enregistrer en PDF",
+        description:
+          "Ouvrez le fichier et utilisez Imprimer pour l'enregistrer en PDF",
       });
     } catch (error) {
       console.error("Erreur:", error);
@@ -120,7 +121,9 @@ const OrderItemCard = ({
         // Récupérer les détails complets du produit
         const productResponse = await fetch(`/api/products/${item.productId}`);
         if (!productResponse.ok) {
-          throw new Error(`Erreur lors de la récupération du produit ${item.product.name}`);
+          throw new Error(
+            `Erreur lors de la récupération du produit ${item.product.name}`,
+          );
         }
 
         const productData = await productResponse.json();
@@ -137,10 +140,13 @@ const OrderItemCard = ({
           description: productData.description || "",
           subTitle: productData.subTitle || "",
           audioUrl: item.audioUrl ?? undefined,
+          videoUrl: item.videoUrl ?? undefined,
           textMessage: item.textMessage ?? undefined,
           createdAt: new Date(productData.createdAt),
           updatedAt: new Date(productData.updatedAt),
-          deletedAt: productData.deletedAt ? new Date(productData.deletedAt) : null,
+          deletedAt: productData.deletedAt
+            ? new Date(productData.deletedAt)
+            : null,
         };
 
         // Ajouter chaque produit individuellement au panier via le CartContext
@@ -156,11 +162,14 @@ const OrderItemCard = ({
             label: "Voir le panier",
             onClick: () => (window.location.href = "/cart"),
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Erreur:", error);
-      const errorMessage = error instanceof Error ? error.message : "Impossible d'ajouter les produits au panier";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Impossible d'ajouter les produits au panier";
       toast.error(errorMessage);
     } finally {
       setIsReordering(false);
@@ -186,7 +195,10 @@ const OrderItemCard = ({
       window.location.reload();
     } catch (error) {
       console.error("Erreur:", error);
-      const errorMessage = error instanceof Error ? error.message : "Impossible d'annuler la commande";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Impossible d'annuler la commande";
       toast.error(errorMessage);
     } finally {
       setIsCancelling(false);
@@ -195,7 +207,7 @@ const OrderItemCard = ({
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-md border border-border/50 hover:border-border">
-      <CardHeader className="relative bg-gradient-to-br from-muted/30 via-muted/10 to-transparent p-5 md:p-7 border-b border-border/50">
+      <CardHeader className="relative bg-linear-to-br from-muted/30 via-muted/10 to-transparent p-5 md:p-7 border-b border-border/50">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-3">
             <div className="flex items-center gap-3 flex-wrap">
@@ -313,7 +325,10 @@ const OrderItemCard = ({
                       {item.quantity} × {item.price.toFixed(2)}€
                     </span>
                     <span className="text-muted-foreground font-medium">
-                      Total: <span className="text-foreground font-bold">{(item.quantity * item.price).toFixed(2)}€</span>
+                      Total:{" "}
+                      <span className="text-foreground font-bold">
+                        {(item.quantity * item.price).toFixed(2)}€
+                      </span>
                     </span>
                   </div>
 
@@ -382,7 +397,9 @@ const OrderItemCard = ({
                 </div>
                 <div className="rounded-xl bg-muted/30 border border-border/50 p-4 space-y-2.5 hover:bg-muted/40 transition-colors">
                   <div className="flex items-center gap-2">
-                    <span className={`font-bold text-sm ${statusDetails.color}`}>
+                    <span
+                      className={`font-bold text-sm ${statusDetails.color}`}
+                    >
                       {statusDetails.label}
                     </span>
                   </div>
@@ -417,7 +434,7 @@ const OrderItemCard = ({
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
-                                }
+                                },
                               )}
                             </p>
                           )}
@@ -436,7 +453,8 @@ const OrderItemCard = ({
                             Remboursement en cours
                           </p>
                           <p className="text-xs font-medium text-muted-foreground">
-                            Votre remboursement sera traité sous 5 à 7 jours ouvrés
+                            Votre remboursement sera traité sous 5 à 7 jours
+                            ouvrés
                           </p>
                         </div>
                       </div>
@@ -451,7 +469,7 @@ const OrderItemCard = ({
 
       <Separator className="opacity-50" />
 
-      <CardFooter className="flex flex-col sm:flex-row items-center justify-between p-5 md:p-7 gap-4 bg-gradient-to-br from-muted/20 via-muted/10 to-transparent">
+      <CardFooter className="flex flex-col sm:flex-row items-center justify-between p-5 md:p-7 gap-4 bg-linear-to-br from-muted/20 via-muted/10 to-transparent">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {order.status === "PROCESSING" && (
             <AlertDialog>
@@ -504,9 +522,7 @@ const OrderItemCard = ({
             <span className="text-3xl font-black text-foreground tracking-tight">
               {order.total.toFixed(2)}
             </span>
-            <span className="text-lg font-bold text-muted-foreground">
-              €
-            </span>
+            <span className="text-lg font-bold text-muted-foreground">€</span>
           </div>
         </div>
       </CardFooter>

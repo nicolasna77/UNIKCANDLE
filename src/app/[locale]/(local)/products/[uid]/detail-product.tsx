@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchProductById, type ProductWithDetails } from "@/services/products";
 import LoadingPage from "./loading";
 import { useCart } from "@/context/CartContext";
-import AudioRecord from "./audio-record";
+import VideoRecord from "./video-record";
 import TextMessage from "./text-message";
 import MedallionEngraving from "./medallion-engraving";
 import { toast } from "sonner";
@@ -136,7 +136,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
     error: Error | null;
   };
   const { addToCart } = useCart();
-  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>();
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | undefined>();
   const [currentTextMessage, setCurrentTextMessage] = useState<string | undefined>();
   const [currentEngravingText, setCurrentEngravingText] = useState<string | undefined>();
   const [quantity, setQuantity] = useState(1);
@@ -203,7 +203,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       description: translatedDescription,
       subTitle: translatedSubTitle,
       category: product.category,
-      audioUrl: currentAudioUrl,
+      videoUrl: currentVideoUrl,
       textMessage: currentTextMessage,
       engravingText: currentEngravingText,
       engravingPrice: product.hasEngraving ? (product.engravingPrice ?? 0) : undefined,
@@ -256,16 +256,16 @@ const DetailProduct = ({ productId }: { productId: string }) => {
               <ScentDisplay scent={selectedScent || product.scents[0]} locale={locale} />
             )}
 
-            {/* Message personnalisé - Audio ou Texte selon le type */}
+            {/* Message personnalisé - Vidéo ou Texte selon le type */}
             {product.messageType === "text" ? (
               <TextMessage
                 productId={product.id}
                 onTextChange={setCurrentTextMessage}
               />
             ) : (
-              <AudioRecord
+              <VideoRecord
                 productId={product.id}
-                onAudioChange={setCurrentAudioUrl}
+                onVideoChange={setCurrentVideoUrl}
               />
             )}
 

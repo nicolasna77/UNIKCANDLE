@@ -1,11 +1,12 @@
 "use client";
 
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Plus, Minus, MessageSquare, Medal } from "lucide-react";
+import { Trash2, Plus, Minus, MessageSquare, Medal, Video } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { AudioPlayer } from "@/components/AudioPlayer";
 import { useTranslations } from "next-intl";
 import type { CartItem } from "@/context/CartContext";
 
@@ -56,19 +57,21 @@ export function CartItemCard({
                   {item.selectedScent?.name}
                 </p>
 
-                {/* Affichage de l'audio */}
-                {item.audioUrl && (
+                {/* Affichage de la vidéo */}
+                {item.videoUrl && (
                   <div className="mt-3 space-y-2">
                     <div className="flex items-center gap-2">
+                      <Video className="h-3 w-3 text-primary" />
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
-                        {t("audioCustomized")}
+                        Message vidéo
                       </span>
                     </div>
-                    <div className="max-w-md">
-                      <AudioPlayer
-                        audioUrl={item.audioUrl}
-                        showControls={true}
-                        className="text-xs"
+                    <div className="max-w-xs">
+                      <video
+                        src={item.videoUrl}
+                        controls
+                        playsInline
+                        className="w-full rounded-lg aspect-video object-cover"
                       />
                     </div>
                   </div>
@@ -121,7 +124,7 @@ export function CartItemCard({
                 )}
 
                 {/* Affichage si pas de personnalisation */}
-                {!item.audioUrl && !item.textMessage && !item.engravingText && (
+                {!item.videoUrl && !item.audioUrl && !item.textMessage && !item.engravingText && (
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
                       {t("noAudio")}

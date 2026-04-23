@@ -5,24 +5,18 @@ import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Mic, Volume2, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { Video, AlertCircle } from "lucide-react";
 import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
 import Image from "next/image";
 
-const AudioPlayer = dynamic(
-  () =>
-    import("@/components/AudioPlayer").then((mod) => ({
-      default: mod.AudioPlayer,
-    })),
+const VideoPlayer = dynamic(
+  () => import("@/components/VideoPlayer").then((mod) => ({ default: mod.VideoPlayer })),
   {
     ssr: false,
     loading: () => (
       <div className="flex items-center gap-2 text-muted-foreground">
-        <Volume2 className="w-4 h-4 animate-pulse" />
-        <span>Chargement du lecteur audio...</span>
+        <Video className="w-4 h-4 animate-pulse" />
+        <span>Chargement du lecteur vidéo…</span>
       </div>
     ),
   }
@@ -32,55 +26,28 @@ interface QRData {
   product: {
     name: string;
     description: string;
-    category: {
-      icon: string;
-    };
-    images: {
-      id: string;
-      url: string;
-    }[];
+    category: { icon: string };
+    images: { id: string; url: string }[];
   };
-  scent: {
-    name: string;
-    description: string;
-    color: string;
-  };
-  audioUrl: string;
+  scent: { name: string; description: string; color: string };
+  videoUrl: string | null;
+  audioUrl: string | null;
   animationId: string;
 }
 
 export default function ARPage() {
   const { code } = useParams();
-  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-  const [autoPlayEnabled, setAutoPlayEnabled] = useState(true);
-  const [hasShownAutoPlayWarning, setHasShownAutoPlayWarning] = useState(false);
 
   const { data, isLoading, error } = useQuery<QRData>({
     queryKey: ["qr", code],
     queryFn: async () => {
       const response = await fetch(`/api/qr?code=${code}`);
-      if (!response.ok) {
-        throw new Error("QR code non trouvé");
-      }
+      if (!response.ok) throw new Error("QR code non trouvé");
       return response.json();
     },
   });
 
-  // Afficher un avertissement sur la lecture automatique
-  useEffect(() => {
-    if (autoPlayEnabled && !hasShownAutoPlayWarning) {
-      toast.info("Lecture automatique activée", {
-        description:
-          "Note : Certains navigateurs peuvent bloquer la lecture automatique. Cliquez sur play si l'audio ne démarre pas.",
-        duration: 5000,
-      });
-      setHasShownAutoPlayWarning(true);
-    }
-  }, [autoPlayEnabled, hasShownAutoPlayWarning]);
-
-  if (isLoading) {
-    return <Loading />;
-  }
+  if (isLoading) return <Loading />;
 
   if (error || !data) {
     return (
@@ -97,8 +64,10 @@ export default function ARPage() {
     );
   }
 
+  const hasMedia = data.videoUrl || data.audioUrl;
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center ">
+    <div className="relative min-h-screen flex items-center justify-center">
       {/* Fond animé */}
       <div
         aria-hidden="true"
@@ -117,7 +86,7 @@ export default function ARPage() {
       {/* Contenu principal */}
       <div className="flex z-10 container mx-auto px-4 py-8">
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 w-full items-center">
-          {/* Côté gauche : Image du produit */}
+          {/* Image du produit */}
           <div className="relative flex items-center justify-center">
             {data?.product.images?.[0]?.url ? (
               <div className="relative w-full max-w-md aspect-square bg-card/30 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-2xl">
@@ -141,85 +110,68 @@ export default function ARPage() {
             <ConfettiEmojiAuto icon={data?.product.category.icon || ""} />
           </div>
 
+          {/* Message vidéo / audio / vide */}
           <div className="flex flex-col justify-center space-y-6">
-            {data.audioUrl && (
-              <div className="space-y-5 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 shadow-lg">
+            {data.videoUrl && (
+              <div className="space-y-4 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 shadow-lg">
                 <div className="flex items-center gap-3 pb-2 border-b border-border/50">
                   <div className="p-2 rounded-full bg-primary/10">
-                    <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold text-foreground">
                     Message personnalisé
                   </h3>
                 </div>
 
-                {/* Lecteur audio avec lecture automatique */}
-                <AudioPlayer
-                  audioUrl={data.audioUrl}
-                  autoPlay={autoPlayEnabled}
+                <VideoPlayer
+                  videoUrl={data.videoUrl}
+                  autoPlay={false}
                   loop={false}
-                  showControls={true}
-                  className="w-full"
+                  className="w-full rounded-xl"
                 />
 
-                {/* Contrôles supplémentaires */}
-                <div className="flex gap-2 sm:gap-3 flex-wrap">
-                  <Button
-                    onClick={() => setShowAudioPlayer(!showAudioPlayer)}
-                    variant="outline"
-                    size="sm"
-                    className="transition-all hover:scale-105"
-                  >
-                    <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                    {showAudioPlayer ? "Masquer" : "Afficher"} les contrôles
-                  </Button>
-
-                  <Button
-                    onClick={() => setAutoPlayEnabled(!autoPlayEnabled)}
-                    variant={autoPlayEnabled ? "default" : "outline"}
-                    size="sm"
-                    className="transition-all hover:scale-105"
-                  >
-                    <Mic className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                    {autoPlayEnabled
-                      ? "Lecture auto activée"
-                      : "Lecture auto désactivée"}
-                  </Button>
-                </div>
-
-                {/* Message d'information */}
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 shadow-sm">
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
                   <p className="text-primary-foreground text-xs sm:text-sm leading-relaxed">
-                    💡{" "}
-                    {autoPlayEnabled
-                      ? "Le message se lance automatiquement. Utilisez les contrôles pour ajuster le volume ou relancer l&apos;audio."
-                      : "La lecture automatique est désactivée. Cliquez sur play pour écouter le message."}
+                    💡 Appuyez sur play pour regarder le message qui vous a été laissé.
                   </p>
                 </div>
-
-                {/* Avertissement sur les restrictions de lecture automatique */}
-                {autoPlayEnabled && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-start gap-2.5">
-                      <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-yellow-700 dark:text-yellow-300 text-xs sm:text-sm leading-relaxed">
-                        <strong>Note :</strong> Certains navigateurs bloquent la
-                        lecture automatique. Si l&apos;audio ne démarre pas,
-                        cliquez sur le bouton play ou désactivez la lecture
-                        automatique.
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* Message si pas d'audio */}
-            {!data.audioUrl && (
+            {/* Fallback audio si pas de vidéo */}
+            {!data.videoUrl && data.audioUrl && (
+              <div className="space-y-4 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 shadow-lg">
+                <div className="flex items-center gap-3 pb-2 border-b border-border/50">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground">
+                    Message audio
+                  </h3>
+                </div>
+                <audio controls src={data.audioUrl} className="w-full" />
+              </div>
+            )}
+
+            {/* Avertissement navigateur si nécessaire */}
+            {hasMedia && (
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-yellow-700 dark:text-yellow-300 text-xs sm:text-sm leading-relaxed">
+                    <strong>Note :</strong> Si la lecture ne démarre pas, vérifiez que
+                    votre navigateur autorise la lecture des médias.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Aucun message */}
+            {!hasMedia && (
               <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-full bg-muted/50">
-                    <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
                   </div>
                   <div>
                     <h3 className="text-foreground font-semibold text-base sm:text-lg">
@@ -235,6 +187,7 @@ export default function ARPage() {
           </div>
         </div>
       </div>
+
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"

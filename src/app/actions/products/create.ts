@@ -36,7 +36,7 @@ export async function createProduct(
         ? JSON.parse(formData.get("scentIds") as string)
         : [],
       arAnimation: formData.get("arAnimation") || "default",
-      messageType: formData.get("messageType") || "audio",
+      messageType: formData.get("messageType") || "video",
       hasEngraving: formData.get("hasEngraving") === "true",
       engravingPrice: formData.get("engravingPrice") ? Number(formData.get("engravingPrice")) : undefined,
       imageUrl: formData.get("imageUrl") || "",

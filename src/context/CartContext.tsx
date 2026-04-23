@@ -29,10 +29,11 @@ export interface CartItem {
   quantity: number;
   description: string;
   subTitle: string;
-  audioUrl?: string; // URL de l'audio enregistré
-  textMessage?: string; // Message texte personnalisé
-  engravingText?: string; // Texte(s) de gravure médaillon, séparés par virgule
-  engravingPrice?: number; // Prix de la gravure (0 = gratuit)
+  audioUrl?: string;
+  videoUrl?: string;
+  textMessage?: string;
+  engravingText?: string;
+  engravingPrice?: number;
 }
 
 // Cart context interface
@@ -44,6 +45,8 @@ interface CartContextType {
   clearCart: () => void;
   updateItemAudio: (id: string, audioUrl: string) => void;
   removeItemAudio: (id: string) => void;
+  updateItemVideo: (id: string, videoUrl: string) => void;
+  removeItemVideo: (id: string) => void;
   updateItemTextMessage: (id: string, textMessage: string) => void;
   removeItemTextMessage: (id: string) => void;
   updateItemEngraving: (id: string, engravingText: string) => void;
@@ -98,15 +101,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Helper function to generate unique key for cart items
   const getItemKey = (item: CartItem) => {
-    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}-${item.engravingText || "no-engraving"}`;
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.videoUrl || "no-video"}-${item.textMessage || "no-text"}-${item.engravingText || "no-engraving"}`;
   };
 
-  // Helper function to check if two items are the same (same product + scent + exact audio/text/engraving)
   const isSameItem = (item1: CartItem, item2: CartItem) => {
     return (
       item1.id === item2.id &&
       item1.selectedScent.id === item2.selectedScent.id &&
       item1.audioUrl === item2.audioUrl &&
+      item1.videoUrl === item2.videoUrl &&
       item1.textMessage === item2.textMessage &&
       item1.engravingText === item2.engravingText
     );
@@ -165,6 +168,26 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const newCart = [...prevCart];
       newCart[itemIndex] = updatedItem;
 
+      return newCart;
+    });
+  };
+
+  const updateItemVideo = (itemKey: string, videoUrl: string) => {
+    setCart((prevCart) => {
+      const idx = prevCart.findIndex((c) => getItemKey(c) === itemKey);
+      if (idx === -1) return prevCart;
+      const newCart = [...prevCart];
+      newCart[idx] = { ...newCart[idx], videoUrl };
+      return newCart;
+    });
+  };
+
+  const removeItemVideo = (itemKey: string) => {
+    setCart((prevCart) => {
+      const idx = prevCart.findIndex((c) => getItemKey(c) === itemKey);
+      if (idx === -1) return prevCart;
+      const newCart = [...prevCart];
+      newCart[idx] = { ...newCart[idx], videoUrl: undefined };
       return newCart;
     });
   };
@@ -267,6 +290,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         clearCart,
         updateItemAudio,
         removeItemAudio,
+        updateItemVideo,
+        removeItemVideo,
         updateItemTextMessage,
         removeItemTextMessage,
         updateItemEngraving,

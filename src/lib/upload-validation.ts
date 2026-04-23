@@ -5,6 +5,7 @@
 // Tailles maximales en bytes
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10MB
+export const MAX_VIDEO_SIZE = 200 * 1024 * 1024; // 200MB
 export const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 
 // Types MIME autorisés
@@ -25,9 +26,18 @@ export const ALLOWED_AUDIO_TYPES = [
   "audio/x-m4a",
 ];
 
+export const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/x-msvideo",
+  "video/mpeg",
+];
+
 // Extensions autorisées
 export const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 export const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".wav", ".webm", ".ogg", ".m4a"];
+export const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".webm", ".mov", ".avi", ".mpeg"];
 
 interface ValidationResult {
   valid: boolean;
@@ -100,6 +110,39 @@ export function validateAudioFile(
     return {
       valid: false,
       error: `Extension de fichier non autorisée. Extensions acceptées: ${ALLOWED_AUDIO_EXTENSIONS.join(", ")}`,
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Valide un fichier vidéo
+ */
+export function validateVideoFile(
+  file: File,
+  maxSize: number = MAX_VIDEO_SIZE
+): ValidationResult {
+  if (file.size > maxSize) {
+    const maxSizeMB = Math.round(maxSize / 1024 / 1024);
+    return {
+      valid: false,
+      error: `Le fichier est trop volumineux. Taille maximale: ${maxSizeMB}MB`,
+    };
+  }
+
+  if (!file.type.startsWith("video/")) {
+    return {
+      valid: false,
+      error: "Le fichier doit être une vidéo",
+    };
+  }
+
+  const extension = getFileExtension(file.name).toLowerCase();
+  if (!ALLOWED_VIDEO_EXTENSIONS.includes(extension)) {
+    return {
+      valid: false,
+      error: `Extension non autorisée. Extensions acceptées: ${ALLOWED_VIDEO_EXTENSIONS.join(", ")}`,
     };
   }
 

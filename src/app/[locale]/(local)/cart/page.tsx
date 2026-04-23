@@ -34,7 +34,7 @@ export default function CartPage() {
   };
 
   const getItemKey = (item: (typeof cart)[0]) => {
-    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.textMessage || "no-text"}-${item.engravingText || "no-engraving"}`;
+    return `${item.id}-${item.selectedScent.id}-${item.audioUrl || "no-audio"}-${item.videoUrl || "no-video"}-${item.textMessage || "no-text"}-${item.engravingText || "no-engraving"}`;
   };
 
   const subtotal = cart.reduce((sum, item) => {
@@ -49,10 +49,10 @@ export default function CartPage() {
   }
 
   const productsWithCustomization = cart.filter(
-    (item) => item.audioUrl || item.textMessage || item.engravingText
+    (item) => item.videoUrl || item.audioUrl || item.textMessage || item.engravingText
   );
   const productsWithoutCustomization = cart.filter(
-    (item) => !item.audioUrl && !item.textMessage && !item.engravingText
+    (item) => !item.videoUrl && !item.audioUrl && !item.textMessage && !item.engravingText
   );
 
   return (

@@ -137,7 +137,7 @@ export default function EditProductForm({
       sloganEN: initialData.sloganEN || "",
       categoryId: initialData.category?.id || "",
       scentIds: initialData.scents?.map(s => s.id) || [],
-      messageType: initialData.messageType || "audio",
+      messageType: (initialData.messageType as string) === "audio" ? "video" : (initialData.messageType || "video"),
       hasEngraving: initialData.hasEngraving ?? false,
       engravingPrice: initialData.engravingPrice ?? null,
     },
@@ -653,8 +653,8 @@ export default function EditProductForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="audio">
-                            🎤 Audio (enregistrement vocal)
+                          <SelectItem value="video">
+                            🎥 Vidéo (enregistrement ou import)
                           </SelectItem>
                           <SelectItem value="text">
                             ✍️ Texte (message gravé dans la cire)

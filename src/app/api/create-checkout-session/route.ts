@@ -16,6 +16,7 @@ interface CheckoutItem {
   };
   imageUrl: string;
   audioUrl?: string;
+  videoUrl?: string;
   textMessage?: string;
   engravingText?: string;
   engravingPrice?: number;
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
           price: item.price,
           qrCodeId: item.qrCodeId,
           audioUrl: item.audioUrl,
+          videoUrl: item.videoUrl,
           textMessage: item.textMessage,
           engravingText: item.engravingText,
           engravingPrice: item.engravingPrice,

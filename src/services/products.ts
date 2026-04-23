@@ -7,7 +7,7 @@
 import { Product, Category, Scent, Image, Review } from "@prisma/client";
 
 export interface ProductWithDetails extends Omit<Product, 'messageType'> {
-  messageType: "audio" | "text";
+  messageType: "video" | "text";
   category: Category;
   scents: Scent[];
   images: Image[];

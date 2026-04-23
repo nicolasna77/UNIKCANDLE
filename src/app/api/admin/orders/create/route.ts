@@ -10,6 +10,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   audioUrl?: string;
+  videoUrl?: string;
 }
 
 interface ShippingAddress {
@@ -88,6 +89,7 @@ export async function POST(request: Request) {
             quantity: item.quantity,
             price: item.price,
             audioUrl: item.audioUrl,
+            videoUrl: item.videoUrl,
           })),
         },
         shippingAddress: {

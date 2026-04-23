@@ -31,6 +31,7 @@ type OrderItemMetadata = {
   quantity: number;
   price: number;
   audioUrl?: string;
+  videoUrl?: string;
   qrCodeId: string;
 };
 
@@ -147,6 +148,7 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
                 quantity: item.quantity,
                 price: item.price,
                 audioUrl: item.audioUrl,
+                videoUrl: item.videoUrl,
                 qrCode: {
                   create: {
                     code: item.qrCodeId,

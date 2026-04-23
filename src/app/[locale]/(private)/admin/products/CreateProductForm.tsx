@@ -91,7 +91,7 @@ export default function CreateProductForm({
       categoryId: "",
       scentIds: [],
       imageUrl: "",
-      messageType: "audio" as const,
+      messageType: "video" as const,
       hasEngraving: false,
       engravingPrice: null,
     },
@@ -585,8 +585,8 @@ export default function CreateProductForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="audio">
-                            🎤 Audio (enregistrement vocal)
+                          <SelectItem value="video">
+                            🎥 Vidéo (enregistrement ou import)
                           </SelectItem>
                           <SelectItem value="text">
                             ✍️ Texte (message gravé dans la cire)

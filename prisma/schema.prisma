@@ -106,7 +106,7 @@ model Product {
   arAnimation   String
   slogan        String
   sloganEN      String?
-  messageType    String      @default("audio") // "audio" ou "text"
+  messageType    String      @default("video") // "video" ou "text"
   hasEngraving   Boolean     @default(false)
   engravingPrice Float?
   categoryId     String
@@ -185,6 +185,7 @@ model OrderItem {
   price       Float
   scentId     String
   audioUrl      String?
+  videoUrl      String?
   textMessage   String?
   engravingText String?
   createdAt     DateTime @default(now())
