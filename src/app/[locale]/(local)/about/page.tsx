@@ -16,15 +16,16 @@ export default function AboutPage() {
   const t = useTranslations("about");
   return (
     <main className="min-h-screen bg-background">
-      <section className="container mx-auto space-y-24 px-4 py-24 md:px-6 2xl:max-w-[1400px]">
+      <section className="container mx-auto space-y-24 px-4 py-24 md:px-6 2xl:max-w-350">
         {/* Hero */}
         <div className="space-y-4 text-center">
           <h2
             className={`${montserrat.className} text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter`}
           >
-            {t("hero.title")} <span className="text-primary">{t("hero.brandName")}</span>
+            {t("hero.title")}{" "}
+            <span className="text-primary">{t("hero.brandName")}</span>
           </h2>
-          <p className="text-muted-foreground mx-auto max-w-[700px] md:text-xl/relaxed">
+          <p className="text-muted-foreground mx-auto max-w-175 md:text-xl/relaxed">
             {t("hero.description")}
           </p>
         </div>
@@ -35,11 +36,21 @@ export default function AboutPage() {
             <div>
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold">{t("mission.title")}</h3>
-                <p className="text-muted-foreground">{t("mission.description1")}</p>
-                <p className="text-muted-foreground">{t("mission.description2")}</p>
-                <p className="text-muted-foreground">{t("mission.description3")}</p>
-                <p className="text-muted-foreground font-semibold">{t("mission.description4")}</p>
-                <p className="text-muted-foreground">{t("mission.description5")}</p>
+                <p className="text-muted-foreground">
+                  {t("mission.description1")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("mission.description2")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("mission.description3")}
+                </p>
+                <p className="text-muted-foreground font-semibold">
+                  {t("mission.description4")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("mission.description5")}
+                </p>
 
                 <Button asChild>
                   <Link href="/products">{t("mission.cta")}</Link>
@@ -48,7 +59,7 @@ export default function AboutPage() {
             </div>
             <div className="relative aspect-video overflow-hidden rounded-xl">
               <Image
-                src="/asset/about.webp"
+                src="/asset/image00001.png"
                 alt={t("mission.imageAlt")}
                 fill
                 quality={75}
@@ -63,16 +74,26 @@ export default function AboutPage() {
             <div className="lg:order-last">
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold">{t("process.title")}</h3>
-                <p className="text-muted-foreground font-semibold">{t("process.description1")}</p>
-                <p className="text-muted-foreground">{t("process.description2")}</p>
-                <p className="text-muted-foreground">{t("process.description3")}</p>
-                <p className="text-muted-foreground">{t("process.description4")}</p>
-                <p className="text-muted-foreground italic">{t("process.description5")}</p>
+                <p className="text-muted-foreground font-semibold">
+                  {t("process.description1")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("process.description2")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("process.description3")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("process.description4")}
+                </p>
+                <p className="text-muted-foreground italic">
+                  {t("process.description5")}
+                </p>
               </div>
             </div>
             <div className="relative aspect-video overflow-hidden rounded-xl">
               <Image
-                src="/asset/IMG_20250328_111936.webp"
+                src="/asset/image00002.jpeg"
                 alt={t("process.imageAlt")}
                 fill
                 quality={75}
@@ -87,15 +108,23 @@ export default function AboutPage() {
             <div>
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold">{t("commitment.title")}</h3>
-                <p className="text-muted-foreground">{t("commitment.description1")}</p>
-                <p className="text-muted-foreground">{t("commitment.description2")}</p>
-                <p className="text-muted-foreground">{t("commitment.description3")}</p>
-                <p className="text-muted-foreground font-semibold italic">{t("commitment.description4")}</p>
+                <p className="text-muted-foreground">
+                  {t("commitment.description1")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("commitment.description2")}
+                </p>
+                <p className="text-muted-foreground">
+                  {t("commitment.description3")}
+                </p>
+                <p className="text-muted-foreground font-semibold italic">
+                  {t("commitment.description4")}
+                </p>
               </div>
             </div>
             <div className="relative aspect-video overflow-hidden rounded-xl">
               <Image
-                src="/asset/IMG_20250328_111933.webp"
+                src="/asset/image00003.png"
                 alt={t("commitment.imageAlt")}
                 fill
                 quality={75}

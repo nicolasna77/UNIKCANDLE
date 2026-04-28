@@ -195,7 +195,9 @@ export default function OrdersPage() {
     return <OrdersPageSkeleton />;
   }
 
-  const hasFilters = Boolean(dateRange?.from || dateRange?.to || activeTab !== "all");
+  const hasFilters = Boolean(
+    dateRange?.from || dateRange?.to || activeTab !== "all",
+  );
 
   return (
     <section className="space-y-6">
