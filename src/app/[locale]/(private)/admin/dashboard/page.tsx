@@ -2,6 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
 import {
   Users,
@@ -10,12 +12,13 @@ import {
   Euro,
   TrendingUp,
   Clock,
-  CheckCircle,
+  CheckCircle2,
   AlertCircle,
   Loader2,
+  RefreshCw,
+  ArrowUpRight,
 } from "lucide-react";
 import { StatsCard } from "@/components/admin/stats-card";
-import { AdminHeader } from "@/components/admin/admin-header";
 import {
   PieChart,
   Pie,
@@ -29,9 +32,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Legend,
 } from "recharts";
-import { Button } from "@/components/ui/button";
 
 interface OrderStatus {
   status: string;
@@ -62,7 +63,6 @@ interface DashboardStats {
   ordersByStatus: OrderStatus[];
   topProducts: TopProduct[];
   recentOrders: RecentOrder[];
-  // Nouvelles métriques
   averageOrderValue: number;
   monthlyRevenue: Array<{
     month: string;
@@ -75,13 +75,44 @@ interface DashboardStats {
   };
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; icon: typeof Clock }
+> = {
+  PENDING: { label: "En attente", color: "text-amber-600", icon: Clock },
+  PROCESSING: {
+    label: "En préparation",
+    color: "text-blue-600",
+    icon: Loader2,
+  },
+  SHIPPED: { label: "Expédiée", color: "text-violet-600", icon: TrendingUp },
+  DELIVERED: { label: "Livrée", color: "text-emerald-600", icon: CheckCircle2 },
+  CANCELLED: { label: "Annulée", color: "text-red-600", icon: AlertCircle },
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
+  PROCESSING: "bg-blue-50 text-blue-700 border-blue-200",
+  SHIPPED: "bg-violet-50 text-violet-700 border-violet-200",
+  DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
+};
+
+// Use theme CSS variables for chart colors
+const CHART_COLORS = [
+  "var(--color-primary-700)",
+  "var(--color-primary-400)",
+  "var(--color-primary-200)",
+  "var(--color-base-400)",
+  "var(--color-base-600)",
+];
 
 export default function DashboardPage() {
   const {
     data: stats,
     isLoading,
     refetch,
+    isFetching,
   } = useQuery<DashboardStats>({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
@@ -92,268 +123,342 @@ export default function DashboardPage() {
     },
   });
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case "processing":
-        return <Loader2 className="h-4 w-4 text-blue-500" />;
-      case "shipped":
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
-      case "delivered":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "cancelled":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "text-yellow-600";
-      case "processing":
-        return "text-blue-600";
-      case "shipped":
-        return "text-green-600";
-      case "delivered":
-        return "text-green-600";
-      case "cancelled":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <AdminHeader
-          title="Tableau de bord"
-          description="Vue d'ensemble des performances de votre boutique"
-          breadcrumbs={[
-            { label: "Administration", href: "/admin" },
-            { label: "Tableau de bord" },
-          ]}
-        />
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <StatsCard key={i} title="" value="" loading={true} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <AdminHeader
-        title="Tableau de bord"
-        description="Vue d'ensemble des performances de votre boutique"
-        breadcrumbs={[
-          { label: "Administration", href: "/admin" },
-          { label: "Tableau de bord" },
-        ]}
-        actions={
-          <Button variant="outline" onClick={() => refetch()}>
-            Actualiser
-          </Button>
-        }
-      />
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">
+            Tableau de bord
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Vue d&apos;ensemble des performances de votre boutique
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="h-8 shrink-0"
+        >
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
+          />
+          <span className="hidden sm:inline ml-1.5">Actualiser</span>
+        </Button>
+      </div>
 
-      {/* Cartes de statistiques principales */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats cards */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Utilisateurs"
-          value={stats?.totalUsers || 0}
-          description="Utilisateurs inscrits"
+          value={isLoading ? "" : stats?.totalUsers ?? 0}
+          description="inscrits"
           icon={Users}
-          trend={{
-            value: stats?.userGrowth?.percentage || 0,
-            label: "Par rapport au mois dernier",
-          }}
+          loading={isLoading}
+          trend={
+            stats?.userGrowth
+              ? {
+                  value: stats.userGrowth.percentage,
+                  label: "vs mois dernier",
+                }
+              : undefined
+          }
         />
-
         <StatsCard
           title="Commandes"
-          value={stats?.totalOrders || 0}
-          description="Commandes totales"
+          value={isLoading ? "" : stats?.totalOrders ?? 0}
+          description="au total"
           icon={ShoppingCart}
-          badge={{
-            text: "Total",
-            variant: "secondary",
-          }}
+          loading={isLoading}
         />
-
         <StatsCard
           title="Produits"
-          value={stats?.totalProducts || 0}
-          description="Produits en catalogue"
+          value={isLoading ? "" : stats?.totalProducts ?? 0}
+          description="en catalogue"
           icon={Package}
+          loading={isLoading}
         />
-
         <StatsCard
           title="Chiffre d'affaires"
-          value={formatCurrency(stats?.totalRevenue || 0)}
-          description={`Panier moyen: ${formatCurrency(stats?.averageOrderValue || 0)}`}
+          value={
+            isLoading ? "" : formatCurrency(stats?.totalRevenue ?? 0)
+          }
+          description={
+            stats
+              ? `Panier moyen ${formatCurrency(stats.averageOrderValue)}`
+              : undefined
+          }
           icon={Euro}
-          trend={{
-            value: 12.5,
-            label: "Croissance mensuelle",
-          }}
+          loading={isLoading}
+          trend={{ value: 12.5, label: "Croissance mensuelle" }}
         />
       </div>
 
-      {/* Graphiques et analyses */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Statut des commandes */}
+      {/* Charts row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Order status pie */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
               Statut des commandes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={stats?.ordersByStatus || []}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="_count"
-                  >
-                    {stats?.ordersByStatus.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {isLoading ? (
+              <div className="h-[240px] flex items-center justify-center">
+                <Skeleton className="h-40 w-40 rounded-full" />
+              </div>
+            ) : (
+              <div className="h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats?.ordersByStatus ?? []}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={85}
+                      paddingAngle={2}
+                      dataKey="_count"
+                    >
+                      {(stats?.ordersByStatus ?? []).map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={CHART_COLORS[index % CHART_COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name) => [
+                        value,
+                        STATUS_CONFIG[name as string]?.label ?? name,
+                      ]}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "1px solid var(--border)",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Produits les plus vendus */}
+        {/* Top products bar */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Package className="h-4 w-4 text-muted-foreground" />
               Top des ventes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats?.topProducts || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 12 }}
-                    interval={0}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="_count" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {isLoading ? (
+              <div className="h-[240px] space-y-3 pt-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <Skeleton className="h-6 flex-1" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={stats?.topProducts ?? []}
+                    layout="vertical"
+                    margin={{ left: 0, right: 16 }}
+                  >
+                    <XAxis type="number" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fontSize: 11 }}
+                      width={90}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "var(--muted)" }}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "1px solid var(--border)",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Bar
+                      dataKey="_count"
+                      fill="var(--primary)"
+                      radius={[0, 4, 4, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Évolution du chiffre d'affaires */}
-      {stats?.monthlyRevenue && (
+      {/* Revenue area chart */}
+      {(isLoading || (stats?.monthlyRevenue && stats.monthlyRevenue.length > 0)) && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
               Évolution du chiffre d&apos;affaires
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.monthlyRevenue}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value) => [
-                      formatCurrency(value as number),
-                      "Chiffre d&apos;affaires",
-                    ]}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                    fillOpacity={0.6}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-[220px] w-full" />
+            ) : (
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats?.monthlyRevenue ?? []}>
+                    <defs>
+                      <linearGradient
+                        id="revenueGradient"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="var(--primary)"
+                          stopOpacity={0.15}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--primary)"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="var(--border)"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => `${v}€`}
+                    />
+                    <Tooltip
+                      formatter={(value) => [
+                        formatCurrency(value as number),
+                        "CA",
+                      ]}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "1px solid var(--border)",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="var(--primary)"
+                      strokeWidth={2}
+                      fill="url(#revenueGradient)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {/* Commandes récentes */}
+      {/* Recent orders */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Commandes récentes
-          </CardTitle>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Commandes récentes
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <a href="orders">
+                Voir tout
+                <ArrowUpRight className="ml-1 h-3 w-3" />
+              </a>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {stats?.recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
-              >
-                <div className="flex items-center space-x-3">
-                  {getStatusIcon(order.status)}
-                  <div>
-                    <div className="font-medium">
-                      Commande #{order.id.slice(-8)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {order.user.name} •{" "}
-                      {new Date(order.createdAt).toLocaleDateString("fr-FR")}
-                    </div>
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="h-3.5 w-32" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
+                  <Skeleton className="h-5 w-16" />
                 </div>
-                <div className="text-right">
-                  <div className="font-medium">
-                    {formatCurrency(order.total)}
-                  </div>
+              ))}
+            </div>
+          ) : !stats?.recentOrders?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              Aucune commande récente
+            </p>
+          ) : (
+            <div className="space-y-1">
+              {stats.recentOrders.map((order) => {
+                const config = STATUS_CONFIG[order.status];
+                const StatusIcon = config?.icon ?? Clock;
+                return (
                   <div
-                    className={`text-sm capitalize ${getStatusColor(order.status)}`}
+                    key={order.id}
+                    className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
                   >
-                    {order.status}
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                      <StatusIcon className={`h-3.5 w-3.5 ${config?.color ?? "text-muted-foreground"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {order.user.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        #{order.id.slice(-8)} &middot;{" "}
+                        {new Date(order.createdAt).toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-semibold">
+                        {formatCurrency(order.total)}
+                      </p>
+                      <span
+                        className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-xs font-medium ${STATUS_BADGE[order.status] ?? "bg-muted text-muted-foreground border-border"}`}
+                      >
+                        {config?.label ?? order.status}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

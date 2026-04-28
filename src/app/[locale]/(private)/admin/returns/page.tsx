@@ -15,9 +15,10 @@ import {
   AdminHeader,
   AdminHeaderActions,
 } from "@/components/admin/admin-header";
+import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { ReturnInstructionsDialog } from "./return-instructions-dialog";
 import { RefundDialog } from "./refund-dialog";
 import { createReturnsColumns, getStatusLabel } from "./columns";
@@ -26,8 +27,10 @@ export default function ReturnsPage() {
   const queryClient = useQueryClient();
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] =
     useState<ReturnItemWithDetails | null>(null);
+  const [returnToDelete, setReturnToDelete] = useState<string | null>(null);
 
   const { data: returns, isLoading, refetch } = useQuery<
     ReturnItemWithDetails[]
@@ -46,7 +49,7 @@ export default function ReturnsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "returns"] });
-      toast.success("Statut du retour mis à jour avec succès");
+      toast.success("Statut du retour mis à jour");
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -63,38 +66,28 @@ export default function ReturnsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "returns"] });
-      toast.success("Demande de retour supprimée avec succès");
+      toast.success("Demande de retour supprimée");
+      setDeleteDialogOpen(false);
+      setReturnToDelete(null);
     },
     onError: (error: Error) => {
       toast.error(error.message);
+      setDeleteDialogOpen(false);
     },
   });
 
-  const handleRefresh = async () => {
-    await refetch();
-    toast.success("Liste des retours rafraîchie");
-  };
-
   const handleStatusUpdate = async (id: string, status: string) => {
-    try {
-      await updateStatusMutation.mutateAsync({
-        id,
-        data: { status },
-      });
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour du statut:", error);
-    }
+    await updateStatusMutation.mutateAsync({ id, data: { status } });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette demande de retour ?")) {
-      return;
-    }
+  const handleDelete = (id: string) => {
+    setReturnToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
-    try {
-      await deleteReturnMutation.mutateAsync(id);
-    } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
+  const confirmDelete = () => {
+    if (returnToDelete) {
+      deleteReturnMutation.mutate(returnToDelete);
     }
   };
 
@@ -139,34 +132,38 @@ export default function ReturnsPage() {
     onDelete: handleDelete,
   });
 
+  const total = returns?.length ?? 0;
+
   return (
     <div className="space-y-6">
       <AdminHeader
-        title="Gestion des retours"
+        title="Retours"
         description="Gérez les demandes de retour des clients"
         breadcrumbs={[
-          { label: "Administration", href: "/admin" },
+          { label: "Administration", href: "/admin/dashboard" },
           { label: "Retours" },
         ]}
         badge={{
-          text: `${returns?.length || 0} retour${(returns?.length || 0) > 1 ? "s" : ""}`,
+          text: `${total} retour${total !== 1 ? "s" : ""}`,
           variant: "secondary",
         }}
         actions={
-          <AdminHeaderActions onRefresh={handleRefresh} isLoading={isLoading} />
+          <AdminHeaderActions
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+          />
         }
       />
 
-      <Suspense fallback={<div>Chargement...</div>}>
+      
         <DataTableAdvanced
           columns={columns}
           data={returns || []}
           searchPlaceholder="Rechercher par produit ou client..."
           onExport={handleExport}
           isLoading={isLoading}
-          emptyMessage="Aucune demande de retour trouvée"
+          emptyMessage="Aucune demande de retour"
         />
-      </Suspense>
 
       <ReturnInstructionsDialog
         returnItem={selectedReturn}
@@ -178,6 +175,18 @@ export default function ReturnsPage() {
         returnItem={selectedReturn}
         open={refundOpen}
         onOpenChange={setRefundOpen}
+      />
+
+      <ConfirmDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setReturnToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Supprimer cette demande de retour ?"
+        description="Cette action est irréversible. La demande de retour sera définitivement supprimée."
+        isLoading={deleteReturnMutation.isPending}
       />
     </div>
   );

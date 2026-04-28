@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { TableActionsMenu } from "@/components/admin/table-actions-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -242,7 +242,7 @@ export default function ProductsPage() {
         title="Gestion des produits"
         description="Gérez votre catalogue de produits"
         breadcrumbs={[
-          { label: "Administration", href: "/admin" },
+          { label: "Administration", href: "/admin/dashboard" },
           { label: "Produits" },
         ]}
         badge={{
@@ -280,7 +280,7 @@ export default function ProductsPage() {
         />
       */}
 
-      <Suspense fallback={<div>Chargement...</div>}>
+      
         <DataTableAdvanced
           columns={columns}
           data={products || []}
@@ -290,7 +290,6 @@ export default function ProductsPage() {
           isLoading={isLoading}
           emptyMessage="Aucun produit trouvé"
         />
-      </Suspense>
 
       {/* Formulaire de création avec dialog intégré */}
       <CreateProductForm

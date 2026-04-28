@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, RefreshCw, Loader2 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -54,8 +54,7 @@ export function AdminHeader({
   };
 
   return (
-    <div className={cn("space-y-4 pb-4", className)}>
-      {/* Breadcrumb */}
+    <div className={cn("space-y-3 pb-4", className)}>
       {breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList>
@@ -64,11 +63,11 @@ export function AdminHeader({
                 {index > 0 && <BreadcrumbSeparator />}
                 <BreadcrumbItem>
                   {item.href ? (
-                    <BreadcrumbLink href={item.href} className="text-sm">
+                    <BreadcrumbLink href={item.href} className="text-xs text-muted-foreground hover:text-foreground">
                       {item.label}
                     </BreadcrumbLink>
                   ) : (
-                    <BreadcrumbPage className="text-sm font-medium">
+                    <BreadcrumbPage className="text-xs font-medium">
                       {item.label}
                     </BreadcrumbPage>
                   )}
@@ -79,37 +78,44 @@ export function AdminHeader({
         </Breadcrumb>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
           {showBack && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleBack}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Retour</span>
             </Button>
           )}
 
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">
+                {title}
+              </h1>
               {badge && (
-                <Badge variant={badge.variant || "secondary"}>
+                <Badge
+                  variant={badge.variant || "secondary"}
+                  className="text-xs font-medium"
+                >
                   {badge.text}
                 </Badge>
               )}
             </div>
             {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {description}
+              </p>
             )}
           </div>
         </div>
 
         {actions && (
-          <div className="flex items-center space-x-2">{actions}</div>
+          <div className="flex items-center gap-2 shrink-0 sm:self-start">{actions}</div>
         )}
       </div>
 
@@ -118,7 +124,6 @@ export function AdminHeader({
   );
 }
 
-// Composants d'actions communes
 interface AdminHeaderActionsProps {
   onRefresh?: () => void;
   onAdd?: () => void;
@@ -135,7 +140,7 @@ export function AdminHeaderActions({
   customActions,
 }: AdminHeaderActionsProps) {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-2">
       {customActions}
 
       {onRefresh && (
@@ -144,17 +149,20 @@ export function AdminHeaderActions({
           size="sm"
           onClick={onRefresh}
           disabled={isLoading}
+          className="h-8"
         >
-          <RefreshCw
-            className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")}
-          />
-          Actualiser
+          {isLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          <span className="hidden sm:inline ml-1.5">Actualiser</span>
         </Button>
       )}
 
       {onAdd && (
-        <Button onClick={onAdd}>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button onClick={onAdd} size="sm" className="h-8">
+          <Plus className="h-3.5 w-3.5 mr-1.5" />
           {addLabel}
         </Button>
       )}

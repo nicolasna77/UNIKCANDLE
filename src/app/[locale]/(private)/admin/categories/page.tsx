@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, Suspense, useMemo, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
 import {
   type CategoryWithProducts,
   fetchCategories,
@@ -11,6 +9,10 @@ import { deleteCategoryById } from "@/app/actions/categories";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
+import {
+  AdminHeader,
+  AdminHeaderActions,
+} from "@/components/admin/admin-header";
 import { createColumns } from "./columns";
 import CreateCategoryForm from "./create-category-form";
 import EditCategoryForm from "./edit-category-form";
@@ -42,40 +44,28 @@ export default function CategoriesPage() {
       return { result, deletedId: id };
     },
     onMutate: async (deletedId) => {
-      // Annuler les refetch en cours pour éviter d'écraser notre mise à jour optimiste
       await queryClient.cancelQueries({ queryKey: ["categories"] });
-
-      // Snapshot de la valeur précédente
-      const previousCategories = queryClient.getQueryData<CategoryWithProducts[]>(["categories"]);
-
-      // Mise à jour optimiste : supprimer la catégorie immédiatement du cache
+      const previousCategories =
+        queryClient.getQueryData<CategoryWithProducts[]>(["categories"]);
       queryClient.setQueryData<CategoryWithProducts[]>(
         ["categories"],
         (old) => old?.filter((cat) => cat.id !== deletedId) ?? []
       );
-
-      // Retourner le contexte avec les données précédentes pour rollback si erreur
       return { previousCategories };
     },
     onSuccess: async ({ result }) => {
       const deletedCount = result?.data?.deletedProductsCount || 0;
-      if (deletedCount > 0) {
-        toast.success(
-          `Catégorie supprimée avec succès. ${deletedCount} produit(s) ont été supprimé(s).`
-        );
-      } else {
-        toast.success("Catégorie supprimée avec succès");
-      }
+      toast.success(
+        deletedCount > 0
+          ? `Catégorie supprimée. ${deletedCount} produit(s) également supprimé(s).`
+          : "Catégorie supprimée avec succès"
+      );
       setDeleteDialogOpen(false);
-
-      // Refetch pour s'assurer que les données sont synchronisées
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (error: Error, _deletedId, context) => {
       toast.error(error.message);
       setDeleteDialogOpen(false);
-
-      // Rollback en cas d'erreur
       if (context?.previousCategories) {
         queryClient.setQueryData(["categories"], context.previousCategories);
       }
@@ -134,38 +124,45 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Gestion des catégories</h1>
-          <p className="text-muted-foreground">
-            Gérez les catégories de produits
-          </p>
-        </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle catégorie
-        </Button>
-      </div>
+      <AdminHeader
+        title="Catégories"
+        description="Gérez les catégories de produits"
+        breadcrumbs={[
+          { label: "Administration", href: "/admin/dashboard" },
+          { label: "Catégories" },
+        ]}
+        badge={{
+          text: `${categories.length} catégorie${categories.length !== 1 ? "s" : ""}`,
+          variant: "secondary",
+        }}
+        actions={
+          <AdminHeaderActions
+            onRefresh={() => refetch()}
+            onAdd={() => setIsCreateOpen(true)}
+            addLabel="Nouvelle catégorie"
+            isLoading={isLoading}
+          />
+        }
+      />
 
-      <Suspense fallback={<div>Chargement...</div>}>
+      
         <DataTableAdvanced
           data={categories}
           columns={columns}
           isLoading={isLoading}
-          onRefresh={refetch}
+          onRefresh={() => refetch()}
           onExport={handleExport}
           emptyMessage="Aucune catégorie trouvée"
+          searchKey="name"
+          searchPlaceholder="Rechercher par nom..."
         />
-      </Suspense>
 
-      {/* Dialog de création */}
       <CreateCategoryForm
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onSuccess={() => setIsCreateOpen(false)}
       />
 
-      {/* Dialog d'édition */}
       {editingCategory && (
         <EditCategoryForm
           open={!!editingCategory}
@@ -175,13 +172,12 @@ export default function CategoriesPage() {
         />
       )}
 
-      {/* Dialog de confirmation de suppression */}
       <ConfirmDeleteDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={confirmDelete}
-        title="Supprimer la catégorie"
-        description="Êtes-vous sûr de vouloir supprimer cette catégorie ? Tous les produits associés à cette catégorie seront également supprimés. Cette action est irréversible."
+        title="Supprimer la catégorie ?"
+        description="Tous les produits associés seront également supprimés. Cette action est irréversible."
         confirmText="Supprimer"
         cancelText="Annuler"
         isLoading={deleteCategory.isPending}

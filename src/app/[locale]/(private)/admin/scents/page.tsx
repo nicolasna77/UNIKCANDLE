@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,21 +10,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
 import {
   AdminHeader,
   AdminHeaderActions,
 } from "@/components/admin/admin-header";
+import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
 import { type ColumnDef } from "@tanstack/react-table";
 import CreateScentForm from "./create-scent-form";
 import { type ScentWithProducts } from "@/lib/admin-schemas";
 
 export default function ScentsPage() {
   const queryClient = useQueryClient();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingScent, setEditingScent] = useState<ScentWithProducts | null>(
     null
   );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [scentToDelete, setScentToDelete] = useState<string | null>(null);
 
   const {
     data: scents = [],
@@ -53,32 +57,29 @@ export default function ScentsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["scents"] });
       toast.success("Senteur supprimée avec succès");
+      setDeleteDialogOpen(false);
+      setScentToDelete(null);
     },
     onError: (error: Error) => {
       toast.error(error.message);
+      setDeleteDialogOpen(false);
     },
   });
 
   const handleDelete = (id: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette senteur ?")) {
-      deleteScent.mutate(id);
-    }
+    setScentToDelete(id);
+    setDeleteDialogOpen(true);
   };
 
-  const handleRefresh = () => {
-    refetch();
+  const confirmDelete = () => {
+    if (scentToDelete) {
+      deleteScent.mutate(scentToDelete);
+    }
   };
 
   const handleExport = (data: ScentWithProducts[]) => {
     const csvContent = [
-      [
-        "ID",
-        "Nom",
-        "Description",
-        "Icône",
-        "Couleur",
-        "Nb Produits",
-      ],
+      ["ID", "Nom", "Description", "Icône", "Couleur", "Nb Produits"],
       ...data.map((scent) => [
         scent.id,
         scent.name,
@@ -109,10 +110,15 @@ export default function ScentsPage() {
         return (
           <div className="flex items-center gap-3">
             <div
-              className="w-4 h-4 rounded-full border"
+              className="w-5 h-5 rounded-full border border-border shrink-0 shadow-sm"
               style={{ backgroundColor: scent.color }}
             />
-            <span className="font-medium">{scent.name}</span>
+            <div>
+              <p className="text-sm font-medium">{scent.name}</p>
+              {scent.nameEN && scent.nameEN !== scent.name && (
+                <p className="text-xs text-muted-foreground">{scent.nameEN}</p>
+              )}
+            </div>
           </div>
         );
       },
@@ -121,15 +127,22 @@ export default function ScentsPage() {
       accessorKey: "description",
       header: "Description",
       cell: ({ row }) => (
-        <div className="max-w-xs truncate" title={row.original.description}>
-          {row.original.description}
-        </div>
+        <p
+          className="max-w-xs text-sm text-muted-foreground truncate"
+          title={row.original.description}
+        >
+          {row.original.description || "—"}
+        </p>
       ),
     },
     {
       accessorKey: "icon",
       header: "Icône",
-      cell: ({ row }) => <Badge variant="outline">{row.original.icon}</Badge>,
+      cell: ({ row }) => (
+        <Badge variant="outline" className="font-mono text-xs">
+          {row.original.icon}
+        </Badge>
+      ),
     },
     {
       accessorKey: "_count.products",
@@ -137,7 +150,10 @@ export default function ScentsPage() {
       cell: ({ row }) => {
         const count = row.original._count?.products || 0;
         return (
-          <Badge variant={count > 0 ? "default" : "secondary"}>
+          <Badge
+            variant={count > 0 ? "default" : "secondary"}
+            className="text-xs"
+          >
             {count} produit{count !== 1 ? "s" : ""}
           </Badge>
         );
@@ -145,25 +161,29 @@ export default function ScentsPage() {
     },
     {
       id: "actions",
-      header: "Actions",
+      header: () => <span className="sr-only">Actions</span>,
       cell: ({ row }) => {
         const scent = row.original;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-1">
             <Button
               variant="ghost"
               size="sm"
+              className="h-7 w-7 p-0"
+              aria-label={`Modifier ${scent.name}`}
               onClick={() => setEditingScent(scent)}
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              aria-label={`Supprimer ${scent.name}`}
               onClick={() => handleDelete(scent.id)}
               disabled={deleteScent.isPending}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         );
@@ -174,39 +194,76 @@ export default function ScentsPage() {
   return (
     <div className="space-y-6">
       <AdminHeader
-        title="Gestion des senteurs"
+        title="Parfums"
         description="Gérez les parfums et senteurs de vos bougies"
         breadcrumbs={[
-          { label: "Administration", href: "/admin" },
-          { label: "Senteurs" },
+          { label: "Administration", href: "/admin/dashboard" },
+          { label: "Parfums" },
         ]}
-        actions={<AdminHeaderActions onRefresh={handleRefresh} />}
+        badge={{
+          text: `${scents.length} senteur${scents.length !== 1 ? "s" : ""}`,
+          variant: "secondary",
+        }}
+        actions={
+          <AdminHeaderActions
+            onRefresh={() => refetch()}
+            onAdd={() => setIsCreateOpen(true)}
+            addLabel="Nouveau parfum"
+            isLoading={isLoading}
+          />
+        }
       />
 
-      <Suspense fallback={<div>Chargement...</div>}>
+      
         <DataTableAdvanced
           data={scents}
           columns={columns}
           isLoading={isLoading}
-          onRefresh={handleRefresh}
+          onRefresh={() => refetch()}
           onExport={handleExport}
           emptyMessage="Aucune senteur trouvée"
+          searchKey="name"
+          searchPlaceholder="Rechercher par nom..."
         />
-      </Suspense>
 
+      {/* Create dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nouveau parfum</DialogTitle>
+          </DialogHeader>
+          <CreateScentForm />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog — note: CreateScentForm currently only handles creation;
+          editing requires a separate EditScentForm wired to the scent id */}
       {editingScent && (
         <Dialog
           open={!!editingScent}
-          onOpenChange={() => setEditingScent(null)}
+          onOpenChange={(open) => !open && setEditingScent(null)}
         >
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Modifier la senteur</DialogTitle>
+              <DialogTitle>Modifier — {editingScent.name}</DialogTitle>
             </DialogHeader>
             <CreateScentForm />
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete confirmation */}
+      <ConfirmDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setScentToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Supprimer cette senteur ?"
+        description="Cette action est irréversible. La senteur sera définitivement supprimée."
+        isLoading={deleteScent.isPending}
+      />
     </div>
   );
 }

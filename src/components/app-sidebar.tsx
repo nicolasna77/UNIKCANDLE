@@ -30,13 +30,8 @@ const data = {
   navMain: [
     {
       title: "Tableau de bord",
-      url: "/admin",
+      url: "/admin/dashboard",
       icon: IconDashboard,
-    },
-    {
-      title: "Utilisateurs",
-      url: "/admin/users",
-      icon: IconUsers,
     },
     {
       title: "Commandes",
@@ -63,6 +58,11 @@ const data = {
       url: "/admin/categories",
       icon: IconCategory,
     },
+    {
+      title: "Utilisateurs",
+      url: "/admin/users",
+      icon: IconUsers,
+    },
   ],
 };
 
@@ -78,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/">
-                <span className="text-center m-auto text-primary font-semibold">
+                <span className="text-center m-auto text-primary font-bold tracking-wider text-sm">
                   UNIKCANDLE
                 </span>
               </Link>

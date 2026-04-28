@@ -13,10 +13,10 @@ export default async function AdminLayout({
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col relative">
-          <div className="@container/main flex flex-1 py-8 flex-col gap-2 relative">
-            <div className="px-4 lg:px-6 relative">{children}</div>
-          </div>
+        <div className="flex flex-1 flex-col min-h-0">
+          <main className="flex flex-1 flex-col py-6 px-4 lg:px-6 gap-0">
+            {children}
+          </main>
         </div>
       </SidebarInset>
     </SidebarProvider>

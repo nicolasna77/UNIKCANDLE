@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, Suspense, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DataTableAdvanced } from "@/components/admin/data-table-advanced";
 import {
   AdminHeader,
   AdminHeaderActions,
 } from "@/components/admin/admin-header";
+import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -23,9 +24,10 @@ import {
 export default function UsersPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
-  // Filters and pagination
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -44,7 +46,6 @@ export default function UsersPage() {
         role: roleFilter,
         status: statusFilter,
       });
-
       const response = await fetch(`/api/admin/users?${params}`);
       if (!response.ok) throw new Error("Failed to fetch users");
       return response.json();
@@ -52,8 +53,14 @@ export default function UsersPage() {
   });
 
   const handleDeleteUser = (userId: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-      deleteUser(userId);
+    setUserToDelete(userId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
+      deleteUser(userToDelete);
+      setUserToDelete(null);
     }
   };
 
@@ -130,17 +137,22 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <AdminHeader
-        title="Gestion des utilisateurs"
+        title="Utilisateurs"
         description="Gérez les utilisateurs, leurs rôles et permissions"
         breadcrumbs={[
-          { label: "Administration", href: "/admin" },
+          { label: "Administration", href: "/admin/dashboard" },
           { label: "Utilisateurs" },
         ]}
+        badge={{
+          text: `${data?.pagination?.total ?? 0} utilisateur${(data?.pagination?.total ?? 0) !== 1 ? "s" : ""}`,
+          variant: "secondary",
+        }}
         actions={
           <AdminHeaderActions
             onRefresh={() => refetch()}
             onAdd={() => setIsCreateDialogOpen(true)}
             addLabel="Nouvel utilisateur"
+            isLoading={isLoading}
           />
         }
       />
@@ -156,7 +168,7 @@ export default function UsersPage() {
         onStatusFilterChange={handleStatusFilterChange}
       />
 
-      <Suspense fallback={<div>Chargement...</div>}>
+      
         <DataTableAdvanced
           data={users}
           columns={columns}
@@ -168,7 +180,6 @@ export default function UsersPage() {
           pagination={pagination}
           onPageChange={setPage}
         />
-      </Suspense>
 
       <CreateUserDialog
         open={isCreateDialogOpen}
@@ -184,6 +195,18 @@ export default function UsersPage() {
         }}
         user={selectedUser}
         onBan={banUser}
+      />
+
+      <ConfirmDeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) setUserToDelete(null);
+        }}
+        onConfirm={confirmDeleteUser}
+        title="Supprimer cet utilisateur ?"
+        description="Cette action est irréversible. Toutes les données liées à cet utilisateur seront perdues."
+        isLoading={false}
       />
     </div>
   );
