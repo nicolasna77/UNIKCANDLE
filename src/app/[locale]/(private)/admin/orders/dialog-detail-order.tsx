@@ -13,8 +13,12 @@ import {
   ExternalLink,
   Loader2,
   Medal,
+  Calendar,
+  Mail,
 } from "lucide-react";
 import { QRCode } from "@/components/ui/shadcn-io/qr-code";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import {
   Dialog,
@@ -24,9 +28,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Order } from "@prisma/client";
 
 interface OrderItem {
@@ -76,6 +79,22 @@ interface ExtendedOrder {
   } | null;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  DELIVERED: "Livrée",
+  SHIPPED: "En livraison",
+  PROCESSING: "En préparation",
+  PENDING: "En attente",
+  CANCELLED: "Annulée",
+};
+
+const STATUS_CLASSES: Record<string, string> = {
+  DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  SHIPPED: "bg-violet-50 text-violet-700 border-violet-200",
+  PROCESSING: "bg-blue-50 text-blue-700 border-blue-200",
+  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
+};
+
 const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) => {
   const [order, setOrder] = useState<ExtendedOrder>(initialOrder);
   const locale = useLocale();
@@ -84,7 +103,6 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = order.total;
 
-  // Génère l'URL complète d'un QR code avec la locale courante
   const getArUrl = (code: string) => {
     const url = process.env.NEXT_PUBLIC_APP_URL || "https://unikcandle.com";
     const base = url.startsWith("http://") || url.startsWith("https://")
@@ -123,245 +141,111 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
   };
 
   const handlePrint = () => {
-    // Créer une nouvelle fenêtre pour l'impression
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
-    // Générer les QR codes pour l'impression
     const generateQRCode = (text: string): string => {
       return `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(text)}`;
     };
 
-    // Styles pour l'impression
     const printStyles = `
       <style>
         @media print {
-          * {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-          body {
-            font-family: system-ui, -apple-system, sans-serif;
-            line-height: 1.5;
-            color: #000;
-            background: #fff;
-            margin: 0;
-            padding: 20px;
-          }
-          .print-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #000;
-          }
-          .print-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-          }
-          .print-badges {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-          }
-          .print-badge {
-            background: #f3f4f6;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            border: 1px solid #d1d5db;
-          }
-          .print-section {
-            margin-bottom: 30px;
-            break-inside: avoid;
-          }
-          .print-section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-          .print-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            break-inside: avoid;
-          }
-          .print-item-image {
-            width: 60px;
-            height: 60px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            object-fit: cover;
-          }
-          .print-item-details {
-            flex: 1;
-          }
-          .print-item-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-          }
-          .print-item-scent {
-            font-size: 14px;
-            color: #6b7280;
-          }
-          .print-item-qr {
-            width: 80px;
-            height: 80px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .print-item-qr img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-          }
-          .print-item-price {
-            text-align: right;
-            font-weight: 600;
-          }
-          .print-total {
-            border-top: 2px solid #000;
-            padding-top: 15px;
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 18px;
-            font-weight: bold;
-          }
-          .print-address {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-          }
-          .print-no-address {
-            background: #fef3c7;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #f59e0b;
-            font-style: italic;
-            color: #92400e;
-          }
+          * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+          body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; color: #000; background: #fff; margin: 0; padding: 20px; }
+          .print-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #000; }
+          .print-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+          .print-badges { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+          .print-badge { background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #d1d5db; }
+          .print-section { margin-bottom: 30px; break-inside: avoid; }
+          .print-section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+          .print-item { display: flex; align-items: center; gap: 15px; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 10px; break-inside: avoid; }
+          .print-item-image { width: 60px; height: 60px; border: 1px solid #d1d5db; border-radius: 6px; object-fit: cover; }
+          .print-item-details { flex: 1; }
+          .print-item-name { font-weight: 600; margin-bottom: 5px; }
+          .print-item-scent { font-size: 14px; color: #6b7280; }
+          .print-item-qr { width: 80px; height: 80px; }
+          .print-item-price { text-align: right; font-weight: 600; }
+          .print-total { border-top: 2px solid #000; padding-top: 15px; margin-top: 15px; display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; }
+          .print-address { background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
         }
       </style>
     `;
 
-    // Contenu HTML pour l'impression
     const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Commande #${order.id.slice(0, 8)}</title>
+          <title>Commande #${order.id.slice(-8).toUpperCase()}</title>
           ${printStyles}
         </head>
         <body>
           <div class="print-header">
-            <div class="print-title">📦 Commande #${order.id.slice(0, 8)}</div>
+            <div class="print-title">📦 Commande #${order.id.slice(-8).toUpperCase()}</div>
             <div class="print-badges">
-              <span class="print-badge">👤 ${order.user.email || "Client"}</span>
+              <span class="print-badge">👤 ${order.user.name || order.user.email}</span>
               <span class="print-badge">${totalItems} article${totalItems > 1 ? "s" : ""}</span>
               <span class="print-badge">${totalAmount.toFixed(2)}€</span>
             </div>
           </div>
-          
           <div class="print-section">
             <div class="print-section-title">🛒 Articles commandés</div>
-            ${order.items
-              .map(
-                (item) => `
+            ${order.items.map((item) => `
               <div class="print-item">
-                <div class="print-item-image-container">
-                  ${
-                    item.product.images?.[0]
-                      ? `<img src="${item.product.images[0].url}" alt="${item.product.name}" class="print-item-image">`
-                      : '<div class="print-item-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #6b7280;">📦</div>'
-                  }
-                </div>
+                ${item.product.images?.[0]
+                  ? `<img src="${item.product.images[0].url}" alt="${item.product.name}" class="print-item-image">`
+                  : '<div class="print-item-image" style="background:#f3f4f6;display:flex;align-items:center;justify-content:center;">📦</div>'
+                }
                 <div class="print-item-details">
                   <div class="print-item-name">${item.product.name}</div>
-                  <div class="print-item-scent">Senteur: ${item.scent.name}</div>
-                  ${item.engravingText ? `<div style="margin-top:4px; font-size:12px; color:#7c3aed;">
-                    🏅 Gravure : ${item.engravingText.split(",").map((t: string) => `✦ ${t.trim()} ✦`).join("  ")}
-                  </div>` : ""}
+                  <div class="print-item-scent">Senteur : ${item.scent.name}</div>
+                  ${item.engravingText ? `<div style="margin-top:4px;font-size:12px;color:#7c3aed;">🏅 Gravure : ${item.engravingText.split(",").map((t: string) => `✦ ${t.trim()} ✦`).join("  ")}</div>` : ""}
                 </div>
                 <div class="print-item-qr">
-                  ${
-                    item.qrCode
-                      ? `<div style="background: #fff; padding: 5px; border-radius: 4px; text-align: center;">
-                      <img src="${generateQRCode(getArUrl(item.qrCode.code))}"
-                           alt="QR Code"
-                           style="width: 70px; height: 70px; border: 1px solid #d1d5db; border-radius: 4px;" />
-                    </div>`
-                      : '<div style="background: #f3f4f6; height: 100%; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 10px;">Pas de QR</div>'
+                  ${item.qrCode
+                    ? `<img src="${generateQRCode(getArUrl(item.qrCode.code))}" alt="QR" style="width:70px;height:70px;border:1px solid #d1d5db;border-radius:4px;" />`
+                    : '<div style="background:#f3f4f6;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b7280;">Pas de QR</div>'
                   }
                 </div>
                 <div class="print-item-price">
-                  <div style="font-size: 14px; color: #6b7280; margin-bottom: 2px;">
-                    ${item.quantity} × ${item.price.toFixed(2)}€
-                  </div>
+                  <div style="font-size:14px;color:#6b7280;">${item.quantity} × ${item.price.toFixed(2)}€</div>
                   <div>${(item.quantity * item.price).toFixed(2)}€</div>
                 </div>
               </div>
-            `
-              )
-              .join("")}
-            
+            `).join("")}
             ${order.items.some((i) => i.engravingText) ? `
-            <div style="margin-top:16px; padding:12px; background:#f5f0ff; border-radius:8px; border:1px solid #c4b5fd;">
-              <div style="font-weight:bold; margin-bottom:8px;">🏅 Gravures à réaliser</div>
-              ${order.items
-                .filter((i) => i.engravingText)
-                .map((i) => `<div style="margin-bottom:6px; font-size:13px;">
-                  <strong>${i.product.name}</strong> :
-                  ${i.engravingText!.split(",").map((t: string) => `<span style="font-style:italic; letter-spacing:2px;"> ✦ ${t.trim()} ✦ </span>`).join("·")}
-                </div>`).join("")}
+            <div style="margin-top:16px;padding:12px;background:#f5f0ff;border-radius:8px;border:1px solid #c4b5fd;">
+              <div style="font-weight:bold;margin-bottom:8px;">🏅 Gravures à réaliser</div>
+              ${order.items.filter((i) => i.engravingText).map((i) => `
+                <div style="margin-bottom:6px;font-size:13px;">
+                  <strong>${i.product.name}</strong> : ${i.engravingText!.split(",").map((t: string) => `✦ ${t.trim()} ✦`).join(" · ")}
+                </div>
+              `).join("")}
             </div>` : ""}
             <div class="print-total">
               <span>Total payé</span>
               <span>${totalAmount.toFixed(2)}€</span>
             </div>
           </div>
-          
           <div class="print-section">
             <div class="print-section-title">📍 Adresse de livraison</div>
-            ${
-              order.shippingAddress
-                ? `
-              <div class="print-address">
-              <div class=" font-bold"> ${order.shippingAddress.name}</div>
-                <div style="font-weight: 600; margin-bottom: 5px;">${order.shippingAddress.street}</div>
-                <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
-                <div style="color: #6b7280; margin-top: 5px;">${order.shippingAddress.state}, ${order.shippingAddress.country}</div>
-              </div>
-            `
-                : `
-              <div class="print-no-address">
-                Aucune adresse de livraison fournie
-              </div>
-            `
+            ${order.shippingAddress
+              ? `<div class="print-address">
+                  <div style="font-weight:600;">${order.shippingAddress.name}</div>
+                  <div>${order.shippingAddress.street}</div>
+                  <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
+                  <div style="color:#6b7280;">${order.shippingAddress.state}, ${order.shippingAddress.country}</div>
+                </div>`
+              : `<div style="background:#fef3c7;padding:15px;border-radius:8px;border:1px solid #f59e0b;color:#92400e;font-style:italic;">Aucune adresse fournie</div>`
             }
           </div>
         </body>
       </html>
     `;
 
-    // Écrire le contenu dans la nouvelle fenêtre
     printWindow.document.write(printContent);
     printWindow.document.close();
-
-    // Attendre que le contenu soit chargé puis imprimer
     printWindow.onload = () => {
       printWindow.print();
       printWindow.close();
@@ -380,190 +264,188 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-3">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Package className="h-5 w-5" />
-              Commande #{order.id.slice(0, 8)}
-            </DialogTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              Imprimer
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-            <Badge variant="secondary" className="gap-1">
-              <User className="h-3 w-3" />
-              {order.user.email || "Client"}
-            </Badge>
-            <Badge variant="outline">
-              {totalItems} article{totalItems > 1 ? "s" : ""}
-            </Badge>
-            <Badge variant="outline" className="font-semibold">
-              {totalAmount.toFixed(2)}€
-            </Badge>
-          </div>
-        </DialogHeader>
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden max-h-[92vh] flex flex-col">
+        {/* ── Header ── */}
+        <div className="px-6 pt-6 pb-4 border-b border-border bg-muted/20 shrink-0">
+          <DialogHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <DialogTitle className="text-2xl font-mono font-bold tracking-tight">
+                  #{order.id.slice(-8).toUpperCase()}
+                </DialogTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                      STATUS_CLASSES[order.status] ?? "bg-muted text-muted-foreground border-border"
+                    }`}
+                  >
+                    {STATUS_LABELS[order.status] ?? order.status}
+                  </span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {format(new Date(order.createdAt), "d MMM yyyy 'à' HH:mm", { locale: fr })}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="gap-2 shrink-0"
+              >
+                <Printer className="h-4 w-4" />
+                <span className="hidden sm:inline">Imprimer</span>
+              </Button>
+            </div>
+          </DialogHeader>
 
-        <div className="space-y-6" data-print-content>
-          {/* Articles commandés */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
+          {/* Customer pill */}
+          <div className="mt-4 flex items-center gap-3 bg-background rounded-lg border border-border p-3">
+            <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+              <User className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-tight truncate">{order.user.name}</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                <Mail className="h-3 w-3 shrink-0" />
+                {order.user.email}
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-xs text-muted-foreground">{totalItems} article{totalItems > 1 ? "s" : ""}</p>
+              <p className="text-sm font-bold">{totalAmount.toFixed(2)} €</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <ScrollArea className="flex-1">
+          <div className="p-6 space-y-6">
+
+            {/* Articles */}
+            <section>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                <ShoppingCart className="h-3.5 w-3.5" />
                 Articles commandés
               </h3>
 
-              <div className="space-y-4">
+              <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
                 {order.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    {/* Image du produit */}
-                    <div className="md:col-span-2 flex justify-center md:justify-start">
-                      {item.product.images?.[0] ? (
-                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border">
-                          <Image
-                            src={
-                              item.product.images[0].url || "/placeholder.svg"
-                            }
-                            alt={item.product.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center border border-border">
-                          <Package className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Détails du produit */}
-                    <div className="md:col-span-4 space-y-1">
-                      <h4 className="font-medium text-base leading-tight">
-                        {item.product.name}
-                      </h4>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        Senteur: {item.scent.name}
-                      </p>
-                      {item.engravingText && (
-                        <div className="mt-1 space-y-1">
-                          <div className="flex items-center gap-1 text-xs font-medium text-primary">
-                            <Medal className="h-3 w-3" />
-                            Gravure médaillon
+                  <div key={item.id} className="p-4 hover:bg-muted/20 transition-colors">
+                    <div className="flex gap-4">
+                      {/* Image */}
+                      <div className="shrink-0">
+                        {item.product.images?.[0] ? (
+                          <div className="relative w-[72px] h-[72px] rounded-lg overflow-hidden border border-border shadow-sm">
+                            <Image
+                              src={item.product.images[0].url || "/placeholder.svg"}
+                              alt={item.product.name}
+                              fill
+                              className="object-cover"
+                            />
                           </div>
-                          <div className="flex flex-wrap gap-1">
+                        ) : (
+                          <div className="w-[72px] h-[72px] bg-muted rounded-lg flex items-center justify-center border border-border">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <p className="font-semibold text-sm leading-tight">{item.product.name}</p>
+                        <p className="text-xs text-muted-foreground">Senteur · {item.scent.name}</p>
+                        {item.engravingText && (
+                          <div className="flex flex-wrap gap-1 pt-1">
                             {item.engravingText.split(",").map((text, i) => (
                               <span
                                 key={i}
-                                className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 border border-primary/20 font-serif italic text-primary text-xs tracking-wider"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 font-serif italic text-primary text-xs tracking-wider"
                               >
-                                ✦ {text.trim()} ✦
+                                <Medal className="h-2.5 w-2.5 shrink-0" />
+                                {text.trim()}
                               </span>
                             ))}
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                        <p className="text-xs text-muted-foreground pt-0.5">
+                          {item.quantity} × {item.price.toFixed(2)} €
+                        </p>
+                      </div>
 
-                    {/* QR Code */}
-                    <div className="md:col-span-3 flex justify-center">
-                      {item.qrCode ? (
-                        <div className="flex flex-col items-center space-y-2">
-                          <div className="p-3 bg-white rounded-lg border border-border shadow-sm w-25 h-25">
-                            <QRCode
-                              data={getArUrl(item.qrCode.code)}
-                              foreground="oklch(0 0 0)"
-                              background="oklch(1 0 0)"
-                              robustness="M"
-                            />
+                      {/* Right: price + QR */}
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span className="text-sm font-bold">
+                          {(item.quantity * item.price).toFixed(2)} €
+                        </span>
+                        {item.qrCode ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="p-1.5 bg-white rounded-md border border-border shadow-sm">
+                              <div className="w-14 h-14">
+                                <QRCode
+                                  data={getArUrl(item.qrCode.code)}
+                                  foreground="oklch(0 0 0)"
+                                  background="oklch(1 0 0)"
+                                  robustness="M"
+                                />
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                const link = document.createElement("a");
+                                link.href = `/api/admin/orders/qr-code/${item.qrCode?.code}?locale=${locale}`;
+                                link.download = `qr-${item.product.name.replace(/\s+/g, "-").toLowerCase()}-${item.qrCode?.code}.svg`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
+                            >
+                              <Download className="h-2.5 w-2.5" />
+                              SVG
+                            </button>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              // Download QR code as SVG
-                              const link = document.createElement("a");
-                              link.href = `/api/admin/orders/qr-code/${item.qrCode?.code}?locale=${locale}`;
-                              link.download = `qr-${item.product.name.replace(/\s+/g, "-").toLowerCase()}-${item.qrCode?.code}.svg`;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                            }}
-                            className="gap-1 text-xs h-7"
-                          >
-                            <Download className="h-3 w-3" />
-                            SVG
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground text-center">
-                            Pas de QR
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Prix et quantité */}
-                    <div className="md:col-span-3 text-right space-y-1">
-                      <div className="flex items-center justify-between md:justify-end md:flex-col md:items-end gap-2">
-                        <span className="text-sm text-muted-foreground">
-                          {item.quantity} × {item.price.toFixed(2)}€
-                        </span>
-                        <span className="font-semibold text-lg">
-                          {(item.quantity * item.price).toFixed(2)}€
-                        </span>
+                        ) : (
+                          <div className="w-14 h-14 bg-muted/50 rounded-md flex items-center justify-center border border-dashed border-border">
+                            <span className="text-[9px] text-muted-foreground text-center leading-tight">No QR</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <Separator className="my-4" />
-
-              {/* Total */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-muted-foreground">
+              {/* Total summary */}
+              <div className="mt-3 rounded-lg border border-border bg-muted/20 p-3 space-y-1.5">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Sous-total articles</span>
                   <span>
-                    {order.items
-                      .reduce((acc, item) => acc + item.quantity * item.price, 0)
-                      .toFixed(2)}€
+                    {order.items.reduce((acc, item) => acc + item.quantity * item.price, 0).toFixed(2)} €
                   </span>
                 </div>
                 {order.shippingCost != null && order.shippingCost > 0 && (
-                  <div className="flex justify-between text-sm text-muted-foreground">
+                  <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Frais de port</span>
-                    <span>{order.shippingCost.toFixed(2)}€</span>
+                    <span>{order.shippingCost.toFixed(2)} €</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center text-lg font-semibold pt-2 border-t border-border">
-                  <span>Total payé</span>
-                  <span className="text-primary">{totalAmount.toFixed(2)}€</span>
+                <Separator className="my-1" />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold">Total payé</span>
+                  <span className="text-sm font-bold text-primary">{totalAmount.toFixed(2)} €</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </section>
 
-          {/* Gravures à réaliser */}
-          {order.items.some((item) => item.engravingText) && (
-            <Card className="border-primary/30 bg-primary/5">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2 text-primary">
-                  <Medal className="h-5 w-5" />
+            {/* Gravures */}
+            {order.items.some((item) => item.engravingText) && (
+              <section>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Medal className="h-3.5 w-3.5" />
                   Gravures à réaliser
                 </h3>
-
-                <div className="space-y-3">
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-4">
                   {order.items
                     .filter((item) => item.engravingText)
                     .map((item) => {
@@ -572,14 +454,10 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                         .map((t) => t.trim())
                         .filter(Boolean);
                       return (
-                        <div
-                          key={item.id}
-                          className="rounded-xl border border-primary/20 bg-background p-4 space-y-3"
-                        >
-                          {/* En-tête produit */}
-                          <div className="flex items-center gap-3">
+                        <div key={item.id} className="space-y-2">
+                          <div className="flex items-center gap-2">
                             {item.product.images?.[0] && (
-                              <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border shrink-0">
+                              <div className="relative w-7 h-7 rounded overflow-hidden border border-border shrink-0">
                                 <Image
                                   src={item.product.images[0].url}
                                   alt={item.product.name}
@@ -588,34 +466,22 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                                 />
                               </div>
                             )}
-                            <div>
-                              <p className="font-semibold text-sm">
-                                {item.product.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.quantity} bougie{item.quantity > 1 ? "s" : ""} · {texts.length} médaillon{texts.length > 1 ? "s" : ""}
-                              </p>
-                            </div>
+                            <p className="text-xs font-semibold">{item.product.name}</p>
+                            <span className="text-xs text-muted-foreground">
+                              — {texts.length} médaillon{texts.length > 1 ? "s" : ""}
+                            </span>
                           </div>
-
-                          {/* Liste des gravures */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {texts.map((text, i) => (
                               <div
                                 key={i}
-                                className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3"
+                                className="flex items-center justify-between rounded-lg border border-primary/20 bg-background px-3 py-2 gap-2"
                               >
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">
-                                    #{i + 1}
-                                  </span>
-                                  <p className="font-serif italic text-primary tracking-widest text-base font-semibold">
-                                    ✦ {text} ✦
-                                  </p>
-                                </div>
-                                <span className="text-xs text-muted-foreground shrink-0">
-                                  {text.length} car.
+                                <span className="text-xs text-muted-foreground shrink-0">#{i + 1}</span>
+                                <span className="font-serif italic text-primary tracking-widest text-sm font-semibold flex-1 text-center">
+                                  ✦ {text} ✦
                                 </span>
+                                <span className="text-xs text-muted-foreground shrink-0">{text.length}c</span>
                               </div>
                             ))}
                           </div>
@@ -623,133 +489,131 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                       );
                     })}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </section>
+            )}
 
-          {/* SendCloud */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <Truck className="h-5 w-5" />
-                Livraison SendCloud
-              </h3>
-
-              {sendcloudError && (
-                <p className="text-sm text-destructive mb-3">{sendcloudError}</p>
-              )}
-
-              {order.shippingCost != null && order.shippingCost > 0 && (
-                <p className="text-sm text-muted-foreground mb-3">
-                  Frais de port : <span className="font-medium text-foreground">{order.shippingCost.toFixed(2)} €</span>
-                </p>
-              )}
-
-              {order.sendcloudParcelId ? (
-                <div className="space-y-3">
-                  <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-                    <p>
-                      <span className="text-muted-foreground">Colis n° </span>
-                      <span className="font-mono font-medium">{order.sendcloudParcelId}</span>
-                    </p>
-                    {order.trackingNumber && (
-                      <p>
-                        <span className="text-muted-foreground">Suivi : </span>
-                        <span className="font-mono font-medium">{order.trackingNumber}</span>
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {order.trackingUrl && (
-                      <a
-                        href={order.trackingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        Suivre le colis
-                      </a>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleSendcloudAction("get_label")}
-                      disabled={sendcloudLoading}
-                      className="gap-2 ml-auto"
-                    >
-                      {sendcloudLoading ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Download className="h-3 w-3" />
-                      )}
-                      Télécharger l&apos;étiquette
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground italic">
-                    Aucun colis créé.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSendcloudAction("create_parcel")}
-                    disabled={sendcloudLoading || !order.shippingAddress || order.shippingMethodId == null}
-                    className="gap-2"
-                  >
-                    {sendcloudLoading ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Package className="h-3 w-3" />
-                    )}
-                    Créer le colis SendCloud
-                  </Button>
-                  {order.shippingMethodId == null && (
-                    <p className="text-xs text-muted-foreground">
-                      Méthode de livraison manquante (commande ancienne)
+            {/* Shipping + Address (2 cols) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* SendCloud */}
+              <section>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Truck className="h-3.5 w-3.5" />
+                  Expédition
+                </h3>
+                <div className="rounded-lg border border-border p-4 h-[calc(100%-28px)]">
+                  {sendcloudError && (
+                    <p className="text-xs text-destructive mb-3 bg-destructive/10 rounded-md p-2">
+                      {sendcloudError}
                     </p>
                   )}
+                  {order.shippingCost != null && order.shippingCost > 0 && (
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Frais :{" "}
+                      <span className="font-semibold text-foreground">
+                        {order.shippingCost.toFixed(2)} €
+                      </span>
+                    </p>
+                  )}
+                  {order.sendcloudParcelId ? (
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 rounded-md p-2.5 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-muted-foreground shrink-0">Colis n°</span>
+                          <span className="font-mono font-medium truncate">{order.sendcloudParcelId}</span>
+                        </div>
+                        {order.trackingNumber && (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-muted-foreground shrink-0">Suivi</span>
+                            <span className="font-mono font-medium truncate">{order.trackingNumber}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {order.trackingUrl && (
+                          <a
+                            href={order.trackingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Suivre
+                          </a>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSendcloudAction("get_label")}
+                          disabled={sendcloudLoading}
+                          className="gap-1.5 ml-auto h-7 text-xs"
+                        >
+                          {sendcloudLoading ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Download className="h-3 w-3" />
+                          )}
+                          Étiquette
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground italic">Aucun colis créé.</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendcloudAction("create_parcel")}
+                        disabled={
+                          sendcloudLoading ||
+                          !order.shippingAddress ||
+                          order.shippingMethodId == null
+                        }
+                        className="gap-1.5 h-7 text-xs w-full"
+                      >
+                        {sendcloudLoading ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Package className="h-3 w-3" />
+                        )}
+                        Créer le colis
+                      </Button>
+                      {order.shippingMethodId == null && (
+                        <p className="text-[10px] text-muted-foreground">
+                          Méthode de livraison manquante
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </section>
 
-          {/* Adresse de livraison */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Adresse de livraison
-              </h3>
+              {/* Address */}
+              <section>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Adresse de livraison
+                </h3>
+                <div className="rounded-lg border border-border p-4 h-[calc(100%-28px)]">
+                  {order.shippingAddress ? (
+                    <address className="not-italic text-sm space-y-0.5">
+                      <p className="font-semibold">{order.shippingAddress.name}</p>
+                      <p className="text-muted-foreground">{order.shippingAddress.street}</p>
+                      <p className="text-muted-foreground">
+                        {order.shippingAddress.zipCode} {order.shippingAddress.city}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {order.shippingAddress.state}, {order.shippingAddress.country}
+                      </p>
+                    </address>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Aucune adresse fournie.</p>
+                  )}
+                </div>
+              </section>
+            </div>
 
-              {order.shippingAddress ? (
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <div className="space-y-1 text-sm">
-                    <p className="font-medium">
-                      {order.shippingAddress.street}
-                    </p>
-                    <p>
-                      {order.shippingAddress.zipCode}{" "}
-                      {order.shippingAddress.city}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {order.shippingAddress.state},{" "}
-                      {order.shippingAddress.country}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground italic">
-                    Aucune adresse de livraison fournie
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

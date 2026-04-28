@@ -19,7 +19,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
@@ -29,7 +28,6 @@ interface VideoRecordProps {
   onVideoChange?: (videoUrl: string | undefined) => void;
 }
 
-// Sélection du meilleur codec disponible (VP9 > VP8 > H264)
 function getSupportedMimeType(): string {
   const types = [
     "video/webm;codecs=vp9,opus",
@@ -41,7 +39,6 @@ function getSupportedMimeType(): string {
 }
 
 const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
-  const [isEnabled, setIsEnabled] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -67,7 +64,6 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
     }
   }, [cartItem?.videoUrl, onVideoChange]);
 
-  // Nettoyage à la destruction du composant
   useEffect(() => {
     return () => {
       stopStream();
@@ -106,9 +102,7 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
   };
 
   const startRecording = async () => {
-    if (!isEnabled) return;
     try {
-      // 720p max — bon équilibre qualité/taille
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
         audio: true,
@@ -124,7 +118,7 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
       const mimeType = getSupportedMimeType();
       const recorder = new MediaRecorder(stream, {
         mimeType,
-        videoBitsPerSecond: 2_500_000, // 2.5 Mbps — qualité excellente sans gaspillage
+        videoBitsPerSecond: 2_500_000,
         audioBitsPerSecond: 128_000,
       });
       mediaRecorderRef.current = recorder;
@@ -136,9 +130,7 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
 
       recorder.onstop = async () => {
         stopStream();
-        const blob = new Blob(chunksRef.current, {
-          type: mimeType || "video/webm",
-        });
+        const blob = new Blob(chunksRef.current, { type: mimeType || "video/webm" });
         const localUrl = URL.createObjectURL(blob);
         setVideoUrl(localUrl);
 
@@ -154,7 +146,7 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
         }
       };
 
-      recorder.start(500); // chunk toutes les 500ms
+      recorder.start(500);
       setIsRecording(true);
       setRecordingTime(0);
       timerRef.current = setInterval(() => setRecordingTime((t) => t + 1), 1000);
@@ -215,9 +207,7 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
     <Card
       className={cn(
         "transition-all duration-300 border-2",
-        isEnabled
-          ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
-          : "border-border bg-muted/30"
+        "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
       )}
     >
       <CardHeader className="space-y-4">
@@ -226,11 +216,6 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
             <CardTitle className="flex items-center gap-2">
               <Video className="h-5 w-5" />
               Message vidéo
-              {videoUrl && (
-                <Badge variant="default" className="ml-2 bg-green-500">
-                  Enregistrée
-                </Badge>
-              )}
               {isUploading && (
                 <Badge variant="outline" className="ml-2">
                   <Upload className="w-3 h-3 mr-1 animate-spin" />
@@ -242,32 +227,15 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
               Enregistrez ou importez un message vidéo pour personnaliser votre bougie.
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "text-sm font-medium transition-colors",
-                isEnabled ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              {isEnabled ? "Activé" : "Désactivé"}
-            </span>
-            <Switch
-              checked={isEnabled}
-              onCheckedChange={(v) => {
-                setIsEnabled(v);
-                if (!v && isRecording) stopRecording();
-              }}
-            />
-          </div>
+          {videoUrl && (
+            <Badge className="bg-green-500 shrink-0">
+              ✓ Enregistrée
+            </Badge>
+          )}
         </div>
       </CardHeader>
 
-      <CardContent
-        className={cn(
-          "transition-all duration-300 space-y-6",
-          !isEnabled && "opacity-50 pointer-events-none"
-        )}
-      >
+      <CardContent className="space-y-4">
         {/* Tabs mode */}
         <div className="flex gap-2">
           <Button
@@ -293,7 +261,6 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
         {/* Mode enregistrement */}
         {mode === "record" && (
           <div className="space-y-4">
-            {/* Preview live */}
             <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
               <video
                 ref={liveVideoRef}
@@ -338,7 +305,9 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
               </Button>
             </div>
             <p className="text-center text-xs text-muted-foreground">
-              {isRecording ? "Cliquez pour arrêter" : "Cliquez pour démarrer l'enregistrement"}
+              {isRecording
+                ? "Cliquez pour arrêter"
+                : "Cliquez pour démarrer l'enregistrement"}
             </p>
           </div>
         )}
@@ -373,12 +342,15 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
           </div>
         )}
 
-        {/* Prévisualisation de la vidéo enregistrée/importée */}
+        {/* Aperçu de la vidéo */}
         {videoUrl && (
-          <div className="space-y-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-xl border border-green-200/50 dark:border-green-800/50">
-            <p className="text-sm font-medium text-green-700 dark:text-green-300 text-center">
-              Aperçu de votre message
-            </p>
+          <div className="space-y-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-xl border border-amber-200/50 dark:border-amber-800/50">
+            <div className="flex items-center gap-2 mb-2">
+              <Video className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                Aperçu de votre message
+              </span>
+            </div>
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
               <video
                 ref={previewRef}
@@ -412,12 +384,12 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
             </div>
             <div className="flex justify-center">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300"
+                className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={deleteVideo}
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 mr-1" />
                 Supprimer la vidéo
               </Button>
             </div>
@@ -425,8 +397,7 @@ const VideoRecord = ({ productId, onVideoChange }: VideoRecordProps) => {
         )}
 
         <p className="text-center text-xs text-muted-foreground">
-          Vidéo enregistrée en haute qualité (720p, codec VP9).
-          Durée recommandée : 15–60 secondes.
+          Vidéo en haute qualité (720p, VP9). Durée recommandée : 15–60 secondes.
         </p>
       </CardContent>
     </Card>

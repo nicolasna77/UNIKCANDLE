@@ -194,6 +194,13 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       return;
     }
 
+    if (product.messageType !== "text" && !currentVideoUrl) {
+      toast.error("Un message vidéo est obligatoire", {
+        description: "Enregistrez ou importez une vidéo avant d'ajouter ce produit au panier.",
+      });
+      return;
+    }
+
     addToCart({
       id: product.id,
       name: translatedName,
@@ -303,7 +310,12 @@ const DetailProduct = ({ productId }: { productId: string }) => {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
-              <Button onClick={handleAddToCart} size="lg" className="flex-1">
+              <Button
+                onClick={handleAddToCart}
+                size="lg"
+                className="flex-1"
+                disabled={product.messageType !== "text" && !currentVideoUrl}
+              >
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 {t("addToCart")}
               </Button>
