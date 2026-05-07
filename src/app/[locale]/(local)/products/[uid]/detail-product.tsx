@@ -1,12 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Star, Minus, Plus } from "lucide-react";
+import { ShoppingBag, Star, Minus, Plus, Video, Mic } from "lucide-react";
 import ReviewProduct from "./review-product";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProductById, type ProductWithDetails } from "@/services/products";
 import LoadingPage from "./loading";
 import { useCart } from "@/context/CartContext";
 import VideoRecord from "./video-record";
+import AudioRecord from "./audio-record";
 import TextMessage from "./text-message";
 import MedallionEngraving from "./medallion-engraving";
 import { toast } from "sonner";
@@ -18,7 +19,11 @@ import { Category, Scent } from "@prisma/client";
 import { useState, useEffect } from "react";
 import SelectScentComponant from "./select-scent-componant";
 import { useTranslations, useLocale } from "next-intl";
-import { getProductTranslation, getCategoryTranslation, getScentTranslation } from "@/lib/product-translation";
+import {
+  getProductTranslation,
+  getCategoryTranslation,
+  getScentTranslation,
+} from "@/lib/product-translation";
 
 // Composant pour l'affichage du prix
 const PriceDisplay = ({ price }: { price: number }) => {
@@ -65,12 +70,22 @@ const CategoryDisplay = ({
 };
 
 // Composant pour l'affichage d'un parfum sélectionné (quand 1 seul parfum)
-const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; locale: string }) => {
+const ScentDisplay = ({
+  scent,
+  locale,
+}: {
+  scent: Scent | null | undefined;
+  locale: string;
+}) => {
   const t = useTranslations("products.detail");
   if (!scent) return null;
 
   const translatedName = getScentTranslation(scent, "name", locale);
-  const translatedDescription = getScentTranslation(scent, "description", locale);
+  const translatedDescription = getScentTranslation(
+    scent,
+    "description",
+    locale,
+  );
 
   return (
     <Card className="border-border/50 bg-card/50 overflow-hidden">
@@ -87,8 +102,10 @@ const ScentDisplay = ({ scent, locale }: { scent: Scent | null | undefined; loca
         <div className="flex items-start gap-4">
           {scent.icon && (
             <div
-              className="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-xl"
-              style={{ backgroundColor: scent.color ? `${scent.color}20` : undefined }}
+              className="shrink-0 flex items-center justify-center w-14 h-14 rounded-xl"
+              style={{
+                backgroundColor: scent.color ? `${scent.color}20` : undefined,
+              }}
             >
               <span className="text-4xl">{scent.icon}</span>
             </div>
@@ -137,8 +154,14 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   };
   const { addToCart } = useCart();
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string | undefined>();
-  const [currentTextMessage, setCurrentTextMessage] = useState<string | undefined>();
-  const [currentEngravingText, setCurrentEngravingText] = useState<string | undefined>();
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>();
+  const [messageMode, setMessageMode] = useState<"video" | "audio">("video");
+  const [currentTextMessage, setCurrentTextMessage] = useState<
+    string | undefined
+  >();
+  const [currentEngravingText, setCurrentEngravingText] = useState<
+    string | undefined
+  >();
   const [quantity, setQuantity] = useState(1);
   const [selectedScent, setSelectedScent] = useState<Scent | undefined>();
 
@@ -149,10 +172,18 @@ const DetailProduct = ({ productId }: { productId: string }) => {
   }, [product, selectedScent]);
 
   // Get translated fields based on current locale
-  const translatedName = product ? getProductTranslation(product, "name", locale) : "";
-  const translatedDescription = product ? getProductTranslation(product, "description", locale) : "";
-  const translatedSubTitle = product ? getProductTranslation(product, "subTitle", locale) : "";
-  const translatedCategoryName = product?.category ? getCategoryTranslation(product.category, "name", locale) : "";
+  const translatedName = product
+    ? getProductTranslation(product, "name", locale)
+    : "";
+  const translatedDescription = product
+    ? getProductTranslation(product, "description", locale)
+    : "";
+  const translatedSubTitle = product
+    ? getProductTranslation(product, "subTitle", locale)
+    : "";
+  const translatedCategoryName = product?.category
+    ? getCategoryTranslation(product.category, "name", locale)
+    : "";
 
   if (isLoading) {
     return (
@@ -169,9 +200,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
         <div className="text-destructive text-xl font-semibold">
           {error?.message || t("detail.errorLoading")}
         </div>
-        <p className="text-muted-foreground">
-          {t("detail.productNotFound")}
-        </p>
+        <p className="text-muted-foreground">{t("detail.productNotFound")}</p>
         <Button
           variant="outline"
           onClick={() => window.location.reload()}
@@ -194,9 +223,14 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       return;
     }
 
-    if (product.messageType !== "text" && !currentVideoUrl) {
-      toast.error("Un message vidéo est obligatoire", {
-        description: "Enregistrez ou importez une vidéo avant d'ajouter ce produit au panier.",
+    if (
+      product.messageType !== "text" &&
+      !currentVideoUrl &&
+      !currentAudioUrl
+    ) {
+      toast.error("Un message vidéo ou audio est obligatoire", {
+        description:
+          "Enregistrez ou importez un message avant d'ajouter ce produit au panier.",
       });
       return;
     }
@@ -211,9 +245,12 @@ const DetailProduct = ({ productId }: { productId: string }) => {
       subTitle: translatedSubTitle,
       category: product.category,
       videoUrl: currentVideoUrl,
+      audioUrl: currentAudioUrl,
       textMessage: currentTextMessage,
       engravingText: currentEngravingText,
-      engravingPrice: product.hasEngraving ? (product.engravingPrice ?? 0) : undefined,
+      engravingPrice: product.hasEngraving
+        ? (product.engravingPrice ?? 0)
+        : undefined,
       quantity,
     });
     toast.success(t("card.addedToCart"));
@@ -236,13 +273,18 @@ const DetailProduct = ({ productId }: { productId: string }) => {
             {/* En-tête produit */}
             <div className="space-y-4">
               <div className="flex md:flex-row flex-col justify-between md:items-center gap-4">
-                <h1 className="text-3xl font-bold ">{translatedName}</h1>
+                <h1 className="text-3xl font-bold text-balance ">
+                  {translatedName}
+                </h1>
                 <PriceDisplay price={product.price} />
               </div>
 
               <div className="flex items-center gap-4">
                 <ReviewDisplay count={product.reviewCount} />
-                <CategoryDisplay category={product.category} translatedName={translatedCategoryName} />
+                <CategoryDisplay
+                  category={product.category}
+                  translatedName={translatedCategoryName}
+                />
               </div>
 
               <p className="text-lg text-muted-foreground">
@@ -260,20 +302,60 @@ const DetailProduct = ({ productId }: { productId: string }) => {
                 setSelectedScent={setSelectedScent}
               />
             ) : (
-              <ScentDisplay scent={selectedScent || product.scents[0]} locale={locale} />
+              <ScentDisplay
+                scent={selectedScent || product.scents[0]}
+                locale={locale}
+              />
             )}
 
-            {/* Message personnalisé - Vidéo ou Texte selon le type */}
+            {/* Message personnalisé - Vidéo, Audio ou Texte selon le type */}
             {product.messageType === "text" ? (
               <TextMessage
                 productId={product.id}
                 onTextChange={setCurrentTextMessage}
               />
             ) : (
-              <VideoRecord
-                productId={product.id}
-                onVideoChange={setCurrentVideoUrl}
-              />
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={messageMode === "video" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => {
+                      setMessageMode("video");
+                      setCurrentAudioUrl(undefined);
+                    }}
+                  >
+                    <Video className="w-4 h-4 mr-2" />
+                    Vidéo
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={messageMode === "audio" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => {
+                      setMessageMode("audio");
+                      setCurrentVideoUrl(undefined);
+                    }}
+                  >
+                    <Mic className="w-4 h-4 mr-2" />
+                    Audio
+                  </Button>
+                </div>
+                {messageMode === "video" ? (
+                  <VideoRecord
+                    productId={product.id}
+                    onVideoChange={setCurrentVideoUrl}
+                  />
+                ) : (
+                  <AudioRecord
+                    productId={product.id}
+                    onAudioChange={setCurrentAudioUrl}
+                  />
+                )}
+              </div>
             )}
 
             {/* Gravure médaillon */}
@@ -298,7 +380,7 @@ const DetailProduct = ({ productId }: { productId: string }) => {
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="px-4 py-2 font-semibold text-sm min-w-[3rem] text-center">
+                <span className="px-4 py-2 font-semibold text-sm min-w-12 text-center">
                   {quantity}
                 </span>
                 <button
@@ -314,7 +396,11 @@ const DetailProduct = ({ productId }: { productId: string }) => {
                 onClick={handleAddToCart}
                 size="lg"
                 className="flex-1"
-                disabled={product.messageType !== "text" && !currentVideoUrl}
+                disabled={
+                  product.messageType !== "text" &&
+                  !currentVideoUrl &&
+                  !currentAudioUrl
+                }
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 {t("addToCart")}
@@ -326,7 +412,9 @@ const DetailProduct = ({ productId }: { productId: string }) => {
         {/* Description et avis */}
         <div className="mt-16 space-y-8">
           <div className=" py-6">
-            <h2 className="text-2xl font-bold mb-4">{t("detail.description")}</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {t("detail.description")}
+            </h2>
             <div
               className="prose prose-sm dark:prose-invert max-w-none leading-relaxed [&_p]:my-3 [&_p:empty]:h-[1.2em]"
               dangerouslySetInnerHTML={{ __html: translatedDescription }}

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { Card } from "@/components/ui/card";
-import { Video, AlertCircle } from "lucide-react";
+import { Video, AlertCircle, Mic, Play, MessageCircle, Volume2 } from "lucide-react";
 import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
 import Image from "next/image";
 
@@ -29,7 +29,7 @@ interface QRData {
     category: { icon: string };
     images: { id: string; url: string }[];
   };
-  scent: { name: string; description: string; color: string };
+  scent: { name: string; description: string; color: string | null } | null;
   videoUrl: string | null;
   audioUrl: string | null;
   animationId: string;
@@ -87,26 +87,67 @@ export default function ARPage() {
       <div className="flex z-10 container mx-auto px-4 py-8">
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 w-full items-center">
           {/* Image du produit */}
-          <div className="relative flex items-center justify-center">
-            {data?.product.images?.[0]?.url ? (
-              <div className="relative w-full max-w-md aspect-square bg-card/30 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-2xl">
-                <div className="relative w-full h-full">
-                  <Image
-                    src={data.product.images[0].url}
-                    alt={data.product.name}
-                    fill
-                    className="object-contain rounded-2xl"
-                    priority
-                  />
+          <div className="relative flex flex-col items-center gap-4">
+            <div className="relative w-full max-w-md">
+              {data?.product.images?.[0]?.url ? (
+                <div className="relative w-full aspect-square bg-card/30 backdrop-blur-sm rounded-3xl p-4 border border-border/50 shadow-2xl">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={data.product.images[0].url}
+                      alt={data.product.name}
+                      fill
+                      className="object-contain rounded-2xl"
+                      priority
+                    />
+                  </div>
                 </div>
+              ) : (
+                <div className="w-full aspect-square bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl flex items-center justify-center shadow-2xl">
+                  <span className="text-muted-foreground text-sm">
+                    Aucune image disponible
+                  </span>
+                </div>
+              )}
+
+              {/* Badge type de message */}
+              <div className="absolute bottom-6 left-6 flex flex-col gap-2">
+                {data.videoUrl && (
+                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg">
+                    <Video className="w-3.5 h-3.5" />
+                    Message vidéo
+                  </div>
+                )}
+                {data.audioUrl && (
+                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg">
+                    <Volume2 className="w-3.5 h-3.5" />
+                    Message audio
+                  </div>
+                )}
+                {!data.videoUrl && !data.audioUrl && (
+                  <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm text-white/70 text-xs px-3 py-1.5 rounded-full">
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    Pas de message
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="w-full max-w-md aspect-square bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl flex items-center justify-center shadow-2xl">
-                <span className="text-muted-foreground text-sm">
-                  Aucune image disponible
-                </span>
-              </div>
-            )}
+            </div>
+
+            {/* Nom du produit + parfum */}
+            <div className="text-center space-y-2 max-w-md w-full">
+              <h1 className="text-xl font-bold text-foreground">{data.product.name}</h1>
+              {data.scent && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm">
+                  {data.scent.color && (
+                    <span
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: data.scent.color }}
+                    />
+                  )}
+                  <span className="text-sm text-muted-foreground">{data.scent.name}</span>
+                </div>
+              )}
+            </div>
+
             <ConfettiEmojiAuto icon={data?.product.category.icon || ""} />
           </div>
 
@@ -138,18 +179,33 @@ export default function ARPage() {
               </div>
             )}
 
-            {/* Fallback audio si pas de vidéo */}
-            {!data.videoUrl && data.audioUrl && (
+            {/* Message audio */}
+            {data.audioUrl && (
               <div className="space-y-4 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 shadow-lg">
                 <div className="flex items-center gap-3 pb-2 border-b border-border/50">
                   <div className="p-2 rounded-full bg-primary/10">
-                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                    <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold text-foreground">
                     Message audio
                   </h3>
                 </div>
-                <audio controls src={data.audioUrl} className="w-full" />
+                <div className="flex flex-col items-center gap-4 py-2">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/20">
+                    <Play className="w-7 h-7 text-primary ml-1" />
+                  </div>
+                  <audio
+                    controls
+                    src={data.audioUrl}
+                    className="w-full rounded-xl"
+                    style={{ accentColor: "hsl(var(--primary))" }}
+                  />
+                </div>
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
+                  <p className="text-primary-foreground text-xs sm:text-sm leading-relaxed">
+                    💡 Appuyez sur play pour écouter le message qui vous a été laissé.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -171,7 +227,7 @@ export default function ARPage() {
               <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-full bg-muted/50">
-                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
                   </div>
                   <div>
                     <h3 className="text-foreground font-semibold text-base sm:text-lg">

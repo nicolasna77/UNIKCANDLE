@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import {
   validateVideoFile,
   generateSecureFilename,
@@ -9,11 +7,6 @@ import {
 
 export async function POST(request: Request) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 

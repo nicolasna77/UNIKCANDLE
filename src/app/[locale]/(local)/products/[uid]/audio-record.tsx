@@ -1,13 +1,7 @@
 "use client";
-import {
-  Trash2,
-  MicIcon,
-  VoicemailIcon,
-  AudioWaveformIcon as Waveform,
-  Upload,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 
+import { Trash2, Mic, AudioWaveformIcon as Waveform, Upload, VoicemailIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,9 +10,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useTranslations } from "next-intl";
@@ -30,22 +23,22 @@ interface AudioRecordProps {
 
 const AudioRecord = ({ productId, onAudioChange }: AudioRecordProps) => {
   const t = useTranslations("products.audioRecord");
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [mode, setMode] = useState<"record" | "upload">("record");
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { updateItemAudio, removeItemAudio, cart } = useCart();
 
-  // Trouver l'item du panier correspondant au produit
   const cartItem = cart.find((item) => item.id === productId);
 
-  // Initialiser l'audioUrl depuis le panier si disponible
   useEffect(() => {
     if (cartItem?.audioUrl) {
       setAudioUrl(cartItem.audioUrl);
@@ -53,44 +46,37 @@ const AudioRecord = ({ productId, onAudioChange }: AudioRecordProps) => {
     }
   }, [cartItem?.audioUrl, onAudioChange]);
 
-  // Fonction pour uploader l'audio vers Vercel Blob
-  const uploadAudio = async (audioBlob: Blob): Promise<string | null> => {
+  useEffect(() => {
+    return () => {
+      if (audioUrl?.startsWith("blob:")) URL.revokeObjectURL(audioUrl);
+      if (timerRef.current) clearInterval(timerRef.current);
+      audioRef.current?.pause();
+    };
+  }, [audioUrl]);
+
+  const uploadAudio = async (blob: Blob, filename: string): Promise<string | null> => {
     try {
       setIsUploading(true);
-
       const formData = new FormData();
-      formData.append("file", audioBlob, `audio-${Date.now()}.wav`);
-
-      const response = await fetch("/api/upload/audio", {
-        method: "POST",
-        body: formData,
-      });
-
+      formData.append("file", blob, filename);
+      const response = await fetch("/api/upload/audio", { method: "POST", body: formData });
       if (!response.ok) {
-        throw new Error("Erreur lors de l'upload");
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error ?? "Upload échoué");
       }
-
       const data = await response.json();
       return data.url;
-    } catch (error) {
-      console.error("Erreur upload audio:", error);
-      toast.error(t("uploadError"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("uploadError"));
       return null;
     } finally {
       setIsUploading(false);
     }
   };
 
-  // Fonction pour démarrer l'enregistrement
   const startRecording = async () => {
-    if (!isEnabled) return;
-
     try {
-      // Réinitialiser le timer avant de commencer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
       setRecordingTime(0);
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -98,104 +84,73 @@ const AudioRecord = ({ productId, onAudioChange }: AudioRecordProps) => {
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/wav",
-        });
-
-        // Upload vers Vercel Blob
-        const uploadedUrl = await uploadAudio(audioBlob);
-
-        if (uploadedUrl) {
-          setAudioUrl(uploadedUrl);
-          // Sauvegarder dans le panier
-          updateItemAudio(productId, uploadedUrl);
-          onAudioChange?.(uploadedUrl);
-          toast.success(t("savedSuccess"), {
-            description: t("savedDescription"),
-          });
-        } else {
-          // Fallback vers URL locale si l'upload échoue
-          const localUrl = URL.createObjectURL(audioBlob);
-          setAudioUrl(localUrl);
-          onAudioChange?.(localUrl);
-          toast.success(t("recordedSuccess"), {
-            description: "Vous pouvez maintenant l'écouter ou le supprimer",
-          });
+        const blob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+        const url = await uploadAudio(blob, `audio-${Date.now()}.wav`);
+        if (url) {
+          setAudioUrl(url);
+          updateItemAudio(productId, url);
+          onAudioChange?.(url);
+          toast.success(t("savedSuccess"), { description: t("savedDescription") });
         }
       };
 
       mediaRecorder.start();
       setIsRecording(true);
-
-      // Démarrer le timer
-      timerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
-    } catch (error) {
-      toast.error("Erreur lors de l'accès au microphone", {
-        description: "Vérifiez que vous avez autorisé l'accès au microphone",
+      timerRef.current = setInterval(() => setRecordingTime((s) => s + 1), 1000);
+    } catch {
+      toast.error("Impossible d'accéder au microphone", {
+        description: "Vérifiez que vous avez autorisé l'accès au microphone.",
       });
-      console.error("Erreur d'enregistrement:", error);
     }
   };
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream
-        .getTracks()
-        .forEach((track) => track.stop());
+      mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop());
       setIsRecording(false);
-
-      // Arrêter et réinitialiser le timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
     }
   };
 
-  // Nettoyage des ressources
-  useEffect(() => {
-    return () => {
-      if (audioUrl && audioUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(audioUrl);
-      }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, [audioUrl]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // Fonction pour tester l'enregistrement
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux (max 10 Mo)");
+      return;
+    }
+    if (!file.type.startsWith("audio/")) {
+      toast.error("Seuls les fichiers audio sont acceptés");
+      return;
+    }
+
+    const url = await uploadAudio(file, file.name);
+    if (url) {
+      setAudioUrl(url);
+      updateItemAudio(productId, url);
+      onAudioChange?.(url);
+      toast.success("Audio importé", {
+        description: "Votre message audio a bien été sauvegardé.",
+      });
+    }
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  };
+
   const playRecording = () => {
     if (audioUrl && !isPlaying) {
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
       setIsPlaying(true);
-
-      audio.onended = () => {
-        setIsPlaying(false);
-        audioRef.current = null;
-      };
-
-      audio.onerror = () => {
-        setIsPlaying(false);
-        audioRef.current = null;
-        toast.error("Erreur lors de la lecture");
-      };
-
+      audio.onended = () => { setIsPlaying(false); audioRef.current = null; };
+      audio.onerror = () => { setIsPlaying(false); audioRef.current = null; };
       audio.play();
     } else if (isPlaying && audioRef.current) {
       audioRef.current.pause();
@@ -204,208 +159,188 @@ const AudioRecord = ({ productId, onAudioChange }: AudioRecordProps) => {
     }
   };
 
-  // Fonction pour supprimer l'enregistrement
   const deleteRecording = () => {
-    if (audioUrl) {
-      if (audioUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(audioUrl);
-      }
-      setAudioUrl(null);
-      setRecordingTime(0);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        audioRef.current = null;
-      }
-      // Supprimer du panier
-      removeItemAudio(productId);
-      onAudioChange?.(undefined);
-      toast.success("Message supprimé");
-    }
+    if (audioUrl?.startsWith("blob:")) URL.revokeObjectURL(audioUrl);
+    setAudioUrl(null);
+    setRecordingTime(0);
+    audioRef.current?.pause();
+    audioRef.current = null;
+    setIsPlaying(false);
+    removeItemAudio(productId);
+    onAudioChange?.(undefined);
+    toast.success("Message supprimé");
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   return (
-    <Card
-      className={cn(
-        "transition-all duration-300 border-2",
-        isEnabled
-          ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
-          : "border-border bg-muted/30"
-      )}
-    >
+    <Card className="transition-all duration-300 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
       <CardHeader className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2">
-              <MicIcon className="h-5 w-5" />
+              <Mic className="h-5 w-5" />
               {t("title")}
-              {audioUrl && (
-                <Badge variant="secondary" className="ml-2">
-                  {t("recorded")}
-                </Badge>
-              )}
               {isUploading && (
                 <Badge variant="outline" className="ml-2">
                   <Upload className="w-3 h-3 mr-1 animate-spin" />
                   {t("uploading")}
                 </Badge>
               )}
-              {audioUrl && !audioUrl.startsWith("blob:") && (
-                <Badge variant="default" className="ml-2 bg-green-500">
-                  {t("saved")}
-                </Badge>
-              )}
             </CardTitle>
-            <CardDescription>
-              {t("description")}
-            </CardDescription>
+            <CardDescription>{t("description")}</CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "text-sm font-medium transition-colors",
-                isEnabled ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              {isEnabled ? t("enabled") : t("disabled")}
-            </span>
-            <Switch
-              checked={isEnabled}
-              onCheckedChange={setIsEnabled}
-              className="data-[state=checked]:bg-primary"
-            />
-          </div>
+          {audioUrl && (
+            <Badge className="bg-green-500 shrink-0">✓ Enregistré</Badge>
+          )}
         </div>
       </CardHeader>
 
-      <CardContent
-        className={cn(
-          "transition-all duration-300",
-          !isEnabled && "opacity-50 pointer-events-none"
-        )}
-      >
-        <div className="space-y-8">
-          {/* Bouton d'enregistrement principal */}
-          <div className="flex flex-col items-center space-y-4">
+      <CardContent className="space-y-4">
+        {/* Tabs mode */}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={mode === "record" ? "default" : "outline"}
+            onClick={() => setMode("record")}
+            className="flex-1"
+          >
+            <Mic className="w-4 h-4 mr-2" />
+            Enregistrer
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={mode === "upload" ? "default" : "outline"}
+            onClick={() => setMode("upload")}
+            className="flex-1"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Importer
+          </Button>
+        </div>
+
+        {/* Mode enregistrement */}
+        {mode === "record" && (
+          <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <Button
+                type="button"
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-28 w-28 rounded-full relative group transition-all duration-500 border-2",
+                  "h-24 w-24 rounded-full border-2 transition-all duration-300",
                   isRecording
                     ? "bg-red-500 text-white border-red-400 shadow-lg shadow-red-500/25 scale-105"
-                    : "hover:bg-primary/10 hover:border-primary/50 hover:scale-105",
-                  !isEnabled && "cursor-not-allowed"
+                    : "hover:bg-primary/10 hover:border-primary/50 hover:scale-105"
                 )}
                 onClick={isRecording ? stopRecording : startRecording}
-                disabled={!isEnabled || isUploading}
+                disabled={isUploading}
               >
-                {/* Effet de pulsation pendant l'enregistrement */}
                 {isRecording && (
                   <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20" />
                 )}
-
                 <div className="absolute inset-0 flex items-center justify-center">
                   {isRecording ? (
                     <div className="w-6 h-6 bg-white rounded-sm animate-pulse" />
                   ) : (
-                    <MicIcon className="w-12 h-12 text-primary group-hover:scale-110 transition-transform duration-300" />
+                    <Mic className="w-10 h-10 text-primary" />
                   )}
                 </div>
               </Button>
-
-              {/* Indicateur visuel d'enregistrement */}
               {isRecording && (
-                <div className="absolute -top-2 -right-2">
-                  <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />
-                </div>
+                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse" />
               )}
             </div>
 
             <div className="text-center">
-              <p
-                className={cn(
-                  "text-sm font-medium transition-colors",
-                  isRecording ? "text-red-500" : "text-muted-foreground"
-                )}
-              >
-                {isRecording
-                  ? t("recordingInProgress")
-                  : t("pressToRecord")}
+              <p className={cn("text-sm font-medium", isRecording ? "text-red-500" : "text-muted-foreground")}>
+                {isRecording ? t("recordingInProgress") : t("pressToRecord")}
               </p>
-
-              {/* Timer d'enregistrement */}
               {isRecording && (
-                <div className="flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/20 px-4 py-2 rounded-full">
+                <div className="inline-flex items-center gap-2 mt-1.5 bg-red-50 dark:bg-red-950/20 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-red-600 dark:text-red-400 font-mono font-semibold">
+                  <span className="text-red-600 dark:text-red-400 font-mono text-sm font-semibold">
                     {formatTime(recordingTime)}
                   </span>
                 </div>
               )}
             </div>
           </div>
+        )}
 
-          {/* Section de lecture et contrôles */}
-          {audioUrl && (
-            <div className="space-y-4 p-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-xl border border-green-200/50 dark:border-green-800/50">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Waveform className="w-5 h-5 text-green-600" />
-                <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                  {t("recordedSuccessfully")}
-                </span>
+        {/* Mode import */}
+        {mode === "upload" && (
+          <div className="space-y-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/m4a,audio/x-m4a,.mp3,.wav,.ogg,.webm,.m4a"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className={cn(
+                "w-full border-2 border-dashed rounded-xl p-10 flex flex-col items-center gap-3 transition-colors",
+                "hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
+                isUploading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <Upload className="w-8 h-8 text-muted-foreground" />
+              <div className="text-center">
+                <p className="text-sm font-medium">Glissez ou cliquez pour importer</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  MP3, WAV, OGG, M4A, WebM — max 10 Mo
+                </p>
               </div>
-
-              <div className="flex justify-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "gap-2 transition-all duration-200",
-                    isPlaying
-                      ? "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
-                      : "hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
-                  )}
-                  onClick={playRecording}
-                  disabled={!audioUrl}
-                >
-                  <VoicemailIcon className="w-4 h-4" />
-                  {isPlaying ? t("playing") : t("listen")}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
-                  onClick={deleteRecording}
-                  disabled={!audioUrl}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  {t("delete")}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          <div className="text-center space-y-2">
-            <p className="text-xs text-muted-foreground">
-              {t.rich("tip", {
-                strong: (chunks) => <strong>{chunks}</strong>,
-              })}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("recommendedDuration")}
-            </p>
+            </button>
           </div>
-        </div>
+        )}
+
+        {/* Aperçu */}
+        {audioUrl && (
+          <div className="space-y-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-xl border border-amber-200/50 dark:border-amber-800/50">
+            <div className="flex items-center gap-2">
+              <Waveform className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                Aperçu de votre message
+              </span>
+            </div>
+            <div className="flex justify-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "gap-2",
+                  isPlaying && "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
+                )}
+                onClick={playRecording}
+              >
+                <VoicemailIcon className="w-4 h-4" />
+                {isPlaying ? t("playing") : t("listen")}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={deleteRecording}
+              >
+                <Trash2 className="w-4 h-4" />
+                {t("delete")}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <p className="text-center text-xs text-muted-foreground">
+          {t("recommendedDuration")}
+        </p>
       </CardContent>
     </Card>
   );
