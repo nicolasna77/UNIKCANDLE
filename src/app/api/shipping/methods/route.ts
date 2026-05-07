@@ -6,10 +6,12 @@ import { logger } from "@/lib/logger";
 let cache: { data: unknown; ts: number } | null = null;
 const CACHE_TTL = 10 * 60 * 1000;
 
-const ALLOWED_CARRIERS = ["mondial relay", "chronopost"];
-
 export async function GET(request: NextRequest) {
   const country = request.nextUrl.searchParams.get("country") ?? "FR";
+  const bust = request.nextUrl.searchParams.get("bust") === "1";
+
+  // Vider le cache si demandé
+  if (bust) cache = null;
 
   // Servir depuis le cache si valide
   if (cache && Date.now() - cache.ts < CACHE_TTL) {
@@ -19,20 +21,15 @@ export async function GET(request: NextRequest) {
   try {
     const methods = await getShippingMethods(country);
 
-    // Filtrer uniquement Mondial Relay et Chronopost
-    const filtered = methods.filter((m) =>
-      ALLOWED_CARRIERS.some((carrier) =>
-        m.carrier?.toLowerCase().includes(carrier)
-      )
-    );
+    logger.info(`SendCloud: ${methods.length} méthode(s) reçue(s) pour ${country}`, {
+      carriers: [...new Set(methods.map((m) => m.carrier))],
+    });
 
-    const normalized = filtered.map((m) => {
+    const normalized = methods.map((m) => {
       const countryData = m.countries?.find((c) => c.iso_2 === country);
       const price = countryData?.price ?? m.price ?? 0;
-      const leadTimeHours =
-        countryData?.lead_time_hours ?? m.lead_time_hours ?? null;
-      const leadTimeDays =
-        countryData?.lead_time_days ?? m.lead_time_days ?? null;
+      const leadTimeHours = countryData?.lead_time_hours ?? m.lead_time_hours ?? null;
+      const leadTimeDays = countryData?.lead_time_days ?? m.lead_time_days ?? null;
 
       let deliveryDays: { min: number; max: number } | null = null;
       if (leadTimeDays != null && leadTimeDays > 0) {
@@ -52,6 +49,10 @@ export async function GET(request: NextRequest) {
         deliveryDays,
       };
     });
+
+    if (normalized.length === 0) {
+      logger.warn("SendCloud: aucune méthode de livraison disponible", { country });
+    }
 
     cache = { data: normalized, ts: Date.now() };
     return NextResponse.json(normalized);
