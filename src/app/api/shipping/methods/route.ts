@@ -6,6 +6,13 @@ import { logger } from "@/lib/logger";
 let cache: { data: unknown; ts: number } | null = null;
 const CACHE_TTL = 10 * 60 * 1000;
 
+// IDs des méthodes autorisées — configurer via SENDCLOUD_METHOD_IDS="123,456"
+function getAllowedIds(): number[] | null {
+  const raw = process.env.SENDCLOUD_METHOD_IDS;
+  if (!raw?.trim()) return null;
+  return raw.split(",").map((s) => parseInt(s.trim(), 10)).filter(Boolean);
+}
+
 export async function GET(request: NextRequest) {
   const country = request.nextUrl.searchParams.get("country") ?? "FR";
   const bust = request.nextUrl.searchParams.get("bust") === "1";
@@ -20,12 +27,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const methods = await getShippingMethods(country);
+    const allowedIds = getAllowedIds();
 
     logger.info(`SendCloud: ${methods.length} méthode(s) reçue(s) pour ${country}`, {
+      allowedIds,
       carriers: [...new Set(methods.map((m) => m.carrier))],
     });
 
-    const normalized = methods.map((m) => {
+    // Filtrer par IDs si SENDCLOUD_METHOD_IDS est défini
+    const filtered = allowedIds
+      ? methods.filter((m) => allowedIds.includes(m.id))
+      : methods;
+
+    const normalized = filtered.map((m) => {
       const countryData = m.countries?.find((c) => c.iso_2 === country);
       const price = countryData?.price ?? m.price ?? 0;
       const leadTimeHours = countryData?.lead_time_hours ?? m.lead_time_hours ?? null;
