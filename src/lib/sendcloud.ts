@@ -1,6 +1,6 @@
 const SENDCLOUD_API_URL = "https://panel.sendcloud.sc/api/v2";
 const SENDCLOUD_API_V3_URL = "https://panel.sendcloud.sc/api/v3";
-const DEFAULT_WEIGHT_KG = 0.5;
+const DEFAULT_WEIGHT_KG = 0.75;
 
 function getAuthHeader(): string {
   const publicKey = process.env.SENDCLOUD_PUBLIC_KEY;
