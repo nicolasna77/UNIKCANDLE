@@ -360,7 +360,8 @@
     "signInError": "Une erreur est survenue lors de la connexion",
     "signUpError": "Une erreur est survenue lors de l'inscription",
     "sendEmailError": "Une erreur est survenue lors de l'envoi de l'email",
-    "resetPasswordError": "Une erreur est survenue lors de la réinitialisation du mot de passe"
+    "resetPasswordError": "Une erreur est survenue lors de la réinitialisation du mot de passe",
+    "googleSignInError": "Erreur lors de la connexion avec Google"
   },
   "profile": {
     "title": "Mon Profil",

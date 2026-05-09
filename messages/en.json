@@ -360,7 +360,8 @@
     "signInError": "An error occurred during sign in",
     "signUpError": "An error occurred during sign up",
     "sendEmailError": "An error occurred while sending the email",
-    "resetPasswordError": "An error occurred while resetting the password"
+    "resetPasswordError": "An error occurred while resetting the password",
+    "googleSignInError": "Error signing in with Google"
   },
   "profile": {
     "title": "My Profile",

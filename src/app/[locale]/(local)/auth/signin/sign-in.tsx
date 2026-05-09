@@ -96,9 +96,24 @@ export default function SignIn() {
 
   async function handleGoogleSignIn() {
     setLoading(true);
+    setError(null);
     try {
-      await signIn.social({ provider: "google", callbackURL: callbackUrl || "/" });
-    } finally {
+      const destination = callbackUrl || "/";
+      const absoluteCallback = destination.startsWith("http")
+        ? destination
+        : `${window.location.origin}${destination}`;
+
+      await signIn.social(
+        { provider: "google", callbackURL: absoluteCallback },
+        {
+          onError: (ctx) => {
+            setError(ctx.error.message || t("googleSignInError"));
+            setLoading(false);
+          },
+        }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("googleSignInError"));
       setLoading(false);
     }
   }
