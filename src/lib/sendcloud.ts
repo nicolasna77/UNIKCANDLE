@@ -155,13 +155,28 @@ export async function getShippingMethods(
 // Fetch v3 shipping products
 export async function getShippingProducts(): Promise<SendCloudProduct[]> {
   try {
-    const data = await sendcloudFetch<{ shipping_products: SendCloudProduct[] }>(
-      "/shipping-products",
-      {},
-      SENDCLOUD_API_V3_URL
-    );
-    const products = data.shipping_products ?? [];
-    console.log("[SendCloud v3] shipping_products count:", products.length, "ids:", products.map((p) => p.id));
+    const publicKey = process.env.SENDCLOUD_PUBLIC_KEY;
+    const secretKey = process.env.SENDCLOUD_SECRET_KEY;
+    const auth = `Basic ${Buffer.from(`${publicKey}:${secretKey}`).toString("base64")}`;
+
+    const url = `${SENDCLOUD_API_V3_URL}/shipping-products?from_country=FR&to_country=FR`;
+    const response = await fetch(url, {
+      headers: { Authorization: auth, "Content-Type": "application/json" },
+    });
+
+    const raw = await response.json();
+    console.log("[SendCloud v3] status:", response.status, "keys:", Object.keys(raw ?? {}));
+
+    if (!response.ok) {
+      console.error("[SendCloud v3] error response:", JSON.stringify(raw).slice(0, 500));
+      return [];
+    }
+
+    // La réponse v3 peut être sous shipping_products ou data ou un tableau direct
+    const products: SendCloudProduct[] =
+      raw.shipping_products ?? raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
+
+    console.log("[SendCloud v3] products found:", products.length, "ids:", products.map((p) => p.id));
     return products;
   } catch (err) {
     console.error("[SendCloud v3] getShippingProducts failed:", err);
