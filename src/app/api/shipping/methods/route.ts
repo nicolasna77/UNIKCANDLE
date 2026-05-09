@@ -1,75 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShippingMethods } from "@/lib/sendcloud";
+import {
+  getShippingMethods,
+  getShippingProducts,
+  normalizeV2Methods,
+  normalizeV3Products,
+  type NormalizedShippingMethod,
+} from "@/lib/sendcloud";
 import { logger } from "@/lib/logger";
 
 // Cache en mémoire : 10 minutes
-let cache: { data: unknown; ts: number } | null = null;
+let cache: { data: NormalizedShippingMethod[]; ts: number } | null = null;
 const CACHE_TTL = 10 * 60 * 1000;
 
-// IDs des méthodes autorisées — configurer via SENDCLOUD_METHOD_IDS="123,456"
-function getAllowedIds(): number[] | null {
+// IDs autorisés — supporte UUID (v3) et entiers (v2)
+// Configurer via SENDCLOUD_METHOD_IDS="c123b615-71ca-4fcb-b1c4-5a0a85a321e2,456"
+function getAllowedIds(): string[] | null {
   const raw = process.env.SENDCLOUD_METHOD_IDS;
   if (!raw?.trim()) return null;
-  return raw.split(",").map((s) => parseInt(s.trim(), 10)).filter(Boolean);
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
 export async function GET(request: NextRequest) {
   const country = request.nextUrl.searchParams.get("country") ?? "FR";
   const bust = request.nextUrl.searchParams.get("bust") === "1";
 
-  // Vider le cache si demandé
   if (bust) cache = null;
 
-  // Servir depuis le cache si valide
   if (cache && Date.now() - cache.ts < CACHE_TTL) {
     return NextResponse.json(cache.data);
   }
 
   try {
-    const methods = await getShippingMethods(country);
-    const allowedIds = getAllowedIds();
+    // Fetch v3 products (UUID) et v2 methods (int) en parallèle
+    const [v3Products, v2Methods] = await Promise.all([
+      getShippingProducts(),
+      getShippingMethods(country),
+    ]);
 
-    logger.info(`SendCloud: ${methods.length} méthode(s) reçue(s) pour ${country}`, {
-      allowedIds,
-      carriers: [...new Set(methods.map((m) => m.carrier))],
+    const normalized: NormalizedShippingMethod[] = [
+      ...normalizeV3Products(v3Products, country),
+      ...normalizeV2Methods(v2Methods, country),
+    ];
+
+    // Dédoublonner : si un method v2 est déjà couvert par un product v3 (même methodId), on le retire
+    const v3MethodIds = new Set(
+      normalizeV3Products(v3Products, country).map((m) => m.methodId)
+    );
+    const deduped = normalized.filter(
+      (m) => m.id.includes("-") || !v3MethodIds.has(m.methodId)
+    );
+
+    logger.info(`SendCloud: ${deduped.length} méthode(s) disponibles`, {
+      v3: v3Products.length,
+      v2: v2Methods.length,
     });
 
     // Filtrer par IDs si SENDCLOUD_METHOD_IDS est défini
+    const allowedIds = getAllowedIds();
     const filtered = allowedIds
-      ? methods.filter((m) => allowedIds.includes(m.id))
-      : methods;
+      ? deduped.filter((m) => allowedIds.includes(m.id))
+      : deduped;
 
-    const normalized = filtered.map((m) => {
-      const countryData = m.countries?.find((c) => c.iso_2 === country);
-      const price = countryData?.price ?? m.price ?? 0;
-      const leadTimeHours = countryData?.lead_time_hours ?? m.lead_time_hours ?? null;
-      const leadTimeDays = countryData?.lead_time_days ?? m.lead_time_days ?? null;
-
-      let deliveryDays: { min: number; max: number } | null = null;
-      if (leadTimeDays != null && leadTimeDays > 0) {
-        deliveryDays = { min: leadTimeDays, max: leadTimeDays };
-      } else if (leadTimeHours != null && leadTimeHours > 0) {
-        const days = Math.ceil(leadTimeHours / 24);
-        deliveryDays = { min: days, max: days + 1 };
-      }
-
-      return {
-        id: m.id,
-        name: m.name,
-        carrier: m.carrier,
-        price: typeof price === "number" ? price : parseFloat(String(price)),
-        min_weight: m.min_weight,
-        max_weight: m.max_weight,
-        deliveryDays,
-      };
-    });
-
-    if (normalized.length === 0) {
-      logger.warn("SendCloud: aucune méthode de livraison disponible", { country });
+    if (filtered.length === 0) {
+      logger.warn("SendCloud: aucune méthode après filtrage", { allowedIds });
     }
 
-    cache = { data: normalized, ts: Date.now() };
-    return NextResponse.json(normalized);
+    cache = { data: filtered, ts: Date.now() };
+    return NextResponse.json(filtered);
   } catch (error) {
     logger.error("Erreur lors de la récupération des méthodes SendCloud", error);
     return NextResponse.json(

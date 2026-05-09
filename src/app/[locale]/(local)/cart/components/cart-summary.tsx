@@ -22,7 +22,8 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 interface ShippingMethod {
-  id: number;
+  id: string;       // UUID (v3) ou string de l'int (v2)
+  methodId: number; // ID entier pour créer le colis SendCloud
   name: string;
   carrier: string;
   price: number;
@@ -44,7 +45,7 @@ export function CartSummary({
 
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
   const [loadingMethods, setLoadingMethods] = useState(true);
-  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [shippingCost, setShippingCost] = useState(0);
   const [selectedDeliveryDays, setSelectedDeliveryDays] = useState<{
     min: number;
@@ -53,7 +54,8 @@ export function CartSummary({
 
   useEffect(() => {
     const fallback: ShippingMethod = {
-      id: 0,
+      id: "0",
+      methodId: 0,
       name: "Livraison standard",
       carrier: "Transporteur",
       price: 0,
@@ -65,19 +67,19 @@ export function CartSummary({
       .then((data: ShippingMethod[]) => {
         if (Array.isArray(data) && data.length > 0) {
           setMethods(data);
-          setSelectedMethodId(data[0].id);
+          setSelectedId(data[0].id);
           setShippingCost(data[0].price);
           setSelectedDeliveryDays(data[0].deliveryDays);
         } else {
           setMethods([fallback]);
-          setSelectedMethodId(fallback.id);
+          setSelectedId(fallback.id);
           setShippingCost(fallback.price);
           setSelectedDeliveryDays(fallback.deliveryDays);
         }
       })
       .catch(() => {
         setMethods([fallback]);
-        setSelectedMethodId(fallback.id);
+        setSelectedId(fallback.id);
         setShippingCost(fallback.price);
         setSelectedDeliveryDays(fallback.deliveryDays);
       })
@@ -85,10 +87,9 @@ export function CartSummary({
   }, []);
 
   const handleMethodChange = (value: string) => {
-    const id = parseInt(value, 10);
-    const method = methods.find((m) => m.id === id);
+    const method = methods.find((m) => m.id === value);
     if (method) {
-      setSelectedMethodId(id);
+      setSelectedId(value);
       setShippingCost(method.price);
       setSelectedDeliveryDays(method.deliveryDays);
     }
@@ -117,7 +118,7 @@ export function CartSummary({
             </div>
           ) : (
             <Select
-              value={selectedMethodId?.toString()}
+              value={selectedId ?? undefined}
               onValueChange={handleMethodChange}
             >
               <SelectTrigger className="w-full max-w-none data-[size=default]:h-auto">
@@ -127,7 +128,7 @@ export function CartSummary({
                 {methods.map((method) => (
                   <SelectItem
                     key={method.id}
-                    value={method.id.toString()}
+                    value={method.id}
                     className="h-auto!"
                   >
                     <div className="flex items-center justify-between gap-4 py-1 w-full">
@@ -208,12 +209,12 @@ export function CartSummary({
         <Button
           className="w-full"
           onClick={() => {
-            if (selectedMethodId !== null) {
-              const method = methods.find((m) => m.id === selectedMethodId);
-              onCheckout(selectedMethodId, shippingCost, method?.name ?? "Livraison");
+            if (selectedId !== null) {
+              const method = methods.find((m) => m.id === selectedId);
+              onCheckout(method?.methodId ?? 0, shippingCost, method?.name ?? "Livraison");
             }
           }}
-          disabled={isLoading || loadingMethods || selectedMethodId === null}
+          disabled={isLoading || loadingMethods || selectedId === null}
         >
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
