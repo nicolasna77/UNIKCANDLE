@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     logger.info(`SendCloud: ${deduped.length} méthode(s) disponibles`, {
       v3: v3Products.length,
       v2: v2Methods.length,
+      ids: deduped.map((m) => `${m.id} (${m.name})`),
     });
 
     // Filtrer par IDs si SENDCLOUD_METHOD_IDS est défini
@@ -62,7 +63,10 @@ export async function GET(request: NextRequest) {
       : deduped;
 
     if (filtered.length === 0) {
-      logger.warn("SendCloud: aucune méthode après filtrage", { allowedIds });
+      logger.warn("SendCloud: aucune méthode après filtrage", {
+        allowedIds,
+        availableIds: deduped.map((m) => m.id),
+      });
     }
 
     cache = { data: filtered, ts: Date.now() };

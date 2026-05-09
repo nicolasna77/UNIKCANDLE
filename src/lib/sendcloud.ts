@@ -160,8 +160,11 @@ export async function getShippingProducts(): Promise<SendCloudProduct[]> {
       {},
       SENDCLOUD_API_V3_URL
     );
-    return data.shipping_products ?? [];
-  } catch {
+    const products = data.shipping_products ?? [];
+    console.log("[SendCloud v3] shipping_products count:", products.length, "ids:", products.map((p) => p.id));
+    return products;
+  } catch (err) {
+    console.error("[SendCloud v3] getShippingProducts failed:", err);
     return [];
   }
 }
