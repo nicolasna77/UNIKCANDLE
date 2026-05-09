@@ -32,12 +32,14 @@ interface ShippingMethod {
 
 interface CartSummaryProps {
   subtotal: number;
+  totalWeight: number;
   isLoading: boolean;
   onCheckout: (methodId: number, shippingCost: number, shippingName: string) => void;
 }
 
 export function CartSummary({
   subtotal,
+  totalWeight,
   isLoading,
   onCheckout,
 }: CartSummaryProps) {
@@ -62,7 +64,8 @@ export function CartSummary({
       deliveryDays: { min: 3, max: 5 },
     };
 
-    fetch("/api/shipping/methods?country=FR")
+    const weightParam = totalWeight > 0 ? `&weight=${totalWeight.toFixed(3)}` : "";
+    fetch(`/api/shipping/methods?country=FR${weightParam}`)
       .then((r) => r.json())
       .then((data: ShippingMethod[]) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -84,7 +87,7 @@ export function CartSummary({
         setSelectedDeliveryDays(fallback.deliveryDays);
       })
       .finally(() => setLoadingMethods(false));
-  }, []);
+  }, [totalWeight]);
 
   const handleMethodChange = (value: string) => {
     const method = methods.find((m) => m.id === value);

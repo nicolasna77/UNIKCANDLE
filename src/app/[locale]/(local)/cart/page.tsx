@@ -44,6 +44,11 @@ export default function CartPage() {
     return sum + (item.price + engravingCost) * qty;
   }, 0);
 
+  const totalWeight = cart.reduce(
+    (sum, item) => sum + (item.quantity || 1) * 0.75,
+    0
+  );
+
   if (cart.length === 0) {
     return <EmptyCart />;
   }
@@ -128,6 +133,7 @@ export default function CartPage() {
         <div className="space-y-6">
           <CartSummary
             subtotal={subtotal}
+            totalWeight={totalWeight}
             isLoading={isLoading}
             onCheckout={handleCheckoutWithShipping}
           />
