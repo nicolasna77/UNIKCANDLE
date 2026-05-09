@@ -37,13 +37,13 @@ export function CartItemCard({
     >
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
-        <div className="relative w-40 sm:w-56 self-stretch shrink-0 overflow-hidden bg-muted rounded-l-2xl">
+        <div className="relative w-full h-48 sm:w-56 sm:h-auto sm:self-stretch shrink-0 overflow-hidden bg-muted">
           <Image
             src={item.imageUrl}
             alt={item.name}
             fill
             className="object-cover"
-            sizes="128px"
+            sizes="(max-width: 640px) 100vw, 224px"
           />
         </div>
 
