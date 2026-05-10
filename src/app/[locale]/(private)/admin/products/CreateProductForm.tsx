@@ -493,65 +493,6 @@ export default function CreateProductForm({
 
                 <FormField
                   control={form.control}
-                  name="scentIds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Parfums *</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <span className={field.value?.length ? "" : "text-muted-foreground"}>
-                                {field.value?.length
-                                  ? scents.filter(s => field.value.includes(s.id)).map(s => s.name).join(", ")
-                                  : "Sélectionner des parfums"}
-                              </span>
-                              <ChevronsUpDown className="h-4 w-4 opacity-50" aria-hidden="true" />
-                            </button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-64 p-2">
-                          <div className="space-y-1">
-                            {scents.map((scent) => {
-                              const checked = field.value?.includes(scent.id);
-                              return (
-                                <label
-                                  key={scent.id}
-                                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 cursor-pointer hover:bg-accent"
-                                >
-                                  <Checkbox
-                                    checked={checked}
-                                    onCheckedChange={(val) => {
-                                      const current = field.value || [];
-                                      field.onChange(
-                                        val
-                                          ? [...current, scent.id]
-                                          : current.filter((id: string) => id !== scent.id)
-                                      );
-                                    }}
-                                  />
-                                  <span className="text-sm">{scent.icon} {scent.name}</span>
-                                  {checked && <Check className="ml-auto h-4 w-4 text-primary" aria-hidden="true" />}
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                      <FormDescription>
-                        Fragrances disponibles pour cette bougie (une ou plusieurs)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="messageType"
                   render={({ field }) => (
                     <FormItem>
@@ -583,6 +524,65 @@ export default function CreateProductForm({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="scentIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Parfums *</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <span className={`truncate ${field.value?.length ? "" : "text-muted-foreground"}`}>
+                              {field.value?.length
+                                ? scents.filter(s => field.value.includes(s.id)).map(s => s.name).join(", ")
+                                : "Sélectionner des parfums"}
+                            </span>
+                            <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0 ml-2" aria-hidden="true" />
+                          </button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-72 p-2">
+                        <div className="space-y-1">
+                          {scents.map((scent) => {
+                            const checked = field.value?.includes(scent.id);
+                            return (
+                              <label
+                                key={scent.id}
+                                className="flex items-center gap-2 rounded-sm px-2 py-1.5 cursor-pointer hover:bg-accent"
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={(val) => {
+                                    const current = field.value || [];
+                                    field.onChange(
+                                      val
+                                        ? [...current, scent.id]
+                                        : current.filter((id: string) => id !== scent.id)
+                                    );
+                                  }}
+                                />
+                                <span className="text-sm">{scent.icon} {scent.name}</span>
+                                {checked && <Check className="ml-auto h-4 w-4 text-primary" aria-hidden="true" />}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      Fragrances disponibles pour cette bougie (une ou plusieurs)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <Separator />
