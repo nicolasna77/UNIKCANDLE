@@ -75,11 +75,6 @@ export function DataTableAdvanced<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [currentPage, setCurrentPage] = React.useState(1);
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [columnFilters]);
 
   const columnsWithSelection: ColumnDef<TData, TValue>[] = React.useMemo(() => {
     const hasSelectionColumn = columns.some(
@@ -123,7 +118,13 @@ export function DataTableAdvanced<TData, TValue>({
     data,
     columns: columnsWithSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    // Réinitialiser la pagination sur changement de filtre, sans useEffect
+    onColumnFiltersChange: (updater) => {
+      setColumnFilters(updater);
+      if (!isServerSidePagination) {
+        setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: isServerSidePagination
       ? undefined
@@ -153,11 +154,10 @@ export function DataTableAdvanced<TData, TValue>({
     },
   });
 
-  React.useEffect(() => {
-    if (!isServerSidePagination) {
-      setCurrentPage(pagination.pageIndex + 1);
-    }
-  }, [pagination.pageIndex, isServerSidePagination]);
+  // Dériver currentPage directement — pas de useEffect de synchronisation
+  const currentPage = isServerSidePagination
+    ? (serverPagination?.page ?? 1)
+    : pagination.pageIndex + 1;
 
   const handlePageChange = React.useCallback(
     (newPage: number) => {
@@ -165,7 +165,6 @@ export function DataTableAdvanced<TData, TValue>({
         onPageChange(newPage);
       } else {
         setPagination((prev) => ({ ...prev, pageIndex: newPage - 1 }));
-        setCurrentPage(newPage);
       }
     },
     [isServerSidePagination, onPageChange]
@@ -322,11 +321,7 @@ export function DataTableAdvanced<TData, TValue>({
         </p>
         <PaginationComponent
           table={table}
-          currentPage={
-            isServerSidePagination
-              ? (serverPagination?.page ?? 1)
-              : currentPage
-          }
+          currentPage={currentPage}
           updatePageInURL={handlePageChange}
         />
       </div>
