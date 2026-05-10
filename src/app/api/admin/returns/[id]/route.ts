@@ -1,21 +1,16 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { verifyAdminAccess } from "@/lib/auth-session";
 
 // PATCH - Mettre à jour le statut d'une demande de retour
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
 
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+  try {
 
     const { status, adminNote, refundAmount } = await request.json();
     const id = (await params).id;
@@ -113,14 +108,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
 
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+  try {
 
     const id = (await params).id;
 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { verifyAdminAccess } from "@/lib/auth-session";
 import QRCode from "qrcode";
 import { routing } from "@/i18n/routing";
 
@@ -8,15 +7,10 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ code: string }> }
 ) {
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user?.role || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
     const { code } = await params;
 
     if (!code) {

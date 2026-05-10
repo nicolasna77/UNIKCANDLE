@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { verifyAdminAccess } from "@/lib/auth-session";
 import { generateSecureQRCode } from "@/lib/qr-code";
 
 interface OrderItem {
@@ -29,24 +28,10 @@ interface CreateOrderRequest {
 }
 
 export async function POST(request: Request) {
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
-    // Vérifier l'authentification et le rôle admin
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    // Vérifier le rôle admin
-    if (session.user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Accès refusé - Admin uniquement" },
-        { status: 403 }
-      );
-    }
-
     const body: CreateOrderRequest = await request.json();
     const { userId, items, shippingAddress } = body;
 
@@ -138,9 +123,6 @@ export async function POST(request: Request) {
         });
       })
     );
-
-    console.log("Commande manuelle créée avec succès:", order.id);
-    console.log(`${qrCodes.length} QR codes générés`);
 
     return NextResponse.json({
       success: true,

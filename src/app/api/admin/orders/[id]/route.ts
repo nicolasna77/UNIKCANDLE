@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { verifyAdminAccess } from "@/lib/auth-session";
 import { z } from "zod";
 
 // Schéma de validation pour le status
@@ -18,14 +17,10 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
 
-    if (!session?.user?.role || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+  try {
 
     const body = await request.json();
     const id = (await params).id;

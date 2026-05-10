@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
+import { verifyAdminAccess } from "@/lib/auth-session";
 import { stripe } from "@/lib/stripe";
 
 // POST - Traiter le remboursement Stripe
@@ -9,15 +8,10 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await verifyAdminAccess();
+  if (authError) return authError;
+
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
     const { refundAmount } = await request.json();
     const id = (await params).id;
 
@@ -41,23 +35,22 @@ export async function POST(
       );
     }
 
-    if (returnRequest.refundStatus !== "PENDING") {
-      return NextResponse.json(
-        {
-          error: "Ce retour a déjà été remboursé ou est en cours de traitement",
-        },
-        { status: 400 }
-      );
-    }
-
-    // Mettre à jour le statut en cours de traitement
-    await prisma["return"].update({
-      where: { id },
+    // Verrouillage atomique : passer de PENDING → PROCESSING en une seule requête
+    // Empêche les doubles clics et les race conditions concurrentes
+    const locked = await prisma["return"].updateMany({
+      where: { id, refundStatus: "PENDING" },
       data: {
         refundStatus: "PROCESSING",
         refundAmount: refundAmount || returnRequest.orderItem.price,
       },
     });
+
+    if (locked.count === 0) {
+      return NextResponse.json(
+        { error: "Ce retour a déjà été remboursé ou est en cours de traitement" },
+        { status: 400 }
+      );
+    }
 
     try {
       // Pour trouver le payment intent, nous devons chercher dans Stripe
