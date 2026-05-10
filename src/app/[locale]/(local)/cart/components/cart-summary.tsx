@@ -171,7 +171,7 @@ export function CartSummary({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>{t("subtotal")}</span>
-            <span>{subtotal.toFixed(2)} €</span>
+            <span className="tabular-nums">{subtotal.toFixed(2)} €</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="flex flex-col">
@@ -184,7 +184,7 @@ export function CartSummary({
                 </span>
               )}
             </span>
-            <span className={shippingCost === 0 ? "text-green-600" : ""}>
+            <span className={`tabular-nums ${shippingCost === 0 ? "text-green-600" : ""}`}>
               {shippingCost === 0
                 ? t("shippingFree")
                 : `${shippingCost.toFixed(2)} €`}
@@ -192,7 +192,7 @@ export function CartSummary({
           </div>
           <div className="flex justify-between font-medium">
             <span>{t("total")}</span>
-            <span>{total.toFixed(2)} €</span>
+            <span className="tabular-nums">{total.toFixed(2)} €</span>
           </div>
         </div>
 
@@ -228,7 +228,10 @@ export function CartSummary({
         </Button>
 
         {isLoading && (
-          <p className="text-center text-sm text-muted-foreground mt-2">
+          <p
+            className="text-center text-sm text-muted-foreground mt-2"
+            aria-live="polite"
+          >
             {t("popupBlockedMessage")}
           </p>
         )}

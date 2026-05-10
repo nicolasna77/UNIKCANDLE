@@ -119,29 +119,19 @@ export default function CreateProductForm({
   const onSubmit = async (values: ProductFormData) => {
     startTransition(async () => {
       try {
-        console.log("🚀 Début de la soumission du formulaire");
-        console.log("📝 Valeurs du formulaire:", values);
-        console.log("📁 Fichiers sélectionnés:", selectedFiles);
-
-        // Vérifier que les champs requis sont présents
         if (
           !values.name ||
           !values.description ||
           !values.categoryId ||
           !values.scentIds?.length
         ) {
-          console.error("❌ Champs requis manquants");
           toast.error("Veuillez remplir tous les champs requis");
           return;
         }
 
-        // Gérer l'upload des images
-        console.log("📤 Upload des images en cours...");
         const uploadedUrls =
           selectedFiles.length > 0 ? await uploadImages(selectedFiles) : [];
-        console.log("✅ Images uploadées:", uploadedUrls);
 
-        // Utiliser la première image comme imageUrl principale et toutes comme images
         const finalData = {
           ...values,
           arAnimation: values.arAnimation || "default",
@@ -149,13 +139,9 @@ export default function CreateProductForm({
           images: uploadedUrls.map((url) => ({ url })),
         };
 
-        console.log("📦 Données finales à envoyer:", finalData);
-
-        // Appel de la Server Action (version JSON)
         const result = await createProductFromJSON(finalData);
 
         if (result.success) {
-          // Invalidation manuelle du cache React Query
           queryClient.invalidateQueries({ queryKey: ["products"] });
           queryClient.invalidateQueries({ queryKey: ["admin-products"] });
 
@@ -164,9 +150,7 @@ export default function CreateProductForm({
           setSelectedFiles([]);
           onOpenChange(false);
           onSuccess();
-          console.log("✅ Produit créé avec succès!");
         } else {
-          // Afficher les erreurs de validation
           if (result.fieldErrors) {
             Object.entries(result.fieldErrors).forEach(([field, errors]) => {
               form.setError(field as keyof ProductFormData, {
@@ -176,15 +160,13 @@ export default function CreateProductForm({
           }
           toast.error(result.error || "Erreur lors de la création du produit");
         }
-      } catch (error) {
-        console.error("❌ Erreur lors de la création:", error);
+      } catch {
         toast.error("Erreur lors de la création du produit");
       }
     });
   };
 
   const handleFilesChange = (files: FileMetadata[]) => {
-    console.log("📸 Fichiers changés:", files);
     setSelectedFiles(files);
   };
 
@@ -193,7 +175,7 @@ export default function CreateProductForm({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
+            <Package className="h-5 w-5" aria-hidden="true" />
             Créer un nouveau produit
           </DialogTitle>
           <DialogDescription>
@@ -205,7 +187,7 @@ export default function CreateProductForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Alert d'aide */}
             <Alert>
-              <Info className="h-4 w-4" />
+              <Info className="h-4 w-4" aria-hidden="true" />
               <AlertDescription>
                 Les champs marqués d&apos;un astérisque (*) sont obligatoires.
                 Assurez-vous d&apos;avoir au moins une image pour le produit.
@@ -215,7 +197,7 @@ export default function CreateProductForm({
             {/* Images du produit */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-muted-foreground" />
+                <Upload className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Images du produit *</h3>
                   <p className="text-sm text-muted-foreground">
@@ -239,7 +221,7 @@ export default function CreateProductForm({
             {/* Informations générales avec onglets FR/EN */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <Sparkles className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Informations générales *</h3>
                   <p className="text-sm text-muted-foreground">
@@ -468,7 +450,7 @@ export default function CreateProductForm({
             {/* Catégories et parfums */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Tag className="h-5 w-5 text-muted-foreground" />
+                <Tag className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Classification *</h3>
                   <p className="text-sm text-muted-foreground">
@@ -528,7 +510,7 @@ export default function CreateProductForm({
                                   ? scents.filter(s => field.value.includes(s.id)).map(s => s.name).join(", ")
                                   : "Sélectionner des parfums"}
                               </span>
-                              <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                              <ChevronsUpDown className="h-4 w-4 opacity-50" aria-hidden="true" />
                             </button>
                           </FormControl>
                         </PopoverTrigger>
@@ -553,7 +535,7 @@ export default function CreateProductForm({
                                     }}
                                   />
                                   <span className="text-sm">{scent.icon} {scent.name}</span>
-                                  {checked && <Check className="ml-auto h-4 w-4 text-primary" />}
+                                  {checked && <Check className="ml-auto h-4 w-4 text-primary" aria-hidden="true" />}
                                 </label>
                               );
                             })}
@@ -608,7 +590,7 @@ export default function CreateProductForm({
             {/* Gravure médaillon */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Medal className="h-5 w-5 text-muted-foreground" />
+                <Medal className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Gravure médaillon</h3>
                   <p className="text-sm text-muted-foreground">
@@ -693,7 +675,7 @@ export default function CreateProductForm({
                 {isPending || form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                    Création...
+                    Création…
                   </>
                 ) : (
                   <>

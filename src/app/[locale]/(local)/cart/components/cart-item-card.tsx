@@ -1,10 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, MessageSquare, Medal, Video, Mic } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Minus,
+  MessageSquare,
+  Medal,
+  Video,
+  Mic,
+} from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
 import type { CartItem } from "@/context/CartContext";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -24,15 +31,17 @@ export function CartItemCard({
   onRemove,
   hasCustomization = false,
 }: CartItemCardProps) {
-  const t = useTranslations("cart");
   const qty = item.quantity || 1;
-  const engravingCost = item.engravingText && item.engravingPrice ? item.engravingPrice : 0;
+  const engravingCost =
+    item.engravingText && item.engravingPrice ? item.engravingPrice : 0;
   const lineTotal = (item.price + engravingCost) * qty;
 
   return (
     <div
       className={`rounded-2xl border bg-card overflow-hidden shadow-sm transition-shadow hover:shadow-md ${
-        hasCustomization ? "border-l-4 border-l-primary border-border" : "border-border"
+        hasCustomization
+          ? "border-l-4 border-l-primary border-border"
+          : "border-border"
       }`}
     >
       <div className="flex flex-col sm:flex-row">
@@ -58,43 +67,49 @@ export function CartItemCard({
                 </h3>
               </Link>
               {item.selectedScent?.name && (
-                <p className="text-sm text-muted-foreground">{item.selectedScent.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {item.selectedScent.name}
+                </p>
               )}
             </div>
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Supprimer l'article"
               className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={() => onRemove(itemKey)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
 
           {/* Badges personnalisation */}
-          {(item.videoUrl || item.audioUrl || item.textMessage || item.engravingText) && (
+          {(item.videoUrl ||
+            item.audioUrl ||
+            item.textMessage ||
+            item.engravingText) && (
             <div className="flex flex-wrap gap-1.5">
               {item.videoUrl && (
                 <Badge variant="secondary" className="gap-1 text-xs">
-                  <Video className="h-3 w-3" />
+                  <Video className="h-3 w-3" aria-hidden="true" />
                   Vidéo
                 </Badge>
               )}
               {item.audioUrl && (
                 <Badge variant="secondary" className="gap-1 text-xs">
-                  <Mic className="h-3 w-3" />
+                  <Mic className="h-3 w-3" aria-hidden="true" />
                   Audio
                 </Badge>
               )}
               {item.textMessage && (
                 <Badge variant="secondary" className="gap-1 text-xs">
-                  <MessageSquare className="h-3 w-3" />
+                  <MessageSquare className="h-3 w-3" aria-hidden="true" />
                   Message
                 </Badge>
               )}
               {item.engravingText && (
                 <Badge variant="secondary" className="gap-1 text-xs">
-                  <Medal className="h-3 w-3" />
+                  <Medal className="h-3 w-3" aria-hidden="true" />
                   Gravure
                   {item.engravingPrice && item.engravingPrice > 0 && (
                     <span className="text-muted-foreground ml-0.5">
@@ -161,27 +176,31 @@ export function CartItemCard({
               <Button
                 variant="outline"
                 size="icon"
+                aria-label="Diminuer la quantité"
                 className="h-8 w-8"
                 onClick={() => onUpdateQuantity(itemKey, qty - 1)}
                 disabled={qty <= 1}
               >
-                <Minus className="h-3 w-3" />
+                <Minus className="h-3 w-3" aria-hidden="true" />
               </Button>
-              <span className="w-8 text-center text-sm font-medium">{qty}</span>
+              <span className="w-8 text-center text-sm font-medium tabular-nums">{qty}</span>
               <Button
                 variant="outline"
                 size="icon"
+                aria-label="Augmenter la quantité"
                 className="h-8 w-8"
                 onClick={() => onUpdateQuantity(itemKey, qty + 1)}
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
 
             <div className="text-right">
-              <p className="font-semibold text-foreground">{lineTotal.toFixed(2)} €</p>
+              <p className="font-semibold text-foreground tabular-nums">
+                {lineTotal.toFixed(2)} €
+              </p>
               {qty > 1 && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground tabular-nums">
                   {(item.price + engravingCost).toFixed(2)} € / unité
                 </p>
               )}

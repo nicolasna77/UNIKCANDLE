@@ -2,6 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
@@ -75,18 +86,38 @@ export default function CartPage() {
                 {t("itemsInCart")}
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                clearCart();
-                toast.success(t("emptyCartSuccess"));
-              }}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t("emptyCart")}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                  {t("emptyCart")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("emptyCartConfirmTitle")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("emptyCartConfirmDescription")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => {
+                      clearCart();
+                      toast.success(t("emptyCartSuccess"));
+                    }}
+                  >
+                    {t("emptyCart")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           <div className="space-y-4">

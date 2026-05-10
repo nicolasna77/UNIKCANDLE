@@ -23,9 +23,9 @@ export function EmptyCart() {
             <CardDescription>{t("emptyDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/products">
-              <Button>{t("discoverProducts")}</Button>
-            </Link>
+            <Button asChild>
+              <Link href="/products">{t("discoverProducts")}</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>

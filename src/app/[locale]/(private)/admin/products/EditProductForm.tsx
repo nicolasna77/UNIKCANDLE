@@ -117,7 +117,6 @@ export default function EditProductForm({
 
       return await response.json();
     } catch (error) {
-      console.error("Erreur lors de la suppression de l'image:", error);
       throw error;
     }
   };
@@ -144,13 +143,10 @@ export default function EditProductForm({
   });
 
   const uploadImages = async (files: FileMetadata[]) => {
-    console.log("Tentative d'upload de", files.length, "fichiers");
-
     const uploadPromises = files
       .filter((file) => file.file && !file.url.startsWith("http"))
       .map(async (file) => {
         if (!file.file) throw new Error("Fichier non trouvé");
-        console.log("Upload du fichier:", file.name, file.file.size, "bytes");
 
         const formData = new FormData();
         formData.append("file", file.file);
@@ -159,15 +155,11 @@ export default function EditProductForm({
           body: formData,
         });
 
-        console.log("Réponse upload:", response.status, response.statusText);
-
         if (!response.ok) {
           const error = await response.json();
-          console.error("Erreur upload:", error);
           throw new Error(error.error || "Échec de l'upload de l'image");
         }
         const data = await response.json();
-        console.log("Upload réussi:", data);
         return data.url;
       });
 
@@ -175,30 +167,21 @@ export default function EditProductForm({
   };
 
   const onSubmit = async (values: ProductUpdateData) => {
-    console.log("=== Début de la soumission du formulaire ===");
-    console.log("Valeurs du formulaire:", values);
-    console.log("Fichiers sélectionnés:", selectedFiles);
-
     startTransition(async () => {
       try {
-        // Supprimer les images supprimées du blob storage
         if (deletedImages.length > 0) {
-          console.log("Suppression de", deletedImages.length, "images");
           await Promise.all(
             deletedImages.map((imageUrl) => deleteImageFromBlob(imageUrl))
           );
         }
 
-        // Gérer l'upload des nouvelles images
         const newFiles = selectedFiles.filter(
           (file) => file.file && !file.url.startsWith("http")
         );
-        console.log("Nouveaux fichiers à uploader:", newFiles.length);
 
         const uploadedUrls =
           newFiles.length > 0 ? await uploadImages(newFiles) : [];
 
-        // Construire la liste finale des URLs d'images
         const finalImageUrls = selectedFiles.map((file) => {
           if (file.url.startsWith("http")) return file.url;
           const newUrl = uploadedUrls.shift();
@@ -206,9 +189,6 @@ export default function EditProductForm({
           return newUrl;
         });
 
-        console.log("URLs finales:", finalImageUrls);
-
-        // Appel de la Server Action
         const finalData = {
           ...values,
           images: finalImageUrls.map((url) => ({ url })),
@@ -217,14 +197,12 @@ export default function EditProductForm({
         const result = await updateProductFromJSON(productId, finalData);
 
         if (result.success) {
-          // Invalidation manuelle du cache React Query
           queryClient.invalidateQueries({ queryKey: ["products"] });
           queryClient.invalidateQueries({ queryKey: ["admin-products"] });
 
           toast.success("Produit mis à jour avec succès");
           onSuccess();
         } else {
-          // Afficher les erreurs de validation
           if (result.fieldErrors) {
             Object.entries(result.fieldErrors).forEach(([field, errors]) => {
               form.setError(field as keyof ProductUpdateData, {
@@ -234,8 +212,7 @@ export default function EditProductForm({
           }
           toast.error(result.error || "Erreur lors de la mise à jour du produit");
         }
-      } catch (error) {
-        console.error("Erreur lors de la mise à jour:", error);
+      } catch {
         toast.error("Erreur lors de la mise à jour du produit");
       }
     });
@@ -261,7 +238,7 @@ export default function EditProductForm({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
+            <Package className="h-5 w-5" aria-hidden="true" />
             Modifier le produit
           </DialogTitle>
           <DialogDescription>
@@ -273,7 +250,7 @@ export default function EditProductForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Alert d'aide */}
             <Alert>
-              <Info className="h-4 w-4" />
+              <Info className="h-4 w-4" aria-hidden="true" />
               <AlertDescription>
                 Les champs marqués d&apos;un astérisque (*) sont obligatoires.
                 Assurez-vous d&apos;avoir au moins une image pour le produit.
@@ -283,7 +260,7 @@ export default function EditProductForm({
             {/* Images du produit */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-muted-foreground" />
+                <Upload className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Images du produit *</h3>
                   <p className="text-sm text-muted-foreground">
@@ -307,7 +284,7 @@ export default function EditProductForm({
             {/* Informations générales avec onglets FR/EN */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <Sparkles className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Informations générales *</h3>
                   <p className="text-sm text-muted-foreground">
@@ -536,7 +513,7 @@ export default function EditProductForm({
             {/* Catégories et parfums */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Tag className="h-5 w-5 text-muted-foreground" />
+                <Tag className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Classification *</h3>
                   <p className="text-sm text-muted-foreground">
@@ -596,7 +573,7 @@ export default function EditProductForm({
                                   ? scents.filter(s => field.value?.includes(s.id)).map(s => s.name).join(", ")
                                   : "Sélectionner des parfums"}
                               </span>
-                              <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                              <ChevronsUpDown className="h-4 w-4 opacity-50" aria-hidden="true" />
                             </button>
                           </FormControl>
                         </PopoverTrigger>
@@ -621,7 +598,7 @@ export default function EditProductForm({
                                     }}
                                   />
                                   <span className="text-sm">{scent.icon} {scent.name}</span>
-                                  {checked && <Check className="ml-auto h-4 w-4 text-primary" />}
+                                  {checked && <Check className="ml-auto h-4 w-4 text-primary" aria-hidden="true" />}
                                 </label>
                               );
                             })}
@@ -676,7 +653,7 @@ export default function EditProductForm({
             {/* Gravure médaillon */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Medal className="h-5 w-5 text-muted-foreground" />
+                <Medal className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <div>
                   <h3 className="text-lg font-semibold">Gravure médaillon</h3>
                   <p className="text-sm text-muted-foreground">
@@ -759,7 +736,7 @@ export default function EditProductForm({
                 {isPending || form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                    Mise à jour...
+                    Mise à jour…
                   </>
                 ) : (
                   <>

@@ -36,11 +36,18 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import type { Order } from "@prisma/client";
-
 import DialogDetailOrder from "./dialog-detail-order";
 import DialogCreateOrder from "./dialog-create-order";
 import { PaginationComponent } from "@/app/[locale]/(private)/Pagination";
@@ -132,6 +139,7 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
   const itemsPerPage = 10;
 
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -223,9 +231,11 @@ export default function OrdersPage() {
       {/* Filters */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
           <Input
-            placeholder="Rechercher par nom ou email..."
+            placeholder="Rechercher par nom ou email…"
+            aria-label="Rechercher une commande"
+            autoComplete="off"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-8 h-9"
@@ -287,7 +297,7 @@ export default function OrdersPage() {
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Package className="h-8 w-8 opacity-20" />
+                    <Package className="h-8 w-8 opacity-20" aria-hidden="true" />
                     <p className="text-sm">Aucune commande trouvée</p>
                   </div>
                 </TableCell>
@@ -312,11 +322,9 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                    {format(new Date(order.createdAt), "d MMM yyyy", {
-                      locale: fr,
-                    })}
+                    {new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" }).format(new Date(order.createdAt))}
                   </TableCell>
-                  <TableCell className="text-sm font-semibold">
+                  <TableCell className="text-sm font-semibold tabular-nums">
                     {order.total.toFixed(2)} €
                   </TableCell>
                   <TableCell>
@@ -335,7 +343,7 @@ export default function OrdersPage() {
                               className="h-7 w-7 p-0"
                               aria-label="Actions"
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
@@ -345,7 +353,7 @@ export default function OrdersPage() {
                                   handleStatusUpdate(order.id, "PROCESSING")
                                 }
                               >
-                                <Package className="mr-2 h-4 w-4" />
+                                <Package className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Mettre en préparation
                               </DropdownMenuItem>
                             )}
@@ -355,7 +363,7 @@ export default function OrdersPage() {
                                   handleStatusUpdate(order.id, "SHIPPED")
                                 }
                               >
-                                <Truck className="mr-2 h-4 w-4" />
+                                <Truck className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Marquer expédiée
                               </DropdownMenuItem>
                             )}
@@ -365,18 +373,16 @@ export default function OrdersPage() {
                                   handleStatusUpdate(order.id, "DELIVERED")
                                 }
                               >
-                                <CheckCircle2 className="mr-2 h-4 w-4" />
+                                <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Marquer livrée
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() =>
-                                handleStatusUpdate(order.id, "CANCELLED")
-                              }
+                              onClick={() => setCancelOrderId(order.id)}
                               className="text-destructive focus:text-destructive"
                             >
-                              <XCircle className="mr-2 h-4 w-4" />
+                              <XCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                               Annuler la commande
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -386,9 +392,9 @@ export default function OrdersPage() {
                       order.status === "CANCELLED") && (
                       <div className="flex items-center justify-center h-7 w-7">
                         {order.status === "DELIVERED" ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
                         ) : (
-                          <XCircle className="h-4 w-4 text-muted-foreground/40" />
+                          <XCircle className="h-4 w-4 text-muted-foreground/40" aria-hidden="true" />
                         )}
                       </div>
                     )}
@@ -417,6 +423,35 @@ export default function OrdersPage() {
           />
         </div>
       )}
+
+      {/* Confirmation d'annulation */}
+      <AlertDialog
+        open={cancelOrderId !== null}
+        onOpenChange={(open) => { if (!open) setCancelOrderId(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annuler la commande ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. La commande sera marquée comme annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Retour</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (cancelOrderId) {
+                  handleStatusUpdate(cancelOrderId, "CANCELLED");
+                  setCancelOrderId(null);
+                }
+              }}
+            >
+              Annuler la commande
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
