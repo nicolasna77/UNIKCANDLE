@@ -184,22 +184,53 @@ export async function getServicePoints(params: {
   carrier?: string;
   radius?: number;
 }): Promise<ServicePoint[]> {
+  const publicKey = process.env.SENDCLOUD_PUBLIC_KEY;
+  if (!publicKey) {
+    console.error("[SendCloud] SENDCLOUD_PUBLIC_KEY manquant");
+    return [];
+  }
+
   try {
     const url = new URL(SENDCLOUD_SERVICEPOINTS_URL);
     url.searchParams.set("country", params.country);
     url.searchParams.set("postal_code", params.postal_code);
-    if (params.carrier) url.searchParams.set("carrier", params.carrier);
     url.searchParams.set("radius", String(params.radius ?? 10000));
+    // L'API servicepoints utilise access_token (clé publique), pas Basic Auth
+    url.searchParams.set("access_token", publicKey);
+    if (params.carrier) url.searchParams.set("carrier", params.carrier);
 
-    const response = await fetch(url.toString(), {
-      headers: { Authorization: getAuthHeader() },
-    });
+    const response = await fetch(url.toString());
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      const text = await response.text();
+      console.error(`[SendCloud] Service points ${response.status}: ${text}`);
+      return [];
+    }
 
     const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch {
+    // L'API peut retourner un tableau direct ou { service_points: [...] }
+    const list: ServicePoint[] = Array.isArray(data)
+      ? data
+      : (data.service_points ?? data.results ?? []);
+
+    // Si aucun résultat avec le filtre carrier, on relance sans filtre
+    if (list.length === 0 && params.carrier) {
+      const urlNoCarrier = new URL(SENDCLOUD_SERVICEPOINTS_URL);
+      urlNoCarrier.searchParams.set("country", params.country);
+      urlNoCarrier.searchParams.set("postal_code", params.postal_code);
+      urlNoCarrier.searchParams.set("radius", String(params.radius ?? 10000));
+      urlNoCarrier.searchParams.set("access_token", publicKey);
+
+      const r2 = await fetch(urlNoCarrier.toString());
+      if (r2.ok) {
+        const d2 = await r2.json();
+        return Array.isArray(d2) ? d2 : (d2.service_points ?? d2.results ?? []);
+      }
+    }
+
+    return list;
+  } catch (err) {
+    console.error("[SendCloud] getServicePoints failed:", err);
     return [];
   }
 }
