@@ -235,8 +235,9 @@ export default function EditProductForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 gap-0">
+        <div className="relative overflow-y-auto flex-1 p-6">
+        <DialogHeader className="mb-2">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" aria-hidden="true" />
             Modifier le produit
@@ -749,6 +750,7 @@ export default function EditProductForm({
             </DialogFooter>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
