@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { cartItems, selectedMethodId, shippingCost, shippingName } = body;
+    const { cartItems, selectedMethodId, shippingCost, shippingName, servicePoint } = body;
 
     if (!cartItems || cartItems.length === 0) {
       return new NextResponse("Le panier est vide", { status: 400 });
@@ -87,6 +87,7 @@ export async function POST(req: Request) {
       userId: session.id,
       selectedMethodId,
       shippingCost,
+      servicePoint: servicePoint ?? null,
       items: cartItemsWithCodes.map(
         (item: CheckoutItem & { qrCodeId: string }) => ({
           id: item.id,

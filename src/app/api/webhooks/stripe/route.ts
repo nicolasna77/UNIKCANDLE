@@ -8,6 +8,7 @@ import { logger } from "@/lib/logger";
 import {
   createParcel,
   calculateTotalWeight,
+  type ServicePoint,
 } from "@/lib/sendcloud";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -120,6 +121,7 @@ export async function POST(req: Request) {
         const cartItems: CartItem[] = orderData.items;
         const selectedMethodId: number | undefined = orderData.selectedMethodId;
         const shippingCost: number = orderData.shippingCost ?? 0;
+        const servicePoint: ServicePoint | null = orderData.servicePoint ?? null;
 
         // Vérifier la connexion à la base de données
         try {
@@ -285,17 +287,32 @@ export async function POST(req: Request) {
               (sum, i) => sum + i.quantity,
               0
             );
+
+            // Pour un point relais, on utilise l'adresse du point comme destination
+            const deliveryAddress = servicePoint
+              ? {
+                  name: order.user.name,
+                  address: `${servicePoint.street} ${servicePoint.house_number}`.trim(),
+                  city: servicePoint.city,
+                  postal_code: servicePoint.postal_code,
+                  country: servicePoint.country,
+                }
+              : {
+                  name: order.shippingAddress.name || order.user.name,
+                  address: order.shippingAddress.street,
+                  city: order.shippingAddress.city,
+                  postal_code: order.shippingAddress.zipCode,
+                  country: order.shippingAddress.country,
+                };
+
             const parcel = await createParcel({
-              name: order.shippingAddress.name || order.user.name,
-              address: order.shippingAddress.street,
-              city: order.shippingAddress.city,
-              postal_code: order.shippingAddress.zipCode,
-              country: order.shippingAddress.country,
+              ...deliveryAddress,
               email: order.user.email,
               weight: calculateTotalWeight(totalQuantity),
               shipment: { id: selectedMethodId },
               order_number: order.id,
               request_label: true,
+              ...(servicePoint ? { to_service_point: servicePoint.id } : {}),
             });
 
             await prisma.order.update({

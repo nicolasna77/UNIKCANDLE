@@ -15,7 +15,7 @@ export function useCheckout(cart: CartItem[]) {
 
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const shippingRef = useRef<{ methodId: number; cost: number; name: string } | null>(null);
+  const shippingRef = useRef<{ methodId: number; cost: number; name: string; servicePoint: unknown | null } | null>(null);
   const isNavigatingRef = useRef(false);
 
   // Vérifier si l'utilisateur revient après annulation
@@ -41,8 +41,8 @@ export function useCheckout(cart: CartItem[]) {
     };
   }, [isLoading]);
 
-  const handleCheckout = async (methodId: number, shippingCost: number, shippingName: string) => {
-    shippingRef.current = { methodId, cost: shippingCost, name: shippingName };
+  const handleCheckout = async (methodId: number, shippingCost: number, shippingName: string, servicePoint: unknown | null = null) => {
+    shippingRef.current = { methodId, cost: shippingCost, name: shippingName, servicePoint };
     try {
       setIsLoading(true);
 
@@ -83,6 +83,7 @@ export function useCheckout(cart: CartItem[]) {
           selectedMethodId: shippingRef.current?.methodId,
           shippingCost: shippingRef.current?.cost ?? 0,
           shippingName: shippingRef.current?.name ?? "Livraison",
+          servicePoint: shippingRef.current?.servicePoint ?? null,
           returnUrl: `${window.location.origin}/cart`,
         }),
       });

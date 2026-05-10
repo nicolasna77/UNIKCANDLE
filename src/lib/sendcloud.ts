@@ -1,5 +1,6 @@
 const SENDCLOUD_API_URL = "https://panel.sendcloud.sc/api/v2";
 const SENDCLOUD_API_V3_URL = "https://panel.sendcloud.sc/api/v3";
+const SENDCLOUD_SERVICEPOINTS_URL = "https://servicepoints.sendcloud.sc/api/v2/service-points";
 const DEFAULT_WEIGHT_KG = 0.75;
 
 function getAuthHeader(): string {
@@ -91,6 +92,25 @@ export interface NormalizedShippingMethod {
   min_weight: number;
   max_weight: number;
   deliveryDays: { min: number; max: number } | null;
+  requiresServicePoint: boolean;
+  servicePointCarrier?: string; // code carrier pour l'API service points (ex: "mondial_relay")
+}
+
+// Point relais SendCloud
+export interface ServicePoint {
+  id: number;
+  name: string;
+  street: string;
+  house_number: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  carrier: string;
+  latitude: string;
+  longitude: string;
+  distance?: number;
+  phone?: string;
+  formatted_opening_times?: Record<string, string[]>;
 }
 
 // --- Types parcel ---
@@ -120,9 +140,69 @@ export interface CreateParcelPayload {
   shipment: { id: number };
   order_number: string;
   request_label: boolean;
+  to_service_point?: number;
 }
 
 // --- Fonctions ---
+
+// Correspondance nom transporteur → code API service points
+const CARRIER_CODE_MAP: Record<string, string> = {
+  "mondial relay": "mondial_relay",
+  "mondialrelay": "mondial_relay",
+  "mondial-relay": "mondial_relay",
+  "relais colis": "relais_colis",
+  "relais-colis": "relais_colis",
+  "chronopost": "chronopost",
+  "dpd": "dpd",
+  "dhl": "dhl",
+  "postnl": "postnl",
+  "ups": "ups",
+  "gls": "gls",
+  "bpost": "bpost",
+};
+
+export function getServicePointCarrierCode(carrier: string): string {
+  const key = carrier.toLowerCase().replace(/[-_]+/g, " ").trim();
+  return CARRIER_CODE_MAP[key] ?? carrier.toLowerCase().replace(/\s+/g, "_");
+}
+
+function isServicePointCarrier(carrier: string): boolean {
+  const name = carrier.toLowerCase();
+  return (
+    name.includes("relay") ||
+    name.includes("relai") ||
+    name.includes("pickup") ||
+    name.includes("service point") ||
+    name.includes("parcel shop")
+  );
+}
+
+// Récupère les points relais depuis l'API SendCloud
+export async function getServicePoints(params: {
+  country: string;
+  postal_code: string;
+  carrier?: string;
+  radius?: number;
+}): Promise<ServicePoint[]> {
+  try {
+    const url = new URL(SENDCLOUD_SERVICEPOINTS_URL);
+    url.searchParams.set("country", params.country);
+    url.searchParams.set("postal_code", params.postal_code);
+    if (params.carrier) url.searchParams.set("carrier", params.carrier);
+    url.searchParams.set("radius", String(params.radius ?? 10000));
+
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: getAuthHeader() },
+    });
+
+    if (!response.ok) return [];
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
 
 export function calculateTotalWeight(quantity: number): string {
   return (quantity * DEFAULT_WEIGHT_KG).toFixed(3);
@@ -189,6 +269,8 @@ export function normalizeV2Methods(
   return methods.map((m) => {
     const countryData = m.countries?.find((c) => c.iso_2 === country);
     const price = countryData?.price ?? m.price ?? 0;
+    const needsServicePoint =
+      m.service_point_input === "required" || m.service_point_input === "optional";
     return {
       id: String(m.id),
       methodId: m.id,
@@ -201,6 +283,10 @@ export function normalizeV2Methods(
         countryData?.lead_time_days ?? m.lead_time_days,
         countryData?.lead_time_hours ?? m.lead_time_hours
       ),
+      requiresServicePoint: needsServicePoint,
+      servicePointCarrier: needsServicePoint
+        ? getServicePointCarrierCode(m.carrier)
+        : undefined,
     };
   });
 }
@@ -216,12 +302,14 @@ export function normalizeV3Products(
 
     const countryData = method.countries?.find((c) => c.iso_2 === country);
     const price = countryData?.price ?? method.price ?? 0;
+    const carrier = product.carrier ?? method.carrier;
+    const needsServicePoint = isServicePointCarrier(carrier);
 
     return [{
       id: product.id, // UUID
       methodId: method.id,
       name: product.name,
-      carrier: product.carrier ?? method.carrier,
+      carrier,
       price: typeof price === "number" ? price : parseFloat(String(price)),
       min_weight: method.min_weight,
       max_weight: method.max_weight,
@@ -229,6 +317,10 @@ export function normalizeV3Products(
         countryData?.lead_time_days ?? method.lead_time_days,
         countryData?.lead_time_hours ?? method.lead_time_hours
       ),
+      requiresServicePoint: needsServicePoint,
+      servicePointCarrier: needsServicePoint
+        ? getServicePointCarrierCode(carrier)
+        : undefined,
     }];
   });
 }

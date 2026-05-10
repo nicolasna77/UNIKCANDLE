@@ -39,9 +39,10 @@ export default function CartPage() {
   const handleCheckoutWithShipping = (
     methodId: number,
     shippingCost: number,
-    shippingName: string
+    shippingName: string,
+    servicePoint: unknown | null
   ) => {
-    handleCheckout(methodId, shippingCost, shippingName);
+    handleCheckout(methodId, shippingCost, shippingName, servicePoint);
   };
 
   const getItemKey = (item: (typeof cart)[0]) => {

@@ -17,24 +17,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreditCard, Truck, Shield, Loader2 } from "lucide-react";
+import { CreditCard, Truck, Shield, Loader2, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { ServicePointPicker } from "@/components/service-point-picker";
+import type { ServicePoint } from "@/lib/sendcloud";
 
 interface ShippingMethod {
-  id: string;       // UUID (v3) ou string de l'int (v2)
-  methodId: number; // ID entier pour créer le colis SendCloud
+  id: string;
+  methodId: number;
   name: string;
   carrier: string;
   price: number;
   deliveryDays: { min: number; max: number } | null;
+  requiresServicePoint: boolean;
+  servicePointCarrier?: string;
 }
 
 interface CartSummaryProps {
   subtotal: number;
   totalWeight: number;
   isLoading: boolean;
-  onCheckout: (methodId: number, shippingCost: number, shippingName: string) => void;
+  onCheckout: (
+    methodId: number,
+    shippingCost: number,
+    shippingName: string,
+    servicePoint: ServicePoint | null
+  ) => void;
 }
 
 export function CartSummary({
@@ -53,6 +62,10 @@ export function CartSummary({
     min: number;
     max: number;
   } | null>(null);
+  const [selectedServicePoint, setSelectedServicePoint] =
+    useState<ServicePoint | null>(null);
+
+  const selectedMethod = methods.find((m) => m.id === selectedId) ?? null;
 
   useEffect(() => {
     const fallback: ShippingMethod = {
@@ -62,6 +75,7 @@ export function CartSummary({
       carrier: "Transporteur",
       price: 0,
       deliveryDays: { min: 3, max: 5 },
+      requiresServicePoint: false,
     };
 
     const weightParam = totalWeight > 0 ? `&weight=${totalWeight.toFixed(3)}` : "";
@@ -95,10 +109,19 @@ export function CartSummary({
       setSelectedId(value);
       setShippingCost(method.price);
       setSelectedDeliveryDays(method.deliveryDays);
+      // Réinitialiser le point relais si la nouvelle méthode n'en requiert pas
+      if (!method.requiresServicePoint) {
+        setSelectedServicePoint(null);
+      }
     }
   };
 
   const total = subtotal + shippingCost;
+  const checkoutDisabled =
+    isLoading ||
+    loadingMethods ||
+    selectedId === null ||
+    (selectedMethod?.requiresServicePoint === true && selectedServicePoint === null);
 
   return (
     <Card className="border-border">
@@ -108,11 +131,11 @@ export function CartSummary({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Méthode de livraison */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label>{t("shippingMethod")}</Label>
           {loadingMethods ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground h-10">
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               {t("loadingShippingMethods")}
             </div>
           ) : methods.length === 0 ? (
@@ -136,14 +159,18 @@ export function CartSummary({
                   >
                     <div className="flex items-center justify-between gap-4 py-1 w-full">
                       <div className="flex flex-col text-start">
-                        <div className="font-medium">{method.name}</div>
+                        <div className="flex items-center gap-1.5 font-medium">
+                          {method.requiresServicePoint && (
+                            <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                          )}
+                          {method.name}
+                        </div>
                         <div className="text-muted-foreground text-xs">
                           {method.carrier}
                           {method.deliveryDays && (
                             <span className="ml-2">
                               &bull;{" "}
-                              {method.deliveryDays.min ===
-                              method.deliveryDays.max
+                              {method.deliveryDays.min === method.deliveryDays.max
                                 ? `${method.deliveryDays.min} jour${method.deliveryDays.min > 1 ? "s" : ""} ouvré${method.deliveryDays.min > 1 ? "s" : ""}`
                                 : `${method.deliveryDays.min}–${method.deliveryDays.max} jours ouvrés`}
                             </span>
@@ -165,6 +192,27 @@ export function CartSummary({
               </SelectContent>
             </Select>
           )}
+
+          {/* Sélecteur de point relais */}
+          {selectedMethod?.requiresServicePoint && (
+            <div className="space-y-2 pt-1">
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
+                Point relais
+              </Label>
+              {!selectedServicePoint && (
+                <p className="text-xs text-muted-foreground">
+                  Recherchez un point relais par code postal pour continuer.
+                </p>
+              )}
+              <ServicePointPicker
+                carrier={selectedMethod.servicePointCarrier}
+                country="FR"
+                value={selectedServicePoint}
+                onChange={setSelectedServicePoint}
+              />
+            </div>
+          )}
         </div>
 
         {/* Résumé */}
@@ -184,7 +232,9 @@ export function CartSummary({
                 </span>
               )}
             </span>
-            <span className={`tabular-nums ${shippingCost === 0 ? "text-green-600" : ""}`}>
+            <span
+              className={`tabular-nums ${shippingCost === 0 ? "text-green-600" : ""}`}
+            >
               {shippingCost === 0
                 ? t("shippingFree")
                 : `${shippingCost.toFixed(2)} €`}
@@ -199,11 +249,11 @@ export function CartSummary({
         {/* Avantages */}
         <div className="space-y-4 border-t border-border pt-4">
           <div className="flex items-center gap-2 text-sm">
-            <Shield className="text-primary h-4 w-4" />
+            <Shield className="text-primary h-4 w-4" aria-hidden="true" />
             <span>{t("securePayment")}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <Truck className="text-primary h-4 w-4" />
+            <Truck className="text-primary h-4 w-4" aria-hidden="true" />
             <span>{t("fastDelivery")}</span>
           </div>
         </div>
@@ -214,18 +264,29 @@ export function CartSummary({
           onClick={() => {
             if (selectedId !== null) {
               const method = methods.find((m) => m.id === selectedId);
-              onCheckout(method?.methodId ?? 0, shippingCost, method?.name ?? "Livraison");
+              onCheckout(
+                method?.methodId ?? 0,
+                shippingCost,
+                method?.name ?? "Livraison",
+                selectedServicePoint
+              );
             }
           }}
-          disabled={isLoading || loadingMethods || selectedId === null}
+          disabled={checkoutDisabled}
         >
           {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <CreditCard className="mr-2 h-4 w-4" />
+            <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
           )}
           {isLoading ? t("redirectingToStripe") : t("proceedToPayment")}
         </Button>
+
+        {selectedMethod?.requiresServicePoint && !selectedServicePoint && (
+          <p className="text-center text-xs text-muted-foreground">
+            Veuillez choisir un point relais pour continuer.
+          </p>
+        )}
 
         {isLoading && (
           <p
