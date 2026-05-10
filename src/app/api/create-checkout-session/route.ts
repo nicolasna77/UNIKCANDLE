@@ -26,6 +26,10 @@ export async function POST(req: Request) {
   try {
     const session = await getUser();
 
+    if (!session) {
+      return new NextResponse("Vous devez être connecté pour passer commande", { status: 401 });
+    }
+
     const body = await req.json();
     const { cartItems, selectedMethodId, shippingCost, shippingName } = body;
 
@@ -80,7 +84,7 @@ export async function POST(req: Request) {
     // Stocker les données complètes en base de données temporairement
     const orderData = {
       orderId,
-      userId: session?.id || "guest",
+      userId: session.id,
       selectedMethodId,
       shippingCost,
       items: cartItemsWithCodes.map(
@@ -103,7 +107,7 @@ export async function POST(req: Request) {
     await prisma.temporaryOrder.create({
       data: {
         orderId: orderId,
-        userId: session?.id || "guest",
+        userId: session.id,
         orderData: JSON.stringify(orderData),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
       },
@@ -120,7 +124,7 @@ export async function POST(req: Request) {
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart?cancelled=true`,
-      client_reference_id: session?.id || "guest",
+      client_reference_id: session.id,
       shipping_address_collection: {
         allowed_countries: ["FR"],
       },
@@ -138,7 +142,7 @@ export async function POST(req: Request) {
       ],
       metadata: {
         orderId: orderId,
-        userId: session?.id || "guest",
+        userId: session.id,
       },
     });
 
