@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { TableActionsMenu } from "@/components/admin/table-actions-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -68,11 +68,11 @@ export default function ProductsPage() {
     },
   });
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
-  const handleExport = (data: Product[]) => {
+  const handleExport = useCallback((data: Product[]) => {
     const csvContent = [
       ["ID", "Nom", "Prix", "Catégorie", "Parfum", "Description"],
       ...data.map((product) => [
@@ -94,30 +94,29 @@ export default function ProductsPage() {
     a.download = `produits-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     setProductToDelete(id);
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     if (productToDelete) {
       deleteProductMutation.mutate(productToDelete, {
         onSuccess: () => {
           toast.success("Produit supprimé avec succès");
           queryClient.invalidateQueries({ queryKey: ["admin-products"] });
         },
-        onError: (error) => {
+        onError: () => {
           toast.error("Erreur lors de la suppression");
-          console.error(error);
         },
       });
     }
     setProductToDelete(null);
-  };
+  }, [productToDelete, deleteProductMutation, queryClient]);
 
-  const columns: ColumnDef<Product>[] = [
+  const columns: ColumnDef<Product>[] = useMemo(() => [
     {
       id: "image",
       header: "Image",
@@ -234,7 +233,7 @@ export default function ProductsPage() {
         );
       },
     },
-  ];
+  ], [handleDelete, setEditingProduct]);
 
   return (
     <div className="space-y-6">
