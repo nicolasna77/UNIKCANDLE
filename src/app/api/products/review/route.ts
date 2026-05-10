@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
+  const { allowed, resetAt } = rateLimit(
+    `reviews:${getIp(request)}`,
+    30,
+    60_000
+  );
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Trop de requêtes, veuillez réessayer dans un moment." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) },
+      }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get("query");

@@ -4,10 +4,24 @@ import LoadingPage from "./loading";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
 type Props = {
   params: Promise<{ uid: string; locale: string }>;
 };
+
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({
+    where: { deletedAt: null },
+    select: { id: true },
+  });
+
+  return routing.locales.flatMap((locale) =>
+    products.map((product) => ({ locale, uid: product.id }))
+  );
+}
+
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { uid, locale } = await params;

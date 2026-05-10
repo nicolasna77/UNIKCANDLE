@@ -12,7 +12,13 @@ const connectionString = process.env.DATABASE_URL;
 
 export const pool =
   globalForPrisma.pool ??
-  new Pool({ connectionString });
+  new Pool({
+    connectionString,
+    // Limiter les connexions simultanées par instance Vercel (Fluid Compute)
+    max: 3,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
+  });
 
 // Créer l'adapter Prisma pour PostgreSQL (requis pour Prisma 7)
 const adapter = new PrismaPg(pool);

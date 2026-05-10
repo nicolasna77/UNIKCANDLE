@@ -1,12 +1,32 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 // Liste blanche des champs autorisés pour le tri
 const ALLOWED_SORT_FIELDS = ["name", "price", "createdAt", "updatedAt"] as const;
 type SortField = (typeof ALLOWED_SORT_FIELDS)[number];
 
 export async function GET(request: Request) {
+  const { allowed, resetAt } = rateLimit(
+    `products:${getIp(request)}`,
+    60,
+    60_000
+  );
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Trop de requêtes, veuillez réessayer dans un moment." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
