@@ -17,10 +17,11 @@ import {
   Package,
   Loader2,
   Medal,
+  CreditCard,
 } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -33,6 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 import type {
   Order,
   OrderItem,
@@ -43,7 +45,6 @@ import type {
   QRCode,
 } from "@prisma/client";
 import ReturnRequestDialog from "./return-request-dialog";
-import { CreditCard } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 const OrderItemCard = ({
@@ -72,15 +73,16 @@ const OrderItemCard = ({
   const [isReordering, setIsReordering] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const { addToCart } = useCart();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const statusDetails = getStatusDetails(order.status);
-  const formattedDate = new Date(order.createdAt).toLocaleDateString("fr-FR", {
+  const formattedDate = new Intl.DateTimeFormat("fr-FR", {
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  }).format(new Date(order.createdAt));
 
-  // Fonction pour télécharger la facture
   const handleDownloadInvoice = async () => {
     setIsDownloadingInvoice(true);
     try {
@@ -104,21 +106,17 @@ const OrderItemCard = ({
         description:
           "Ouvrez le fichier et utilisez Imprimer pour l'enregistrer en PDF",
       });
-    } catch (error) {
-      console.error("Erreur:", error);
+    } catch {
       toast.error("Impossible de télécharger la facture");
     } finally {
       setIsDownloadingInvoice(false);
     }
   };
 
-  // Fonction pour recommander (ajouter les produits au panier)
   const handleReorder = async () => {
     setIsReordering(true);
     try {
-      // Récupérer les détails complets de chaque produit et les ajouter au panier
       for (const item of order.items) {
-        // Récupérer les détails complets du produit
         const productResponse = await fetch(`/api/products/${item.productId}`);
         if (!productResponse.ok) {
           throw new Error(
@@ -128,7 +126,6 @@ const OrderItemCard = ({
 
         const productData = await productResponse.json();
 
-        // Créer l'objet CartItem avec toutes les données nécessaires
         const cartItem = {
           id: productData.id,
           name: productData.name,
@@ -149,7 +146,6 @@ const OrderItemCard = ({
             : null,
         };
 
-        // Ajouter chaque produit individuellement au panier via le CartContext
         for (let i = 0; i < item.quantity; i++) {
           addToCart(cartItem);
         }
@@ -160,12 +156,11 @@ const OrderItemCard = ({
         {
           action: {
             label: "Voir le panier",
-            onClick: () => (window.location.href = "/cart"),
+            onClick: () => router.push("/cart"),
           },
         },
       );
     } catch (error) {
-      console.error("Erreur:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -176,7 +171,6 @@ const OrderItemCard = ({
     }
   };
 
-  // Fonction pour annuler la commande
   const handleCancelOrder = async () => {
     setIsCancelling(true);
     try {
@@ -190,11 +184,8 @@ const OrderItemCard = ({
       }
 
       toast.success("Commande annulée avec succès");
-
-      // Recharger la page pour afficher le nouveau statut
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
     } catch (error) {
-      console.error("Erreur:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -217,7 +208,7 @@ const OrderItemCard = ({
               {statusDetails.badge}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-              <Calendar className="h-4 w-4 text-primary/60" />
+              <Calendar className="h-4 w-4 text-primary/60" aria-hidden="true" />
               <span>{formattedDate}</span>
             </div>
           </div>
@@ -228,11 +219,12 @@ const OrderItemCard = ({
               className="gap-2 hover:bg-muted/50 transition-colors"
               onClick={handleDownloadInvoice}
               disabled={isDownloadingInvoice}
+              aria-label="Télécharger la facture"
             >
               {isDownloadingInvoice ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <FileText className="h-4 w-4" />
+                <FileText className="h-4 w-4" aria-hidden="true" />
               )}
               <span className="font-medium">Facture</span>
             </Button>
@@ -242,11 +234,12 @@ const OrderItemCard = ({
               className="gap-2 shadow-sm hover:shadow transition-shadow"
               onClick={handleReorder}
               disabled={isReordering}
+              aria-label="Recommander les mêmes articles"
             >
               {isReordering ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
               )}
               <span className="font-medium">Recommander</span>
             </Button>
@@ -258,7 +251,7 @@ const OrderItemCard = ({
         <div className="p-5 md:p-7 space-y-6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Package className="h-4 w-4 text-primary" />
+              <Package className="h-4 w-4 text-primary" aria-hidden="true" />
             </div>
             <h4 className="font-bold text-base tracking-tight">
               Produits ({order.items.length})
@@ -303,7 +296,7 @@ const OrderItemCard = ({
                     {item.engravingText && (
                       <div className="mt-2 space-y-1">
                         <div className="flex items-center gap-1 text-xs font-medium text-primary">
-                          <Medal className="h-3 w-3" />
+                          <Medal className="h-3 w-3" aria-hidden="true" />
                           Gravure médaillon
                         </div>
                         <div className="flex flex-wrap gap-1">
@@ -320,14 +313,14 @@ const OrderItemCard = ({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-4 text-sm tabular-nums">
                     <span className="font-bold text-foreground">
-                      {item.quantity} × {item.price.toFixed(2)}€
+                      {item.quantity} × {item.price.toFixed(2)} €
                     </span>
                     <span className="text-muted-foreground font-medium">
-                      Total:{" "}
+                      Total :{" "}
                       <span className="text-foreground font-bold">
-                        {(item.quantity * item.price).toFixed(2)}€
+                        {(item.quantity * item.price).toFixed(2)} €
                       </span>
                     </span>
                   </div>
@@ -367,7 +360,7 @@ const OrderItemCard = ({
               <div className="space-y-3">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                    <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                   </div>
                   <h4 className="font-bold text-sm tracking-tight">
                     Adresse de livraison
@@ -413,29 +406,25 @@ const OrderItemCard = ({
                           : "Votre commande est en cours de préparation."}
                   </p>
 
-                  {/* Affichage du statut de remboursement */}
                   {order.status === "CANCELLED" && order.stripeRefundId && (
                     <div className="mt-3 pt-3 border-t border-border/50">
                       <div className="flex items-start gap-2.5">
-                        <CreditCard className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                        <CreditCard className="h-4 w-4 text-green-600 mt-0.5 shrink-0" aria-hidden="true" />
                         <div className="space-y-1">
                           <p className="text-sm font-bold text-green-600">
                             Remboursement effectué
                           </p>
-                          <p className="text-xs font-medium text-muted-foreground">
-                            Montant : {order.refundAmount?.toFixed(2)}€
+                          <p className="text-xs font-medium text-muted-foreground tabular-nums">
+                            Montant : {order.refundAmount?.toFixed(2)} €
                           </p>
                           {order.refundedAt && (
                             <p className="text-xs font-medium text-muted-foreground">
                               Le{" "}
-                              {new Date(order.refundedAt).toLocaleDateString(
-                                "fr-FR",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                },
-                              )}
+                              {new Intl.DateTimeFormat("fr-FR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }).format(new Date(order.refundedAt))}
                             </p>
                           )}
                         </div>
@@ -443,11 +432,10 @@ const OrderItemCard = ({
                     </div>
                   )}
 
-                  {/* Message si annulé mais pas encore remboursé */}
                   {order.status === "CANCELLED" && !order.stripeRefundId && (
                     <div className="mt-3 pt-3 border-t border-border/50">
                       <div className="flex items-start gap-2.5">
-                        <CreditCard className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                        <CreditCard className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" aria-hidden="true" />
                         <div className="space-y-1">
                           <p className="text-sm font-bold text-amber-600">
                             Remboursement en cours
@@ -481,9 +469,9 @@ const OrderItemCard = ({
                   disabled={isCancelling}
                 >
                   {isCancelling ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                   ) : (
-                    <XCircle className="h-4 w-4" />
+                    <XCircle className="h-4 w-4" aria-hidden="true" />
                   )}
                   <span>Annuler la commande</span>
                 </Button>
@@ -518,7 +506,7 @@ const OrderItemCard = ({
           <span className="text-sm font-bold text-muted-foreground tracking-tight">
             Montant total
           </span>
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-1 tabular-nums">
             <span className="text-3xl font-black text-foreground tracking-tight">
               {order.total.toFixed(2)}
             </span>

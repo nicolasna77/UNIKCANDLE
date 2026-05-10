@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,77 +8,75 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const DeleteAccountForm = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isPending, setIsPending] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteAccount = async () => {
-    setIsPending(true);
+    setIsDeleting(true);
     try {
       await authClient.deleteUser();
       toast.success("Compte supprimé avec succès");
-    } catch (error) {
-      console.error("Erreur lors de la suppression du compte:", error);
+    } catch {
       toast.error("Erreur lors de la suppression du compte");
-    } finally {
-      setIsPending(false);
+      setIsDeleting(false);
     }
   };
 
   return (
-    <Card className="border-border">
+    <Card className="border-destructive/20 bg-destructive/5">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Supprimer le compte</CardTitle>
+        <CardTitle className="text-xl font-bold text-destructive">
+          Supprimer le compte
+        </CardTitle>
         <CardDescription>
-          Supprimer définitivement toutes les données de profil dans toutes les
-          organisations auxquelles vous appartenez.
+          Supprime définitivement votre profil et toutes vos données. Cette
+          action est immédiate et ne peut pas être annulée.
         </CardDescription>
       </CardHeader>
-      <CardFooter className="flex justify-between">
-        <p className="text-sm">
-          <span className="font-bold">Attention :</span> Cette action est
-          immédiate et ne peut pas être annulée.
-        </p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="destructive">Supprimer le compte</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                Êtes-vous sûr de vouloir supprimer votre compte ?
-              </DialogTitle>
-              <DialogDescription>
+      <CardFooter>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" disabled={isDeleting}>
+              {isDeleting && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
+              )}
+              {isDeleting ? "Suppression en cours…" : "Supprimer le compte"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Supprimer votre compte ?</AlertDialogTitle>
+              <AlertDialogDescription>
                 Cette action est irréversible. Toutes vos données seront
-                définitivement supprimées.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Annuler
-              </Button>
-              <Button
-                variant="destructive"
+                définitivement supprimées et vous ne pourrez plus vous connecter.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction
                 onClick={handleDeleteAccount}
-                disabled={isPending}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               >
-                {isPending ? "Suppression..." : "Confirmer la suppression"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                Supprimer définitivement
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );

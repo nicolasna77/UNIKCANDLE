@@ -61,8 +61,7 @@ const ChangePasswordForm = () => {
         description: "Votre mot de passe a été modifié avec succès",
       });
       form.reset();
-    } catch (error: unknown) {
-      console.error("Erreur lors de la mise à jour du mot de passe:", error);
+    } catch {
       toast.error("Erreur", {
         description:
           "Une erreur est survenue lors de la mise à jour du mot de passe",
@@ -93,8 +92,9 @@ const ChangePasswordForm = () => {
                       <Input
                         type="password"
                         placeholder="Entrez votre mot de passe actuel"
+                        autoComplete="current-password"
+                        spellCheck={false}
                         {...field}
-                        aria-label="Mot de passe actuel"
                       />
                     </FormControl>
                     <FormMessage />
@@ -113,8 +113,9 @@ const ChangePasswordForm = () => {
                       <Input
                         type="password"
                         placeholder="Entrez votre nouveau mot de passe"
+                        autoComplete="new-password"
+                        spellCheck={false}
                         {...field}
-                        aria-label="Nouveau mot de passe"
                       />
                     </FormControl>
                     <FormMessage />
@@ -133,8 +134,9 @@ const ChangePasswordForm = () => {
                       <Input
                         type="password"
                         placeholder="Confirmez votre nouveau mot de passe"
+                        autoComplete="new-password"
+                        spellCheck={false}
                         {...field}
-                        aria-label="Confirmer le nouveau mot de passe"
                       />
                     </FormControl>
                     <FormMessage />
@@ -149,7 +151,7 @@ const ChangePasswordForm = () => {
               aria-label="Mettre à jour le mot de passe"
             >
               {form.formState.isSubmitting
-                ? "Mise à jour..."
+                ? "Mise à jour…"
                 : "Mettre à jour le mot de passe"}
             </Button>
           </form>

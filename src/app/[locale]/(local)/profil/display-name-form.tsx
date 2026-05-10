@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import Image from "next/image";
 import { Upload, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { User } from "better-auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,8 +92,7 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
       toast.success("Profil mis à jour", {
         description: "Votre profil a été modifié avec succès",
       });
-    } catch (error: unknown) {
-      console.error("Erreur lors de la mise à jour du profil:", error);
+    } catch {
       toast.error("Erreur", {
         description: "Une erreur est survenue lors de la mise à jour du profil",
       });
@@ -115,16 +115,16 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                  <div className="relative w-24 h-24 mx-auto sm:mx-0 rounded-full overflow-hidden border-2 border-border">
+                  <div className="relative w-24 h-24 mx-auto sm:mx-0 rounded-full overflow-hidden border-2 border-border bg-muted shrink-0">
                     {previewUrl ? (
                       <Image
-                        src={previewUrl || "/placeholder.svg"}
+                        src={previewUrl}
                         alt="Photo de profil"
                         fill
                         className="object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center">
                         <span className="text-3xl text-muted-foreground">
                           {form.watch("name").charAt(0).toUpperCase()}
                         </span>
@@ -132,45 +132,50 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
                     )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    <FormLabel htmlFor="image" className="text-base font-medium">
+                    <FormLabel className="text-base font-medium">
                       Photo de profil
                     </FormLabel>
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <Input
-                          id="image"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="flex-1"
-                          aria-label="Télécharger une photo de profil"
-                        />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() =>
+                          document.getElementById("image-upload")?.click()
+                        }
+                      >
+                        <Upload className="h-4 w-4" aria-hidden="true" />
+                        Choisir une photo
+                      </Button>
+                      {previewUrl && previewUrl !== session.image && (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                        >
-                          <Upload className="h-4 w-4 mr-2" />
-                          <span className="hidden sm:inline">Télécharger</span>
-                        </Button>
-                      </div>
-                      {previewUrl && previewUrl !== session.image && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
+                          className="gap-2 text-muted-foreground hover:text-foreground"
                           onClick={() => {
                             form.setValue("image", undefined);
                             setPreviewUrl(session.image || null);
                           }}
-                          className="flex-shrink-0"
                           aria-label="Annuler le changement de photo"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-4 w-4" aria-hidden="true" />
+                          Annuler
                         </Button>
                       )}
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="sr-only"
+                        aria-label="Télécharger une photo de profil"
+                      />
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG ou WebP. Max 4 Mo.
+                    </p>
                   </div>
                 </div>
 
@@ -188,7 +193,7 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
                           disabled={form.formState.isSubmitting || isPending}
                           placeholder="Votre nom"
                           className="max-w-md"
-                          aria-label="Nom"
+                          autoComplete="name"
                         />
                       </FormControl>
                       <FormMessage />
@@ -206,13 +211,19 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
                       aria-label="Email (non modifiable)"
                     />
                     {session.emailVerified ? (
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 text-xs font-medium text-green-700 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800"
+                      >
                         Vérifié
-                      </span>
+                      </Badge>
                     ) : (
-                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 text-xs font-medium text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800"
+                      >
                         Non vérifié
-                      </span>
+                      </Badge>
                     )}
                   </div>
                 </div>
@@ -224,7 +235,7 @@ export function DisplayNameForm({ session, isPending }: DisplayNameFormProps) {
                 className="w-full sm:w-auto"
                 aria-label="Mettre à jour le profil"
               >
-                {form.formState.isSubmitting ? "Mise à jour..." : "Mettre à jour le profil"}
+                {form.formState.isSubmitting ? "Mise à jour…" : "Mettre à jour le profil"}
               </Button>
             </form>
           </Form>

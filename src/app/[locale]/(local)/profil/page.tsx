@@ -9,7 +9,7 @@ import LoadingPage from "../loading";
 export default function ProfilPage() {
   const { data: session, isPending } = authClient.useSession();
   return (
-    <div className="space-y-2">
+    <div className="space-y-6">
       <PageHeader
         title="Profil"
         description="Gérer vos informations personnelles."
