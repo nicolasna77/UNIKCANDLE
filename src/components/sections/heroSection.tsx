@@ -164,8 +164,10 @@ const HeroSection = () => {
                 aria-label={t("videoAlt")}
                 aria-hidden="true"
               >
-                <source src="/asset/hero.MOV" type="video/quicktime" />
-                <source src="/asset/hero.MOV" type="video/mp4" />
+                <source
+                  src="/asset/copy_4447286A-9868-4AB4-8560-658743442719.mp4"
+                  type="video/mp4"
+                />
               </video>
 
               {/* Reflet élégant */}
