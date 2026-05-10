@@ -25,17 +25,22 @@ async function buildCache(country: string): Promise<NormalizedShippingMethod[]> 
     getShippingMethods(country),
   ]);
 
-  const normalized: NormalizedShippingMethod[] = [
-    ...normalizeV3Products(v3Products, country),
-    ...normalizeV2Methods(v2Methods, country),
-  ];
+  const v3Normalized = normalizeV3Products(v3Products, country);
+  const v2Normalized = normalizeV2Methods(v2Methods, country);
 
-  const v3MethodIds = new Set(
-    normalizeV3Products(v3Products, country).map((m) => m.methodId)
-  );
-  const deduped = normalized.filter(
-    (m) => m.id.includes("-") || !v3MethodIds.has(m.methodId)
-  );
+  // L'API v3 renvoie souvent null pour les prix (tarification dynamique).
+  // On complète avec le prix v2 quand le prix v3 est 0/nul.
+  const v2PriceByMethodId = new Map(v2Normalized.map((m) => [m.methodId, m.price]));
+  const v3WithPrices = v3Normalized.map((m) => ({
+    ...m,
+    price: m.price > 0 ? m.price : (v2PriceByMethodId.get(m.methodId) ?? m.price),
+  }));
+
+  const v3MethodIds = new Set(v3Normalized.map((m) => m.methodId));
+  const deduped = [
+    ...v3WithPrices,
+    ...v2Normalized.filter((m) => !v3MethodIds.has(m.methodId)),
+  ];
 
   const allowedCarriers = getAllowedCarriers();
   const byCarrier = allowedCarriers
