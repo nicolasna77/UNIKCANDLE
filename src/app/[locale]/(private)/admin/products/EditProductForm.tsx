@@ -521,7 +521,7 @@ export default function EditProductForm({
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="categoryId"
@@ -591,7 +591,7 @@ export default function EditProductForm({
                   control={form.control}
                   name="scentIds"
                   render={({ field }) => (
-                    <FormItem className="sm:col-span-2 lg:col-span-1">
+                    <FormItem>
                       <FormLabel>Parfums *</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
