@@ -83,8 +83,8 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
     const orderData = JSON.parse(temporaryOrder.orderData);
     const metadataItems = orderData.items as OrderItemMetadata[];
 
-    const productIds = metadataItems.map((item) => item.id);
-    const scentIds = metadataItems.map((item) => item.scentId).filter(Boolean);
+    const productIds = [...new Set(metadataItems.map((item) => item.id))];
+    const scentIds = [...new Set(metadataItems.map((item) => item.scentId).filter(Boolean))];
 
     console.log("IDs des produits à vérifier:", productIds);
     console.log("IDs des senteurs à vérifier:", scentIds);
