@@ -117,7 +117,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Function to add items to the cart
   const addToCart = (item: CartItem) => {
-    console.log("Adding item:", item);
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) =>
         isSameItem(cartItem, item)

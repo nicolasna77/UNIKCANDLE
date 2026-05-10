@@ -16,6 +16,7 @@ export function useCheckout(cart: CartItem[]) {
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shippingRef = useRef<{ methodId: number; cost: number; name: string } | null>(null);
+  const isNavigatingRef = useRef(false);
 
   // Vérifier si l'utilisateur revient après annulation
   useEffect(() => {
@@ -25,12 +26,11 @@ export function useCheckout(cart: CartItem[]) {
     }
   }, [searchParams, router, t]);
 
-  // Gérer le retour de l'utilisateur depuis Stripe
+  // Réinitialiser le loading si l'utilisateur revient depuis Stripe sans compléter
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && isLoading) {
+      if (document.visibilityState === "visible" && isLoading && !isNavigatingRef.current) {
         setIsLoading(false);
-        console.log("Utilisateur revenu sur la page, arrêt du loading");
       }
     };
 
@@ -125,10 +125,11 @@ export function useCheckout(cart: CartItem[]) {
         throw new Error("URL de paiement manquante");
       }
 
-      // Redirection directe vers l'URL Stripe Checkout (API moderne)
+      // Redirection directe vers l'URL Stripe Checkout — ne pas reset isLoading
+      isNavigatingRef.current = true;
       window.location.href = data.url;
+      return;
     } catch (error) {
-      console.error("Erreur lors du paiement:", error);
 
       const errorMessage =
         error instanceof Error
@@ -147,7 +148,9 @@ export function useCheckout(cart: CartItem[]) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      setIsLoading(false);
+      if (!isNavigatingRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
