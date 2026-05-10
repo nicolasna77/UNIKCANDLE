@@ -165,10 +165,8 @@ export async function getShippingProducts(): Promise<SendCloudProduct[]> {
     });
 
     const raw = await response.json();
-    console.log("[SendCloud v3] status:", response.status, "keys:", Object.keys(raw ?? {}));
 
     if (!response.ok) {
-      console.error("[SendCloud v3] error response:", JSON.stringify(raw).slice(0, 500));
       return [];
     }
 
@@ -176,7 +174,6 @@ export async function getShippingProducts(): Promise<SendCloudProduct[]> {
     const products: SendCloudProduct[] =
       raw.shipping_products ?? raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
 
-    console.log("[SendCloud v3] products found:", products.length, "ids:", products.map((p) => p.id));
     return products;
   } catch (err) {
     console.error("[SendCloud v3] getShippingProducts failed:", err);

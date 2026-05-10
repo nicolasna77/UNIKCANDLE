@@ -83,21 +83,30 @@ export async function GET(request: NextRequest) {
     const byWeight = result.filter(
       (m) => m.min_weight <= weight && weight <= m.max_weight
     );
-    if (byWeight.length > 0) {
-      result = byWeight;
-    } else {
+    result = byWeight.length > 0 ? byWeight : (() => {
       // Fallback : tranche la plus proche par transporteur
       const carriers = [...new Set(result.map((m) => m.carrier))];
-      result = carriers.flatMap((carrier) => {
+      return carriers.flatMap((carrier) => {
         const methods = result.filter((m) => m.carrier === carrier);
         const above = methods
           .filter((m) => m.min_weight <= weight)
           .sort((a, b) => b.min_weight - a.min_weight);
         return above.length > 0 ? [above[0]] : methods.slice(0, 1);
       });
-    }
-    logger.info(`SendCloud: ${result.length} méthode(s) pour ${weight}kg`);
+    })();
   }
+
+  // Une seule option par transporteur (la moins chère) pour éviter la surcharge de choix
+  const byCarrier = new Map<string, typeof result[0]>();
+  for (const m of result) {
+    const existing = byCarrier.get(m.carrier);
+    if (!existing || m.price < existing.price) {
+      byCarrier.set(m.carrier, m);
+    }
+  }
+  result = [...byCarrier.values()];
+
+  logger.info(`SendCloud: ${result.length} méthode(s) affichée(s) pour ${weight ?? "?"}kg`);
 
   return NextResponse.json(result);
 }
