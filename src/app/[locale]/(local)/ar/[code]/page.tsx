@@ -3,9 +3,13 @@
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import Loading from "@/components/loading";
 import { Card } from "@/components/ui/card";
-import { Video, AlertCircle, Mic, Play, MessageCircle, Volume2 } from "lucide-react";
+import { Video, AlertCircle, Mic, Play, Pause, MessageCircle, Volume2, RotateCcw } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { ConfettiEmojiAuto } from "@/components/magicui/confettiEmojiauto";
 import Image from "next/image";
 
@@ -21,6 +25,88 @@ const VideoPlayer = dynamic(
     ),
   }
 );
+
+function AudioPlayer({ src }: { src: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+  };
+
+  const restart = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play();
+  };
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-5 py-2">
+      <audio
+        ref={audioRef}
+        src={src}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime ?? 0)}
+        onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
+        preload="metadata"
+      />
+
+      {/* Bouton play/pause principal */}
+      <button
+        onClick={togglePlay}
+        className="flex items-center justify-center w-20 h-20 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 active:scale-95 transition-transform"
+        aria-label={isPlaying ? "Pause" : "Lecture"}
+      >
+        {isPlaying ? (
+          <Pause className="w-9 h-9" />
+        ) : (
+          <Play className="w-9 h-9 ml-1" />
+        )}
+      </button>
+
+      {/* Barre de progression */}
+      <div className="w-full space-y-1">
+        <Slider
+          value={[currentTime]}
+          max={duration || 1}
+          step={0.1}
+          onValueChange={([val]) => {
+            if (audioRef.current) audioRef.current.currentTime = val;
+            setCurrentTime(val);
+          }}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      {/* Bouton recommencer */}
+      <Button variant="ghost" size="sm" onClick={restart} className="gap-2">
+        <RotateCcw className="w-4 h-4" />
+        Recommencer
+      </Button>
+    </div>
+  );
+}
 
 interface QRData {
   product: {
@@ -190,22 +276,7 @@ export default function ARPage() {
                     Message audio
                   </h3>
                 </div>
-                <div className="flex flex-col items-center gap-4 py-2">
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/20">
-                    <Play className="w-7 h-7 text-primary ml-1" />
-                  </div>
-                  <audio
-                    controls
-                    src={data.audioUrl}
-                    className="w-full rounded-xl"
-                    style={{ accentColor: "hsl(var(--primary))" }}
-                  />
-                </div>
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
-                  <p className="text-primary-foreground text-xs sm:text-sm leading-relaxed">
-                    💡 Appuyez sur play pour écouter le message qui vous a été laissé.
-                  </p>
-                </div>
+                <AudioPlayer src={data.audioUrl} />
               </div>
             )}
 
