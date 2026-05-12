@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       : {}),
   };
 
-  const [affiliates, total] = await Promise.all([
+  const [affiliates, total, totalEarned, totalPaid, pendingCount] = await Promise.all([
     prisma.affiliate.findMany({
       where,
       skip,
@@ -38,9 +38,6 @@ export async function GET(req: Request) {
       },
     }),
     prisma.affiliate.count({ where }),
-  ]);
-
-  const [totalEarned, totalPaid, pendingCount] = await Promise.all([
     prisma.affiliate.aggregate({ _sum: { totalEarned: true } }),
     prisma.affiliate.aggregate({ _sum: { totalPaid: true } }),
     prisma.affiliateCommission.count({ where: { status: "PENDING" } }),

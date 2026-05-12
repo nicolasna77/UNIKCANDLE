@@ -66,31 +66,28 @@ export async function updateProduct(
 
     const data = validatedFields.data;
 
-    // Vérifications des relations si modifiées
-    if (data.scentIds && data.scentIds.length > 0) {
-      const existingScents = await prisma.scent.findMany({
-        where: { id: { in: data.scentIds } },
-      });
+    // Vérifications des relations si modifiées (en parallèle)
+    const [existingScents, existingCategory] = await Promise.all([
+      data.scentIds && data.scentIds.length > 0
+        ? prisma.scent.findMany({ where: { id: { in: data.scentIds } } })
+        : Promise.resolve(null),
+      data.categoryId
+        ? prisma.category.findUnique({ where: { id: data.categoryId } })
+        : Promise.resolve(null),
+    ]);
 
-      if (existingScents.length !== data.scentIds.length) {
-        return validationError(
-          { scentIds: ["Un ou plusieurs parfums sont invalides"] },
-          "Parfum(s) sélectionné(s) introuvable(s)"
-        );
-      }
+    if (data.scentIds && data.scentIds.length > 0 && existingScents && existingScents.length !== data.scentIds.length) {
+      return validationError(
+        { scentIds: ["Un ou plusieurs parfums sont invalides"] },
+        "Parfum(s) sélectionné(s) introuvable(s)"
+      );
     }
 
-    if (data.categoryId) {
-      const existingCategory = await prisma.category.findUnique({
-        where: { id: data.categoryId },
-      });
-
-      if (!existingCategory) {
-        return validationError(
-          { categoryId: ["Catégorie invalide"] },
-          "La catégorie sélectionnée n'existe pas"
-        );
-      }
+    if (data.categoryId && !existingCategory) {
+      return validationError(
+        { categoryId: ["Catégorie invalide"] },
+        "La catégorie sélectionnée n'existe pas"
+      );
     }
 
     // Gestion des images si fournies
@@ -189,23 +186,22 @@ export async function updateProductFromJSON(
 
     const validData = validatedFields.data;
 
-    // Vérifications des relations si modifiées
-    if (validData.scentIds && validData.scentIds.length > 0) {
-      const scents = await prisma.scent.findMany({
-        where: { id: { in: validData.scentIds } },
-      });
-      if (scents.length !== validData.scentIds.length) {
-        return errorResponse("Parfum(s) invalide(s)");
-      }
+    // Vérifications des relations si modifiées (en parallèle)
+    const [scents, category] = await Promise.all([
+      validData.scentIds && validData.scentIds.length > 0
+        ? prisma.scent.findMany({ where: { id: { in: validData.scentIds } } })
+        : Promise.resolve(null),
+      validData.categoryId
+        ? prisma.category.findUnique({ where: { id: validData.categoryId } })
+        : Promise.resolve(null),
+    ]);
+
+    if (validData.scentIds && validData.scentIds.length > 0 && scents && scents.length !== validData.scentIds.length) {
+      return errorResponse("Parfum(s) invalide(s)");
     }
 
-    if (validData.categoryId) {
-      const category = await prisma.category.findUnique({
-        where: { id: validData.categoryId },
-      });
-      if (!category) {
-        return errorResponse("Catégorie invalide");
-      }
+    if (validData.categoryId && !category) {
+      return errorResponse("Catégorie invalide");
     }
 
     // Gestion des images si fournies

@@ -124,37 +124,23 @@ export async function POST(req: Request) {
         const servicePoint: ServicePoint | null = orderData.servicePoint ?? null;
         const affiliateCode: string | null = orderData.affiliateCode ?? session.metadata?.affiliateCode ?? null;
 
-        // Vérifier la connexion à la base de données
-        try {
-          await prisma.$connect();
-        } catch (error) {
-          logger.error(
-            "Webhook Stripe: Erreur de connexion à la base de données",
-            error
-          );
-          throw error;
-        }
+        const userId = session.metadata!.userId;
+        const orderTotal = session.amount_total ? session.amount_total / 100 : 0;
 
-        // Récupérer l'utilisateur
-        const user = await prisma.user.findUnique({
-          where: { id: session.metadata.userId },
-        });
+        // Récupérer user et affilié en parallèle
+        const [user, affiliateForCommission] = await Promise.all([
+          prisma.user.findUnique({ where: { id: userId } }),
+          affiliateCode
+            ? prisma.affiliate.findUnique({
+                where: { code: affiliateCode, status: "ACTIVE" },
+                select: { id: true, commissionRate: true, userId: true },
+              })
+            : Promise.resolve(null),
+        ]);
 
         if (!user) {
           throw new Error("Utilisateur non trouvé");
         }
-
-        // Extraire les métadonnées avant la transaction (évite l'erreur TS null)
-        const userId = session.metadata!.userId;
-        const orderTotal = session.amount_total ? session.amount_total / 100 : 0;
-
-        // Résoudre l'affilié si un code est présent
-        const affiliateForCommission = affiliateCode
-          ? await prisma.affiliate.findUnique({
-              where: { code: affiliateCode, status: "ACTIVE" },
-              select: { id: true, commissionRate: true, userId: true },
-            })
-          : null;
 
         // Créer la commande et les QR codes dans une transaction atomique
         const order = await prisma.$transaction(async (tx) => {
