@@ -8,8 +8,8 @@ import {
 } from "@/lib/sendcloud";
 import { logger } from "@/lib/logger";
 
-// Cache en mémoire : 10 minutes (méthodes filtrées par transporteur, toutes tranches de poids)
-let cache: { data: NormalizedShippingMethod[]; ts: number } | null = null;
+// Cache en mémoire : 10 minutes, clé = pays ISO-2
+const cacheMap = new Map<string, { data: NormalizedShippingMethod[]; ts: number }>();
 const CACHE_TTL = 10 * 60 * 1000;
 
 // SENDCLOUD_CARRIERS="Colissimo,Mondial Relay" — filtre par nom de transporteur
@@ -21,7 +21,7 @@ function getAllowedCarriers(): string[] | null {
 
 async function buildCache(country: string): Promise<NormalizedShippingMethod[]> {
   const [v3Products, v2Methods] = await Promise.all([
-    getShippingProducts(),
+    getShippingProducts(country),
     getShippingMethods(country),
   ]);
 
@@ -67,23 +67,21 @@ export async function GET(request: NextRequest) {
   const weight = weightParam ? parseFloat(weightParam) : null;
   const bust = request.nextUrl.searchParams.get("bust") === "1";
 
-  if (bust) cache = null;
+  if (bust) cacheMap.delete(country);
 
-  if (!cache || Date.now() - cache.ts >= CACHE_TTL) {
+  const cached = cacheMap.get(country);
+  if (!cached || Date.now() - cached.ts >= CACHE_TTL) {
     try {
       const data = await buildCache(country);
-      cache = { data, ts: Date.now() };
+      cacheMap.set(country, { data, ts: Date.now() });
     } catch (error) {
       logger.error("Erreur lors de la récupération des méthodes SendCloud", error);
-      return NextResponse.json(
-        { error: "Impossible de récupérer les méthodes de livraison" },
-        { status: 500 }
-      );
+      return NextResponse.json([]);
     }
   }
 
   // Filtre par poids (non mis en cache — varie selon le panier)
-  let result = cache.data;
+  let result = cacheMap.get(country)!.data;
   if (weight !== null && !isNaN(weight) && weight > 0) {
     const byWeight = result.filter(
       (m) => m.min_weight <= weight && weight <= m.max_weight

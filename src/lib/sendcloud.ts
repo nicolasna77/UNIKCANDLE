@@ -264,13 +264,13 @@ export async function getShippingMethods(
 }
 
 // Fetch v3 shipping products
-export async function getShippingProducts(): Promise<SendCloudProduct[]> {
+export async function getShippingProducts(toCountry = "FR"): Promise<SendCloudProduct[]> {
   try {
     const publicKey = process.env.SENDCLOUD_PUBLIC_KEY;
     const secretKey = process.env.SENDCLOUD_SECRET_KEY;
     const auth = `Basic ${Buffer.from(`${publicKey}:${secretKey}`).toString("base64")}`;
 
-    const url = `${SENDCLOUD_API_V3_URL}/shipping-products?from_country=FR&to_country=FR`;
+    const url = `${SENDCLOUD_API_V3_URL}/shipping-products?from_country=FR&to_country=${toCountry}`;
     const response = await fetch(url, {
       headers: { Authorization: auth, "Content-Type": "application/json" },
     });
