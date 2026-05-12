@@ -325,22 +325,33 @@ export async function POST(req: Request) {
               0
             );
 
-            // Pour un point relais, on utilise l'adresse du point comme destination
-            const deliveryAddress = servicePoint
-              ? {
-                  name: order.user.name,
-                  address: `${servicePoint.street} ${servicePoint.house_number}`.trim(),
-                  city: servicePoint.city,
-                  postal_code: servicePoint.postal_code,
-                  country: servicePoint.country,
-                }
-              : {
-                  name: order.shippingAddress.name || order.user.name,
-                  address: order.shippingAddress.street,
-                  city: order.shippingAddress.city,
-                  postal_code: order.shippingAddress.zipCode,
-                  country: order.shippingAddress.country,
-                };
+            // SendCloud reçoit toujours l'adresse du destinataire (client).
+            // Pour un point relais, to_service_point indique où livrer ;
+            // l'adresse client reste celle collectée par Stripe.
+            const stripeStreet =
+              session.shipping_details?.address?.line1 ||
+              session.collected_information?.shipping_details?.address?.line1 ||
+              session.customer_details?.address?.line1 || "";
+            const stripeCity =
+              session.shipping_details?.address?.city ||
+              session.collected_information?.shipping_details?.address?.city ||
+              session.customer_details?.address?.city || "";
+            const stripeZip =
+              session.shipping_details?.address?.postal_code ||
+              session.collected_information?.shipping_details?.address?.postal_code ||
+              session.customer_details?.address?.postal_code || "";
+            const stripeCountry =
+              session.shipping_details?.address?.country ||
+              session.collected_information?.shipping_details?.address?.country ||
+              session.customer_details?.address?.country || "";
+
+            const deliveryAddress = {
+              name: session.customer_details?.name || order.user.name,
+              address: stripeStreet,
+              city: stripeCity,
+              postal_code: stripeZip,
+              country: stripeCountry,
+            };
 
             const parcel = await createParcel({
               ...deliveryAddress,

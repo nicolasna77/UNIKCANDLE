@@ -159,15 +159,9 @@ export async function POST(req: Request) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart?cancelled=true`,
       client_reference_id: session.id,
-      // Pour les points relais l'adresse de livraison est déjà connue (servicePoint),
-      // inutile de la collecter à nouveau via Stripe
-      ...(servicePoint
-        ? {}
-        : {
-            shipping_address_collection: {
-              allowed_countries: [shippingCountry as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry],
-            },
-          }),
+      shipping_address_collection: {
+        allowed_countries: [shippingCountry as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry],
+      },
       shipping_options: [
         {
           shipping_rate_data: {
