@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { getUser } from "@/lib/auth-session";
 import prisma from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { generateSecureQRCode } from "@/lib/qr-code";
+import { cookies } from "next/headers";
 
 interface CheckoutItem {
   id: string;
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { cartItems, selectedMethodId, shippingCost, shippingName, servicePoint } = body;
+    const { cartItems, selectedMethodId, shippingCost, shippingName, servicePoint, country } = body;
 
     if (!cartItems || cartItems.length === 0) {
       return new NextResponse("Le panier est vide", { status: 400 });
@@ -40,6 +42,10 @@ export async function POST(req: Request) {
     if (typeof selectedMethodId !== "number" || typeof shippingCost !== "number") {
       return new NextResponse("Méthode de livraison manquante", { status: 400 });
     }
+
+    const shippingCountry = typeof country === "string" && country.length === 2
+      ? country.toUpperCase()
+      : "FR";
 
     // Générer des codes uniques et cryptographiquement sécurisés pour chaque article
     const cartItemsWithCodes = cartItems.map((item: CheckoutItem) => ({
@@ -78,6 +84,31 @@ export async function POST(req: Request) {
       }
     );
 
+    // Lire le code affilié depuis le cookie (30 jours)
+    const cookieStore = await cookies();
+    const rawAffiliateCode = cookieStore.get("affiliate_ref")?.value ?? null;
+
+    // Valider que le code existe et que l'acheteur n'est pas lui-même l'affilié
+    let resolvedAffiliateCode: string | null = null;
+    if (rawAffiliateCode) {
+      const affiliate = await prisma.affiliate.findUnique({
+        where: { code: rawAffiliateCode, status: "ACTIVE" },
+        select: { userId: true },
+      });
+      if (affiliate && affiliate.userId !== session.id) {
+        resolvedAffiliateCode = rawAffiliateCode;
+        // Enregistrer le clic affilié
+        await prisma.affiliateClick.create({
+          data: {
+            affiliateId: (await prisma.affiliate.findUnique({ where: { code: rawAffiliateCode }, select: { id: true } }))!.id,
+            ip: null,
+            userAgent: null,
+            referer: null,
+          },
+        });
+      }
+    }
+
     // Créer un identifiant unique pour cette commande
     const orderId = `order_${Date.now()}`;
 
@@ -87,7 +118,9 @@ export async function POST(req: Request) {
       userId: session.id,
       selectedMethodId,
       shippingCost,
+      shippingCountry,
       servicePoint: servicePoint ?? null,
+      affiliateCode: resolvedAffiliateCode,
       items: cartItemsWithCodes.map(
         (item: CheckoutItem & { qrCodeId: string }) => ({
           id: item.id,
@@ -126,9 +159,15 @@ export async function POST(req: Request) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart?cancelled=true`,
       client_reference_id: session.id,
-      shipping_address_collection: {
-        allowed_countries: ["FR"],
-      },
+      // Pour les points relais l'adresse de livraison est déjà connue (servicePoint),
+      // inutile de la collecter à nouveau via Stripe
+      ...(servicePoint
+        ? {}
+        : {
+            shipping_address_collection: {
+              allowed_countries: [shippingCountry as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry],
+            },
+          }),
       shipping_options: [
         {
           shipping_rate_data: {
@@ -144,6 +183,7 @@ export async function POST(req: Request) {
       metadata: {
         orderId: orderId,
         userId: session.id,
+        affiliateCode: resolvedAffiliateCode ?? "",
       },
     });
 

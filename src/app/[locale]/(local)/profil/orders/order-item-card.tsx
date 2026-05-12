@@ -367,7 +367,12 @@ const OrderItemCard = ({
                   </h4>
                 </div>
                 <div className="rounded-xl bg-muted/30 border border-border/50 p-4 space-y-1.5 hover:bg-muted/40 transition-colors">
-                  <p className="font-bold text-sm text-foreground">
+                  {order.shippingAddress.name && (
+                    <p className="font-bold text-sm text-foreground">
+                      {order.shippingAddress.name}
+                    </p>
+                  )}
+                  <p className={order.shippingAddress.name ? "text-sm font-medium text-muted-foreground" : "font-bold text-sm text-foreground"}>
                     {order.shippingAddress.street}
                   </p>
                   <p className="text-sm font-medium text-muted-foreground">

@@ -122,6 +122,7 @@ export async function POST(req: Request) {
         const selectedMethodId: number | undefined = orderData.selectedMethodId;
         const shippingCost: number = orderData.shippingCost ?? 0;
         const servicePoint: ServicePoint | null = orderData.servicePoint ?? null;
+        const affiliateCode: string | null = orderData.affiliateCode ?? session.metadata?.affiliateCode ?? null;
 
         // Vérifier la connexion à la base de données
         try {
@@ -147,6 +148,14 @@ export async function POST(req: Request) {
         const userId = session.metadata!.userId;
         const orderTotal = session.amount_total ? session.amount_total / 100 : 0;
 
+        // Résoudre l'affilié si un code est présent
+        const affiliateForCommission = affiliateCode
+          ? await prisma.affiliate.findUnique({
+              where: { code: affiliateCode, status: "ACTIVE" },
+              select: { id: true, commissionRate: true, userId: true },
+            })
+          : null;
+
         // Créer la commande et les QR codes dans une transaction atomique
         const order = await prisma.$transaction(async (tx) => {
           const createdOrder = await tx.order.create({
@@ -155,6 +164,8 @@ export async function POST(req: Request) {
               total: orderTotal,
               shippingCost,
               shippingMethodId: selectedMethodId,
+              affiliateCode: affiliateForCommission ? affiliateCode : null,
+              affiliateId: affiliateForCommission?.id ?? null,
               items: {
                 create: cartItems.map((item: CartItem) => ({
                   productId: item.id,
@@ -172,39 +183,45 @@ export async function POST(req: Request) {
                 })),
               },
               shippingAddress: {
-                create: {
-                  name: session.customer_details?.name || "",
-                  street:
-                    session.shipping_details?.address?.line1 ||
-                    session.collected_information?.shipping_details?.address
-                      ?.line1 ||
-                    session.customer_details?.address?.line1 ||
-                    "",
-                  city:
-                    session.shipping_details?.address?.city ||
-                    session.collected_information?.shipping_details?.address
-                      ?.city ||
-                    session.customer_details?.address?.city ||
-                    "",
-                  state:
-                    session.shipping_details?.address?.state ||
-                    session.collected_information?.shipping_details?.address
-                      ?.state ||
-                    session.customer_details?.address?.state ||
-                    "",
-                  zipCode:
-                    session.shipping_details?.address?.postal_code ||
-                    session.collected_information?.shipping_details?.address
-                      ?.postal_code ||
-                    session.customer_details?.address?.postal_code ||
-                    "",
-                  country:
-                    session.shipping_details?.address?.country ||
-                    session.collected_information?.shipping_details?.address
-                      ?.country ||
-                    session.customer_details?.address?.country ||
-                    "",
-                },
+                create: servicePoint
+                  ? {
+                      // Adresse du point relais
+                      name: `${servicePoint.name} (Point relais)`,
+                      street: `${servicePoint.street} ${servicePoint.house_number}`.trim(),
+                      city: servicePoint.city,
+                      state: "",
+                      zipCode: servicePoint.postal_code,
+                      country: servicePoint.country,
+                    }
+                  : {
+                      // Adresse domicile collectée par Stripe
+                      name: session.customer_details?.name || "",
+                      street:
+                        session.shipping_details?.address?.line1 ||
+                        session.collected_information?.shipping_details?.address?.line1 ||
+                        session.customer_details?.address?.line1 ||
+                        "",
+                      city:
+                        session.shipping_details?.address?.city ||
+                        session.collected_information?.shipping_details?.address?.city ||
+                        session.customer_details?.address?.city ||
+                        "",
+                      state:
+                        session.shipping_details?.address?.state ||
+                        session.collected_information?.shipping_details?.address?.state ||
+                        session.customer_details?.address?.state ||
+                        "",
+                      zipCode:
+                        session.shipping_details?.address?.postal_code ||
+                        session.collected_information?.shipping_details?.address?.postal_code ||
+                        session.customer_details?.address?.postal_code ||
+                        "",
+                      country:
+                        session.shipping_details?.address?.country ||
+                        session.collected_information?.shipping_details?.address?.country ||
+                        session.customer_details?.address?.country ||
+                        "",
+                    },
               },
             },
             include: {
@@ -242,6 +259,26 @@ export async function POST(req: Request) {
               });
             })
           );
+
+          // Créer la commission affilié si applicable
+          if (affiliateForCommission) {
+            const commissionAmount = parseFloat(
+              ((orderTotal * affiliateForCommission.commissionRate) / 100).toFixed(2)
+            );
+            await tx.affiliateCommission.create({
+              data: {
+                affiliateId: affiliateForCommission.id,
+                orderId: createdOrder.id,
+                amount: commissionAmount,
+                rate: affiliateForCommission.commissionRate,
+                status: "PENDING",
+              },
+            });
+            await tx.affiliate.update({
+              where: { id: affiliateForCommission.id },
+              data: { totalEarned: { increment: commissionAmount } },
+            });
+          }
 
           return createdOrder;
         });
