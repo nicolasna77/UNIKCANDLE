@@ -17,6 +17,7 @@ export function useCheckout(cart: CartItem[]) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shippingRef = useRef<{ methodId: number; cost: number; name: string; servicePoint: unknown | null; country: string } | null>(null);
   const isNavigatingRef = useRef(false);
+  const isLoadingRef = useRef(false);
 
   // Vérifier si l'utilisateur revient après annulation
   useEffect(() => {
@@ -26,11 +27,13 @@ export function useCheckout(cart: CartItem[]) {
     }
   }, [searchParams, router, t]);
 
-  // Réinitialiser le loading si l'utilisateur revient depuis Stripe sans compléter
+  // Réinitialiser le loading si l'utilisateur revient depuis Stripe sans compléter.
+  // isLoadingRef évite le stale closure et permet un deps array vide (listener enregistré une seule fois).
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && isLoading && !isNavigatingRef.current) {
+      if (document.visibilityState === "visible" && isLoadingRef.current && !isNavigatingRef.current) {
         setIsLoading(false);
+        isLoadingRef.current = false;
       }
     };
 
@@ -39,17 +42,19 @@ export function useCheckout(cart: CartItem[]) {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isLoading]);
+  }, []);
 
   const handleCheckout = async (methodId: number, shippingCost: number, shippingName: string, servicePoint: unknown | null = null, country = "FR") => {
     shippingRef.current = { methodId, cost: shippingCost, name: shippingName, servicePoint, country };
     try {
       setIsLoading(true);
+      isLoadingRef.current = true;
 
       // Timeout de sécurité pour réinitialiser le loading après 5 minutes
       timeoutRef.current = setTimeout(
         () => {
           setIsLoading(false);
+          isLoadingRef.current = false;
         },
         5 * 60 * 1000
       );
@@ -152,6 +157,7 @@ export function useCheckout(cart: CartItem[]) {
       }
       if (!isNavigatingRef.current) {
         setIsLoading(false);
+        isLoadingRef.current = false;
       }
     }
   };

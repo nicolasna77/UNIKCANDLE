@@ -1,25 +1,22 @@
-import { redirect } from "next/navigation";
 import ProfilMenu from "./profil-menu";
 import { getUser } from "@/lib/auth-session";
 import prisma from "@/lib/prisma";
 
 const DashboardLayout = async ({
   children,
-  params,
 }: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) => {
-  const { locale } = await params;
+  // Auth is already enforced by the proxy — no redirect needed here
   const session = await getUser();
-  if (!session) {
-    redirect(`/${locale}/auth/signin`);
-  }
 
-  const affiliate = await prisma.affiliate.findUnique({
-    where: { userId: session.id },
-    select: { id: true },
-  });
+  const affiliate = session
+    ? await prisma.affiliate.findUnique({
+        where: { userId: session.id },
+        select: { id: true },
+      })
+    : null;
 
   return (
     <div>

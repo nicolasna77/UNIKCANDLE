@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -149,6 +149,18 @@ export function CartSummary({
     selectedId === null ||
     methods.length === 0 ||
     needsServicePoint;
+
+  const handleCheckoutClick = useCallback(() => {
+    if (selectedId === null) return;
+    const method = methods.find((m) => m.id === selectedId);
+    onCheckout(
+      method?.methodId ?? 0,
+      shippingCost,
+      method?.name ?? "Livraison",
+      selectedServicePoint,
+      selectedCountry
+    );
+  }, [selectedId, methods, shippingCost, selectedServicePoint, selectedCountry, onCheckout]);
 
   return (
     <Card className="border-border shadow-sm">
@@ -342,17 +354,7 @@ export function CartSummary({
         {/* Bouton paiement */}
         <Button
           className="w-full h-11 rounded-xl text-sm font-medium"
-          onClick={() => {
-            if (selectedId === null) return;
-            const method = methods.find((m) => m.id === selectedId);
-            onCheckout(
-              method?.methodId ?? 0,
-              shippingCost,
-              method?.name ?? "Livraison",
-              selectedServicePoint,
-              selectedCountry
-            );
-          }}
+          onClick={handleCheckoutClick}
           disabled={checkoutDisabled}
         >
           {isLoading ? (

@@ -93,14 +93,13 @@ export async function POST(req: Request) {
     if (rawAffiliateCode) {
       const affiliate = await prisma.affiliate.findUnique({
         where: { code: rawAffiliateCode, status: "ACTIVE" },
-        select: { userId: true },
+        select: { id: true, userId: true },
       });
       if (affiliate && affiliate.userId !== session.id) {
         resolvedAffiliateCode = rawAffiliateCode;
-        // Enregistrer le clic affilié
         await prisma.affiliateClick.create({
           data: {
-            affiliateId: (await prisma.affiliate.findUnique({ where: { code: rawAffiliateCode }, select: { id: true } }))!.id,
+            affiliateId: affiliate.id,
             ip: null,
             userAgent: null,
             referer: null,

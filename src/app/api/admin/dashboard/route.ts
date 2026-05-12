@@ -109,12 +109,9 @@ export async function GET() {
         },
       }),
 
-      // Toutes les commandes pour calculer le revenu
-      prisma.order.findMany({
-        select: {
-          total: true,
-          createdAt: true,
-        },
+      // Revenu total agrégé en base (évite de charger toutes les commandes)
+      prisma.order.aggregate({
+        _sum: { total: true },
       }),
 
       // Statistiques mensuelles pour les 6 derniers mois
@@ -131,8 +128,8 @@ export async function GET() {
       }),
     ]);
 
-    // Calcul du revenu total et de la valeur moyenne des commandes
-    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+    // Revenu total et valeur moyenne des commandes
+    const totalRevenue = orders._sum.total ?? 0;
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     // Calcul de la croissance des utilisateurs
