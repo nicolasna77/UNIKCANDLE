@@ -31,6 +31,7 @@ model User {
   reviews       Review[]
   accounts      Account[]
   sessions      Session[]
+  affiliate     Affiliate?
 
   @@map("user")
 }
@@ -169,12 +170,18 @@ model Order {
   trackingNumber    String?
   trackingUrl       String?
 
+  // Affiliation
+  affiliateCode String?
+  affiliateId   String?
+
   shippingAddress Address?
-  user            User        @relation(fields: [userId], references: [id])
+  user            User                 @relation(fields: [userId], references: [id])
   items           OrderItem[]
+  commission      AffiliateCommission?
 
   @@index([userId, createdAt])
   @@index([status])
+  @@index([affiliateId])
 }
 
 model OrderItem {
@@ -303,6 +310,76 @@ model Category {
   products      Product[]
 
   @@index([deletedAt])
+}
+
+model Affiliate {
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  code            String          @unique
+  commissionRate  Float           @default(10)
+  minPayoutAmount Float           @default(20)
+  status          AffiliateStatus @default(ACTIVE)
+  stripeAccountId String?
+  stripeOnboarded Boolean         @default(false)
+  totalEarned     Float           @default(0)
+  totalPaid       Float           @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clicks      AffiliateClick[]
+  commissions AffiliateCommission[]
+
+  @@index([code])
+  @@map("affiliate")
+}
+
+model AffiliateClick {
+  id          String   @id @default(uuid())
+  affiliateId String
+  ip          String?
+  userAgent   String?
+  referer     String?
+  createdAt   DateTime @default(now())
+
+  affiliate Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId])
+  @@index([createdAt])
+  @@map("affiliate_click")
+}
+
+model AffiliateCommission {
+  id               String           @id @default(uuid())
+  affiliateId      String
+  orderId          String           @unique
+  amount           Float
+  rate             Float
+  status           CommissionStatus @default(PENDING)
+  paidAt           DateTime?
+  stripeTransferId String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  affiliate Affiliate @relation(fields: [affiliateId], references: [id])
+  order     Order     @relation(fields: [orderId], references: [id])
+
+  @@index([affiliateId])
+  @@index([status])
+  @@map("affiliate_commission")
+}
+
+enum AffiliateStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
 }
 
 enum ReturnStatus {

@@ -9,6 +9,7 @@ import {
   IconRefresh,
   IconCategory,
   IconDroplet,
+  IconShare,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -62,6 +63,11 @@ const data = {
       title: "Utilisateurs",
       url: "/admin/users",
       icon: IconUsers,
+    },
+    {
+      title: "Affiliés",
+      url: "/admin/affiliates",
+      icon: IconShare,
     },
   ],
 };

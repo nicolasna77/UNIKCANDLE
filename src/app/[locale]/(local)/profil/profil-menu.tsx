@@ -1,15 +1,18 @@
 "use client";
-import { User, ListOrdered } from "lucide-react";
+import { User, ListOrdered, Share2 } from "lucide-react";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const baseNavItems = [
   { label: "Profil", href: "/profil", icon: User },
   { label: "Mes commandes", href: "/profil/orders", icon: ListOrdered },
 ];
 
-const ProfilMenu = () => {
+const affiliateItem = { label: "Affiliation", href: "/profil/affiliation", icon: Share2 };
+
+const ProfilMenu = ({ isAffiliate = false }: { isAffiliate?: boolean }) => {
   const pathname = usePathname();
+  const navItems = isAffiliate ? [...baseNavItems, affiliateItem] : baseNavItems;
 
   return (
     <nav

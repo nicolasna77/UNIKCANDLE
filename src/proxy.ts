@@ -33,6 +33,17 @@ const staticRoutes = [
 export async function proxy(request: NextRequest) {
   const response = intlMiddleware(request);
 
+  // Affiliate cookie tracking: persist ?ref=CODE for 30 days
+  const refCode = request.nextUrl.searchParams.get("ref");
+  if (refCode && /^[A-Z0-9]{4,20}$/.test(refCode)) {
+    response.cookies.set("affiliate_ref", refCode, {
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false,
+    });
+  }
+
   const pathName = request.nextUrl.pathname;
 
   const localeRegex = /^\/(?:fr|en)(?=\/|$)/;
