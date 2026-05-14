@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import prisma from "@/lib/prisma";
 
 type Props = {
   params: Promise<{ uid: string }>;
@@ -6,26 +7,17 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const resolvedParams = await params;
-  const uid = resolvedParams.uid;
+  const { uid } = await params;
 
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/products/${uid}`,
-      {
-        cache: "no-store",
-        next: { revalidate: 0 },
-      }
-    );
+    const product = await prisma.product.findUnique({
+      where: { id: uid, deletedAt: null },
+      select: { name: true, description: true, images: { take: 1, select: { url: true } } },
+    });
 
-    if (!response.ok) {
-      return {
-        title: "Produit non trouvé",
-        description: "Le produit que vous recherchez n'existe pas.",
-      };
+    if (!product) {
+      return { title: "Produit non trouvé", description: "Le produit que vous recherchez n'existe pas." };
     }
-
-    const product = await response.json();
 
     return {
       title: product.name,
@@ -33,15 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: product.name,
         description: product.description,
-        images: product.images?.[0]?.url,
+        images: product.images[0]?.url,
       },
     };
-  } catch (error) {
-    console.error("Erreur lors de la récupération des métadonnées:", error);
-    return {
-      title: "Produit non trouvé",
-      description: "Le produit que vous recherchez n'existe pas.",
-    };
+  } catch {
+    return { title: "Produit non trouvé", description: "Le produit que vous recherchez n'existe pas." };
   }
 }
 
