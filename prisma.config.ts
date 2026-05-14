@@ -8,12 +8,4 @@ export default defineConfig({
     // The real URL is injected by Vercel during vercel-build (prisma db push).
     url: process.env.DATABASE_URL ?? "postgresql://placeholder:placeholder@localhost:5432/placeholder",
   },
-  migrate: {
-    async adapter(env) {
-      const { PrismaPg } = await import("@prisma/adapter-pg");
-      const { Pool } = await import("pg");
-      const pool = new Pool({ connectionString: env["DATABASE_URL"] });
-      return new PrismaPg(pool);
-    },
-  },
 });
