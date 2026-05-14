@@ -10,12 +10,14 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
+const DEFAULT_FROM = `UnikCandle <${process.env.OVH_EMAIL ?? "contact@unikcandle.com"}>`;
+
 export async function sendMail(options: {
-  from: string;
+  from?: string;
   to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
 }) {
-  return transporter.sendMail(options);
+  return transporter.sendMail({ from: DEFAULT_FROM, ...options });
 }

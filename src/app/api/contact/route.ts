@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
     ]);
 
     await sendMail({
-      from: "UnikCandle <contact@unikcandle.com>",
       to: "contact@unikcandle.com",
       subject: `Nouveau message de contact: ${subject}`,
       html: teamHtml,
@@ -37,7 +36,6 @@ export async function POST(request: NextRequest) {
     });
 
     await sendMail({
-      from: "UnikCandle <contact@unikcandle.com>",
       to: email,
       subject: "Confirmation de votre message - UnikCandle",
       html: confirmHtml,

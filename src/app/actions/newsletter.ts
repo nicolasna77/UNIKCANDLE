@@ -41,7 +41,6 @@ export async function subscribeToNewsletter(formData: FormData) {
     const html = await render(NewsletterWelcomeEmail());
 
     await sendMail({
-      from: "UNIKCANDLE <noreply@unikcandle.com>",
       to: validatedFields.data.email,
       subject: "Bienvenue dans l'aventure UNIKCANDLE !",
       html,

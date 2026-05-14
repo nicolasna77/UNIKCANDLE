@@ -34,7 +34,6 @@ export async function sendContactMessage(formData: FormData) {
     );
 
     await sendMail({
-      from: "UNIKCANDLE Contact <contact@unikcandle.com>",
       to: "support@unikcandle.com",
       subject: `[Contact] ${subject}`,
       html,

@@ -20,7 +20,6 @@ export const sendConfirmationEmail = async (order: Order) => {
   );
 
   await sendMail({
-    from: "UnikCandle <noreply@unikcandle.com>",
     to: order.user.email,
     subject: "Confirmation de votre commande UnikCandle",
     html,
@@ -42,7 +41,6 @@ export const sendShippingNotificationEmail = async (params: {
     : "Votre colis UNIKCANDLE est en route !";
 
   await sendMail({
-    from: "UnikCandle <noreply@unikcandle.com>",
     to: params.userEmail,
     subject,
     html,

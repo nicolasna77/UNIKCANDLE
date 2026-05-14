@@ -39,7 +39,6 @@ export const auth = betterAuth({
         ResetPasswordEmail({ userFirstname: user.name, resetPasswordLink: url })
       );
       await sendMail({
-        from: "UnikCandle <noreply@unikcandle.com>",
         to: user.email,
         subject: "Réinitialiser votre mot de passe",
         html,
@@ -53,7 +52,6 @@ export const auth = betterAuth({
         EmailVerificationEmail({ userFirstname: user.name, verificationLink: url })
       );
       await sendMail({
-        from: "UnikCandle <noreply@unikcandle.com>",
         to: user.email,
         subject: "Vérifiez votre adresse email UNIKCANDLE",
         html,
@@ -62,7 +60,6 @@ export const auth = betterAuth({
     afterEmailVerified: async (user: { email: string; name: string }) => {
       const html = await render(NewsletterWelcomeEmail());
       await sendMail({
-        from: "UnikCandle <noreply@unikcandle.com>",
         to: user.email,
         subject: "Bienvenue chez UNIKCANDLE !",
         html,
