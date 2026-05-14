@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { resend } from "./resend";
+import { sendMail } from "./mailer";
+import { render } from "@react-email/render";
 import { ResetPasswordEmail } from "@/emails/reset-password";
 import { NewsletterWelcomeEmail } from "@/emails/newsletter-welcome";
 import { EmailVerificationEmail } from "@/emails/email-verification";
@@ -34,41 +35,37 @@ export const auth = betterAuth({
     autoSignIn: false,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await resend.emails.send({
-        from: "noreply@unikcandle.com",
+      const html = await render(
+        ResetPasswordEmail({ userFirstname: user.name, resetPasswordLink: url })
+      );
+      await sendMail({
+        from: "UnikCandle <noreply@unikcandle.com>",
         to: user.email,
-        headers: {
-          "X-Mailgun-Variables": JSON.stringify({
-            url: url,
-          }),
-        },
         subject: "Réinitialiser votre mot de passe",
-        react: ResetPasswordEmail({
-          userFirstname: user.name,
-          resetPasswordLink: url,
-        }),
+        html,
       });
     },
   },
 
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await resend.emails.send({
-        from: "noreply@unikcandle.com",
+      const html = await render(
+        EmailVerificationEmail({ userFirstname: user.name, verificationLink: url })
+      );
+      await sendMail({
+        from: "UnikCandle <noreply@unikcandle.com>",
         to: user.email,
         subject: "Vérifiez votre adresse email UNIKCANDLE",
-        react: EmailVerificationEmail({
-          userFirstname: user.name,
-          verificationLink: url,
-        }),
+        html,
       });
     },
     afterEmailVerified: async (user: { email: string; name: string }) => {
-      await resend.emails.send({
-        from: "noreply@unikcandle.com",
+      const html = await render(NewsletterWelcomeEmail());
+      await sendMail({
+        from: "UnikCandle <noreply@unikcandle.com>",
         to: user.email,
         subject: "Bienvenue chez UNIKCANDLE !",
-        react: NewsletterWelcomeEmail(),
+        html,
       });
     },
   },

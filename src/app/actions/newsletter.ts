@@ -1,11 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { Resend } from "resend";
+import { render } from "@react-email/render";
 import NewsletterWelcomeEmail from "@/emails/newsletter-welcome";
 import prisma from "@/lib/prisma";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendMail } from "@/lib/mailer";
 
 const newsletterSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -24,11 +23,8 @@ export async function subscribeToNewsletter(formData: FormData) {
   }
 
   try {
-    // Vérifier si l'email existe déjà
     const existingSubscription = await prisma.newsletter.findUnique({
-      where: {
-        email: validatedFields.data.email,
-      },
+      where: { email: validatedFields.data.email },
     });
 
     if (existingSubscription) {
@@ -38,25 +34,17 @@ export async function subscribeToNewsletter(formData: FormData) {
       };
     }
 
-    // Créer l'inscription dans la base de données
     await prisma.newsletter.create({
-      data: {
-        email: validatedFields.data.email,
-      },
+      data: { email: validatedFields.data.email },
     });
 
-    // Envoyer l'email de bienvenue
-    await resend.emails.send({
+    const html = await render(NewsletterWelcomeEmail());
+
+    await sendMail({
       from: "UNIKCANDLE <noreply@unikcandle.com>",
       to: validatedFields.data.email,
       subject: "Bienvenue dans l'aventure UNIKCANDLE !",
-      react: NewsletterWelcomeEmail(),
-      headers: {
-        "List-Unsubscribe": `<mailto:unsubscribe@unikcandle.com?subject=unsubscribe>, <https://unikcandle.com/unsubscribe>`,
-        Precedence: "bulk",
-        "X-Auto-Response-Suppress": "OOF, AutoReply",
-      },
-      tags: [{ name: "category", value: "welcome" }],
+      html,
     });
 
     return {

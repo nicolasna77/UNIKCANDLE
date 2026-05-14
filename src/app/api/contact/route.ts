@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { render } from "@react-email/render";
 import ContactFormEmail from "@/emails/contact-form";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendMail } from "@/lib/mailer";
 
 export async function POST(request: NextRequest) {
   try {
     const { firstName, lastName, email, phone, subject, message } =
       await request.json();
 
-    // Validation des champs requis
     if (!firstName || !lastName || !email || !subject || !message) {
       return NextResponse.json(
         { error: "Tous les champs obligatoires doivent être remplis" },
@@ -17,7 +15,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validation de l'email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -26,44 +23,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Envoi de l'email à l'équipe
-    const { error } = await resend.emails.send({
+    const [teamHtml, confirmHtml] = await Promise.all([
+      render(ContactFormEmail({ firstName, lastName, email, phone, subject, message, isConfirmation: false })),
+      render(ContactFormEmail({ firstName, lastName, email, phone, subject, message, isConfirmation: true })),
+    ]);
+
+    await sendMail({
       from: "UnikCandle <contact@unikcandle.com>",
-      to: ["contact@unikcandle.com"], // Email de l'équipe
+      to: "contact@unikcandle.com",
       subject: `Nouveau message de contact: ${subject}`,
-      react: ContactFormEmail({
-        firstName,
-        lastName,
-        email,
-        phone,
-        subject,
-        message,
-        isConfirmation: false,
-      }),
+      html: teamHtml,
+      replyTo: email,
     });
 
-    if (error) {
-      console.error("Erreur Resend:", error);
-      return NextResponse.json(
-        { error: "Erreur lors de l'envoi de l'email" },
-        { status: 500 }
-      );
-    }
-
-    // Email de confirmation au client
-    await resend.emails.send({
+    await sendMail({
       from: "UnikCandle <contact@unikcandle.com>",
-      to: [email],
+      to: email,
       subject: "Confirmation de votre message - UnikCandle",
-      react: ContactFormEmail({
-        firstName,
-        lastName,
-        email,
-        phone,
-        subject,
-        message,
-        isConfirmation: true,
-      }),
+      html: confirmHtml,
     });
 
     return NextResponse.json(

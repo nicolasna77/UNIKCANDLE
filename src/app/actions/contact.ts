@@ -1,13 +1,11 @@
 "use server";
 
-import { Resend } from "resend";
+import { render } from "@react-email/render";
 import ContactEmail from "@/emails/contact";
 import { contactFormSchema } from "@/lib/schemas";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendMail } from "@/lib/mailer";
 
 export async function sendContactMessage(formData: FormData) {
-  // Extraction et validation des données du formulaire
   const rawData = {
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
@@ -17,7 +15,6 @@ export async function sendContactMessage(formData: FormData) {
     message: formData.get("message"),
   };
 
-  // Validation côté serveur (sécurité primaire)
   const validatedFields = contactFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
@@ -32,21 +29,16 @@ export async function sendContactMessage(formData: FormData) {
     validatedFields.data;
 
   try {
-    // Envoyer l'email
-    await resend.emails.send({
+    const html = await render(
+      ContactEmail({ firstName, lastName, email, phone: phone || "Non renseigné", subject, message })
+    );
+
+    await sendMail({
       from: "UNIKCANDLE Contact <contact@unikcandle.com>",
       to: "support@unikcandle.com",
-      replyTo: email,
       subject: `[Contact] ${subject}`,
-      react: ContactEmail({
-        firstName,
-        lastName,
-        email,
-        phone: phone || "Non renseigné",
-        subject,
-        message,
-      }),
-      tags: [{ name: "category", value: "contact" }],
+      html,
+      replyTo: email,
     });
 
     return {
