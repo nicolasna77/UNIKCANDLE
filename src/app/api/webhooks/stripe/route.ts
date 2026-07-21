@@ -81,6 +81,7 @@ export async function POST(req: Request) {
             postal_code: string;
             country: string;
           };
+          phone?: string | null;
         };
       };
 
@@ -178,10 +179,12 @@ export async function POST(req: Request) {
                       state: "",
                       zipCode: servicePoint.postal_code,
                       country: servicePoint.country,
+                      phone: session.customer_details?.phone || null,
                     }
                   : {
                       // Adresse domicile collectée par Stripe
                       name: session.customer_details?.name || "",
+                      phone: session.customer_details?.phone || null,
                       street:
                         session.shipping_details?.address?.line1 ||
                         session.collected_information?.shipping_details?.address?.line1 ||

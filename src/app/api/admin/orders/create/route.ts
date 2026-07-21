@@ -14,6 +14,7 @@ interface OrderItem {
 
 interface ShippingAddress {
   name: string;
+  phone?: string;
   street: string;
   city: string;
   state: string;
@@ -80,6 +81,7 @@ export async function POST(request: Request) {
         shippingAddress: {
           create: {
             name: shippingAddress.name,
+            phone: shippingAddress.phone || null,
             street: shippingAddress.street,
             city: shippingAddress.city,
             state: shippingAddress.state,

@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               name: true,
+              phone: true,
               street: true,
               city: true,
               state: true,

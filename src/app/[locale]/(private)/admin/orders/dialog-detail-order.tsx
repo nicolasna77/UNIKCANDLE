@@ -15,6 +15,7 @@ import {
   Medal,
   Calendar,
   Mail,
+  Phone,
 } from "lucide-react";
 import { QRCode } from "@/components/ui/shadcn-io/qr-code";
 import { format } from "date-fns";
@@ -71,6 +72,7 @@ interface ExtendedOrder {
   shippingAddress: {
     id: string;
     name: string;
+    phone: string | null;
     street: string;
     city: string;
     state: string;
@@ -102,6 +104,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
   const [sendcloudError, setSendcloudError] = useState<string | null>(null);
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = order.total;
+  const hasEngraving = order.items.some((item) => item.engravingText);
 
   const getArUrl = (code: string) => {
     const url = process.env.NEXT_PUBLIC_APP_URL || "https://unikcandle.com";
@@ -233,6 +236,7 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
             ${order.shippingAddress
               ? `<div class="print-address">
                   <div style="font-weight:600;">${order.shippingAddress.name}</div>
+                  ${order.shippingAddress.phone ? `<div>📞 ${order.shippingAddress.phone}</div>` : ""}
                   <div>${order.shippingAddress.street}</div>
                   <div>${order.shippingAddress.zipCode} ${order.shippingAddress.city}</div>
                   <div style="color:#6b7280;">${order.shippingAddress.state}, ${order.shippingAddress.country}</div>
@@ -281,6 +285,12 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                   >
                     {STATUS_LABELS[order.status] ?? order.status}
                   </span>
+                  {hasEngraving && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                      <Medal className="h-3 w-3" />
+                      Gravure
+                    </span>
+                  )}
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {format(new Date(order.createdAt), "d MMM yyyy 'à' HH:mm", { locale: fr })}
@@ -597,6 +607,15 @@ const DialogDetailOrder = ({ order: initialOrder }: { order: ExtendedOrder }) =>
                   {order.shippingAddress ? (
                     <address className="not-italic text-sm space-y-0.5">
                       <p className="font-semibold">{order.shippingAddress.name}</p>
+                      {order.shippingAddress.phone && (
+                        <a
+                          href={`tel:${order.shippingAddress.phone}`}
+                          className="text-muted-foreground hover:text-foreground flex items-center gap-1 w-fit"
+                        >
+                          <Phone className="h-3 w-3 shrink-0" />
+                          {order.shippingAddress.phone}
+                        </a>
+                      )}
                       <p className="text-muted-foreground">{order.shippingAddress.street}</p>
                       <p className="text-muted-foreground">
                         {order.shippingAddress.zipCode} {order.shippingAddress.city}

@@ -33,6 +33,7 @@ import {
   CheckCircle2,
   XCircle,
   Search,
+  Medal,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -90,6 +91,7 @@ type OrderListItem = {
   shippingAddress: {
     id: string;
     name: string;
+    phone: string | null;
     street: string;
     city: string;
     state: string;
@@ -313,8 +315,17 @@ export default function OrdersPage() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="text-sm font-medium leading-tight">
+                      <p className="text-sm font-medium leading-tight flex items-center gap-1.5">
                         {order.user.name}
+                        {order.items.some((item) => item.engravingText) && (
+                          <span
+                            title="Commande avec gravure"
+                            className="inline-flex items-center gap-0.5 rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                          >
+                            <Medal className="h-2.5 w-2.5" />
+                            Gravure
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {order.user.email}

@@ -161,6 +161,9 @@ export async function POST(req: Request) {
       shipping_address_collection: {
         allowed_countries: [shippingCountry as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry],
       },
+      phone_number_collection: {
+        enabled: true,
+      },
       shipping_options: [
         {
           shipping_rate_data: {

@@ -8,6 +8,7 @@ export interface OrderItem {
 
 export interface ShippingAddress {
   name: string;
+  phone: string;
   street: string;
   city: string;
   state: string;
@@ -26,6 +27,7 @@ export const initialOrderForm: OrderForm = {
   items: [],
   shippingAddress: {
     name: "",
+    phone: "",
     street: "",
     city: "",
     state: "",

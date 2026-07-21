@@ -164,6 +164,7 @@ export async function createOrder({ sessionId }: { sessionId: string }) {
           session.customer_details?.address
             ? {
                 create: {
+                  phone: session.customer_details?.phone || null,
                   street:
                     session.collected_information?.shipping_details?.address
                       ?.line1 ||

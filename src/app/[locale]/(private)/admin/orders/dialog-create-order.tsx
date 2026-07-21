@@ -42,6 +42,7 @@ interface OrderForm {
   items: OrderItem[];
   shippingAddress: {
     name: string;
+    phone: string;
     street: string;
     city: string;
     state: string;
@@ -65,6 +66,7 @@ export default function DialogCreateOrder() {
     items: [],
     shippingAddress: {
       name: "",
+      phone: "",
       street: "",
       city: "",
       state: "",
@@ -131,6 +133,7 @@ export default function DialogCreateOrder() {
       items: [],
       shippingAddress: {
         name: "",
+        phone: "",
         street: "",
         city: "",
         state: "",
@@ -496,6 +499,24 @@ export default function DialogCreateOrder() {
                     })
                   }
                   placeholder="Jean Dupont"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label>Téléphone</Label>
+                <Input
+                  type="tel"
+                  value={formData.shippingAddress.phone}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      shippingAddress: {
+                        ...formData.shippingAddress,
+                        phone: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder="06 12 34 56 78"
                 />
               </div>
 
