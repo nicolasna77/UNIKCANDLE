@@ -52,7 +52,10 @@ import type { Order } from "@prisma/client";
 import DialogDetailOrder from "./dialog-detail-order";
 import DialogCreateOrder from "./dialog-create-order";
 import { PaginationComponent } from "@/app/[locale]/(private)/Pagination";
-import { AdminHeader, AdminHeaderActions } from "@/components/admin/admin-header";
+import {
+  AdminHeader,
+  AdminHeaderActions,
+} from "@/components/admin/admin-header";
 
 type OrderListItem = {
   id: string;
@@ -233,7 +236,10 @@ export default function OrdersPage() {
       {/* Filters */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
+          <Search
+            className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none"
+            aria-hidden="true"
+          />
           <Input
             placeholder="Rechercher par nom ou email…"
             aria-label="Rechercher une commande"
@@ -244,7 +250,7 @@ export default function OrdersPage() {
           />
         </div>
         <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-          <SelectTrigger className="w-full sm:w-[160px] h-9">
+          <SelectTrigger className="w-full sm:w-40 h-9">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
@@ -290,7 +296,7 @@ export default function OrdersPage() {
                 <TableRow key={i}>
                   {Array.from({ length: 7 }).map((_, j) => (
                     <TableCell key={j}>
-                      <Skeleton className="h-4 w-full max-w-[100px]" />
+                      <Skeleton className="h-4 w-full max-w-25" />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -299,7 +305,10 @@ export default function OrdersPage() {
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Package className="h-8 w-8 opacity-20" aria-hidden="true" />
+                    <Package
+                      className="h-8 w-8 opacity-20"
+                      aria-hidden="true"
+                    />
                     <p className="text-sm">Aucune commande trouvée</p>
                   </div>
                 </TableCell>
@@ -333,7 +342,11 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                    {new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" }).format(new Date(order.createdAt))}
+                    {new Intl.DateTimeFormat("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    }).format(new Date(order.createdAt))}
                   </TableCell>
                   <TableCell className="text-sm font-semibold tabular-nums">
                     {order.total.toFixed(2)} €
@@ -354,7 +367,10 @@ export default function OrdersPage() {
                               className="h-7 w-7 p-0"
                               aria-label="Actions"
                             >
-                              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                              <MoreHorizontal
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
@@ -364,7 +380,10 @@ export default function OrdersPage() {
                                   handleStatusUpdate(order.id, "PROCESSING")
                                 }
                               >
-                                <Package className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <Package
+                                  className="mr-2 h-4 w-4"
+                                  aria-hidden="true"
+                                />
                                 Mettre en préparation
                               </DropdownMenuItem>
                             )}
@@ -374,7 +393,10 @@ export default function OrdersPage() {
                                   handleStatusUpdate(order.id, "SHIPPED")
                                 }
                               >
-                                <Truck className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <Truck
+                                  className="mr-2 h-4 w-4"
+                                  aria-hidden="true"
+                                />
                                 Marquer expédiée
                               </DropdownMenuItem>
                             )}
@@ -384,7 +406,10 @@ export default function OrdersPage() {
                                   handleStatusUpdate(order.id, "DELIVERED")
                                 }
                               >
-                                <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <CheckCircle2
+                                  className="mr-2 h-4 w-4"
+                                  aria-hidden="true"
+                                />
                                 Marquer livrée
                               </DropdownMenuItem>
                             )}
@@ -393,7 +418,10 @@ export default function OrdersPage() {
                               onClick={() => setCancelOrderId(order.id)}
                               className="text-destructive focus:text-destructive"
                             >
-                              <XCircle className="mr-2 h-4 w-4" aria-hidden="true" />
+                              <XCircle
+                                className="mr-2 h-4 w-4"
+                                aria-hidden="true"
+                              />
                               Annuler la commande
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -403,9 +431,15 @@ export default function OrdersPage() {
                       order.status === "CANCELLED") && (
                       <div className="flex items-center justify-center h-7 w-7">
                         {order.status === "DELIVERED" ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                          <CheckCircle2
+                            className="h-4 w-4 text-emerald-500"
+                            aria-hidden="true"
+                          />
                         ) : (
-                          <XCircle className="h-4 w-4 text-muted-foreground/40" aria-hidden="true" />
+                          <XCircle
+                            className="h-4 w-4 text-muted-foreground/40"
+                            aria-hidden="true"
+                          />
                         )}
                       </div>
                     )}
@@ -438,13 +472,16 @@ export default function OrdersPage() {
       {/* Confirmation d'annulation */}
       <AlertDialog
         open={cancelOrderId !== null}
-        onOpenChange={(open) => { if (!open) setCancelOrderId(null); }}
+        onOpenChange={(open) => {
+          if (!open) setCancelOrderId(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Annuler la commande ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. La commande sera marquée comme annulée.
+              Cette action est irréversible. La commande sera marquée comme
+              annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
