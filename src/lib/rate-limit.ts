@@ -35,6 +35,12 @@ export function rateLimit(
 }
 
 export function getIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
+  return getIpFromHeaders(request.headers);
+}
+
+// Variante utilisable dans les Server Actions, où l'on n'a pas d'objet Request
+// mais le résultat de `headers()` de next/headers.
+export function getIpFromHeaders(headersList: Pick<Headers, "get">): string {
+  const forwarded = headersList.get("x-forwarded-for");
   return forwarded ? forwarded.split(",")[0].trim() : "unknown";
 }

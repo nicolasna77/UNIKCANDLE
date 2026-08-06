@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Montserrat } from "next/font/google";
-import { useTransition } from "react";
+import { useRef, useTransition } from "react";
 import { toast } from "sonner";
 import { Mail, Send, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -31,6 +31,7 @@ const montserrat = Montserrat({
 const ContactPage = () => {
   const t = useTranslations("contact");
   const [isPending, startTransition] = useTransition();
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -50,6 +51,8 @@ const ContactPage = () => {
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
       });
+      // Honeypot anti-spam : champ invisible, uniquement rempli par les bots
+      formData.append("company", honeypotRef.current?.value ?? "");
 
       const result = await sendContactMessage(formData);
 
@@ -126,6 +129,24 @@ const ContactPage = () => {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
+                  {/* Honeypot anti-spam : caché visuellement et pour les lecteurs d'écran.
+                      Un humain ne le voit ni ne l'atteint au clavier ; un bot qui remplit
+                      tous les champs du formulaire le remplira aussi. */}
+                  <div
+                    className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+                    aria-hidden="true"
+                  >
+                    <label htmlFor="company">Company</label>
+                    <input
+                      ref={honeypotRef}
+                      type="text"
+                      id="company"
+                      name="company"
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                  </div>
+
                   <div className="grid sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}

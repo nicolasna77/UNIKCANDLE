@@ -1,11 +1,33 @@
 "use server";
 
+import { headers } from "next/headers";
 import { render } from "@react-email/render";
 import ContactEmail from "@/emails/contact";
 import { contactFormSchema } from "@/lib/schemas";
 import { sendMail } from "@/lib/mailer";
+import { rateLimit, getIpFromHeaders } from "@/lib/rate-limit";
 
 export async function sendContactMessage(formData: FormData) {
+  // Honeypot anti-spam : ce champ est invisible pour un humain (voir contact/page.tsx),
+  // seuls les bots qui remplissent tous les champs le renseignent.
+  if (formData.get("company")) {
+    return {
+      success: true,
+      message: "Message envoyé avec succès",
+    };
+  }
+
+  const ip = getIpFromHeaders(await headers());
+  const { allowed, resetAt } = rateLimit(`contact:${ip}`, 3, 10 * 60_000);
+
+  if (!allowed) {
+    const retryMinutes = Math.max(1, Math.ceil((resetAt - Date.now()) / 60_000));
+    return {
+      success: false,
+      error: `Trop de messages envoyés. Veuillez réessayer dans ${retryMinutes} minute(s).`,
+    };
+  }
+
   const rawData = {
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
